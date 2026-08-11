@@ -1,24 +1,80 @@
-# README
+# 🎋 絶望えらぁ短歌
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+> **プログラミングのエラーに打ちひしがれるエンジニアの悲痛な叫びを、和の風情溢れる「短歌」へと昇華するWebアプリケーション**
 
-Things you may want to cover:
+![App Screenshot](/public/bg.jpg)
 
-* Ruby version
+---
 
-* System dependencies
+## 📖 サービス概要
 
-* Configuration
+プログラミング学習や開発において避けては通れない「エラーログ」。  
+『絶望えらぁ短歌』は、エンジニアが直面したエラーログを入力すると、AI（OpenAI API）がその絶望感や「エンジニアあるある」を捉えた五・七・五・七・七の短歌を自動生成してくれるサービスです。
 
-* Database creation
+和風の世界観に没入できるこだわりのデザイン（水墨画グラフィック・手書きロゴ・縦書き短冊UI）の中で、日々の開発のストレスをクスッと笑える芸術へと変換します。
 
-* Database initialization
+* **本番URL**: [https://despair-tanka.onrender.com](https://despair-tanka.onrender.com)
 
-* How to run the test suite
+---
 
-* Services (job queues, cache servers, search engines, etc.)
+## ✨ 主な機能
 
-* Deployment instructions
+### 1. AI短歌自動生成機能
+* 入力されたエラーログを元に、OpenAI API（`gpt-4o-mini`）がプログラミングあるあるを込めた短歌を1首詠み上げます。
+* 生成された短歌は、風情ある縦書き短冊UIで結果表示されます。
 
-* ...
+### 2. ユーザー登録・雅号（がごう）機能
+* Deviseを活用したユーザー認証機能を搭載。
+* 登録時に設定した「名前（雅号）」は、短歌を投稿する際に自動で詠み手としてセットされます。
+
+### 3. みんなのギャラリー（短冊展覧会）
+* 投稿された短歌がずらりと並ぶ、横スクロールの展覧会ギャラリーUI。
+* 一枚一枚の短冊にホバーアニメーションを施し、クリックで詳細画面へ遷移できます。
+
+### 4. マイページ（絶望ログ）
+* 自身が過去に詠んだ短歌（エラーログ）を一覧で振り返ることができます。
+
+---
+
+## 🎨 UI/UX・デザインのこだわり
+
+* **ファーストビュー**: 水墨画風のイラストと自作の和風筆文字ロゴ、縦書きの木札風ボタンを組み合わせ、圧倒的な世界観を演出。
+* **縦書き明朝体レイアウト**: Google Fonts（Shippori Mincho）を使用し、和紙のような質感を表現した短冊UIを実現。
+* **レスポンシブ・直感的な動線**: 横スクロールによる短冊表示など、直感的に楽しめる体験を追求。
+
+---
+
+## 🛠️ 使用技術（技術スタック）
+
+| カテゴリ | 技術・ツール |
+|---|---|
+| **バックエンド** | Ruby 3.3.12 / Ruby on Rails 8.1.3 |
+| **フロントエンド** | HTML5 / CSS3 / JavaScript (Importmaps) / ERB |
+| **データベース** | PostgreSQL |
+| **認証** | Devise |
+| **外部API** | OpenAI API (`gpt-4o-mini`) |
+| **インフラ / デプロイ** | Render (Docker環境) |
+| **デザイン作成** | Illustrator / Procreate / Adobe Firefly |
+
+---
+
+## 🚀 開発環境の構築方法
+
+```bash
+# 1. リポジトリのクローン
+git clone [https://github.com/mmsbox/zetsubou_tanka.git](https://github.com/mmsbox/zetsubou_tanka.git)
+cd zetsubou_tanka
+
+# 2. Gemのインストール
+bundle install
+
+# 3. データベースのセットアップ
+bin/rails db:prepare
+
+# 4. 環境変数の設定 (.env 等)
+# OPENAI_API_KEY=your_api_key
+
+# 5. ローカルサーバーの起動
+bin/rails server
+👤 作者
+GitHub: @mmsbox
