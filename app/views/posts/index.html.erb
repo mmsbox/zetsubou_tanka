@@ -1,2 +1,25 @@
-<h1>Posts#index</h1>
-<p>Find me in app/views/posts/index.html.erb</p>
+<h1>絶望短歌 一覧</h1>
+
+<p><%= link_to "新しい絶望を投稿する", new_post_path %></p>
+
+<hr>
+
+<% if @posts.any? %>
+  <% @posts.each do |post| %>
+    <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px;">
+      <% if post.author_name.present? %>
+        <p><strong>作者:</strong> <%= post.author_name %></p>
+      <% end %>
+
+      <h3>エラー内容</h3>
+      <pre style="background: #f4f4f4; padding: 10px;"><%= post.error_message %></pre>
+
+      <h3>短歌</h3>
+      <p style="font-size: 1.2em; font-weight: bold;"><%= simple_format(post.tanka) %></p>
+
+      <small>投稿日時: <%= post.created_at.strftime("%Y/%m/%d %H:%M") %></small>
+    </div>
+  <% end %>
+<% else %>
+  <p>まだ投稿がありません。</p>
+<% end %>
