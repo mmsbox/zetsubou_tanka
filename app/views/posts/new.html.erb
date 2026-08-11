@@ -1,2 +1,31 @@
-<h1>Posts#new</h1>
-<p>Find me in app/views/posts/new.html.erb</p>
+<h1>絶望投稿フォーム</h1>
+
+<%= form_with model: @post do |f| %>
+  <div>
+    <%= f.label :author_name, "ユーザー名（作者）" %><br>
+    <%= f.text_field :author_name, placeholder: "例: 匿名法師" %>
+  </div>
+
+  <br>
+
+  <div>
+    <%= f.label :error_message, "エラーログを貼り付けるエリア" %><br>
+    <%= f.text_area :error_message, rows: 5, placeholder: "エラーログをここにペースト" %>
+  </div>
+
+  <br>
+
+  <div>
+    <%= f.label :tanka, "短歌（5・7・5・7・7）" %><br>
+    <%= f.text_area :tanka, rows: 3, placeholder: "短歌を入力（※AI連携後は自動生成されます）" %>
+  </div>
+
+  <br>
+
+  <div>
+    <%= f.submit "詠む" %>
+  </div>
+<% end %>
+
+<br>
+<%= link_to "みんなのギャラリーへ", posts_path %>
