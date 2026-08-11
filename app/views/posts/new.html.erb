@@ -1,31 +1,49 @@
-<h1>絶望投稿フォーム</h1>
-
-<%= form_with model: @post do |f| %>
-  <div>
-    <%= f.label :author_name, "ユーザー名（作者）" %><br>
-    <%= f.text_field :author_name, placeholder: "例: 匿名法師" %>
+<div style="max-width: 600px; margin: 40px auto; padding: 20px; font-family: sans-serif;">
+  
+  <!-- タイトルエリア -->
+  <div style="text-align: center; margin-bottom: 30px;">
+    <h1 style="font-family: 'Shippori Mincho', serif; font-size: 28px; color: #8c1d1d; margin-bottom: 8px;">
+      ☠️ 悲痛なるエラーを詠む
+    </h1>
+    <p style="font-size: 14px; color: #666; font-family: 'Shippori Mincho', serif;">
+      日常で遭遇した絶望のエラー文を打ち込み、短歌へと昇華させよ
+    </p>
   </div>
 
-  <br>
+  <!-- 入力フォームエリア（和紙風カード） -->
+  <div style="background: #faf6ed; border: 2px solid #d4c5b0; border-radius: 12px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); box-sizing: border-box;">
+    <%= form_with(model: @post, local: true) do |f| %>
 
-  <div>
-    <%= f.label :error_message, "エラーログを貼り付けるエリア" %><br>
-    <%= f.text_area :error_message, rows: 5, placeholder: "エラーログをここにペースト" %>
+      <!-- エラーメッセージ（入力必須） -->
+      <div style="margin-bottom: 24px;">
+        <%= f.label :error_message, "絶望のエラーメッセージ / 悲鳴", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #333; font-family: 'Shippori Mincho', serif; font-size: 15px;" %>
+        <%= f.text_area :error_message, 
+            rows: 5, 
+            placeholder: "例: NoMethodError: undefined method 'user=' for nil:NilClass\n（怒りや悲しみの叫びでも可）", 
+            style: "width: 100%; padding: 12px; border: 1px solid #c8b9a6; border-radius: 8px; background: #fff; font-size: 14px; box-sizing: border-box; font-family: monospace; resize: vertical; line-height: 1.5;" 
+        %>
+      </div>
+
+      <!-- 詠み手（名前・任意） -->
+      <div style="margin-bottom: 30px;">
+        <%= f.label :author_name, "詠み手（お名前 / 雅号）", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #333; font-family: 'Shippori Mincho', serif; font-size: 15px;" %>
+        <%= f.text_field :author_name, 
+            placeholder: "例: 迷えるエンジニア（空欄の場合は「名無し法師」）", 
+            style: "width: 100%; padding: 12px; border: 1px solid #c8b9a6; border-radius: 8px; background: #fff; font-size: 14px; box-sizing: border-box;" 
+        %>
+      </div>
+
+      <!-- 送信ボタン（和風漆黒ボタン） -->
+      <div style="text-align: center;">
+        <%= f.submit "短歌を詠む 🔥", style: "width: 100%; padding: 14px; background: linear-gradient(135deg, #1a1a1a, #8c1d1d); color: #fff; font-size: 16px; font-weight: bold; font-family: 'Shippori Mincho', serif; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(140, 29, 29, 0.3); transition: all 0.2s ease;" %>
+      </div>
+
+    <% end %>
   </div>
 
-  <br>
-
-  <div>
-    <%= f.label :tanka, "短歌（5・7・5・7・7）" %><br>
-    <%= f.text_area :tanka, rows: 3, placeholder: "短歌を入力（※AI連携後は自動生成されます）" %>
+  <!-- 戻るリンク -->
+  <div style="text-align: center; margin-top: 20px;">
+    <%= link_to "← TOPへもどる", root_path, style: "color: #666; text-decoration: none; font-size: 14px; font-weight: bold;" %>
   </div>
 
-  <br>
-
-  <div>
-    <%= f.submit "詠む" %>
-  </div>
-<% end %>
-
-<br>
-<%= link_to "みんなのギャラリーへ", posts_path %>
+</div>
