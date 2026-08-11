@@ -3,7 +3,7 @@ class PostsController < ApplicationController
     @posts = Post.all.order(created_at: :desc)
   end
 
-  # ★ 追加：結果画面（詳細表示）
+  # 結果画面（詳細表示）
   def show
     @post = Post.find(params[:id])
   end
@@ -15,24 +15,20 @@ class PostsController < ApplicationController
   def create
     @post = Post.new(post_params)
 
+    # ログイン中ならユーザーを紐付け
+    @post.user = current_user if user_signed_in?
+
+    # エラーメッセージがあれば OpenAI で短歌を生成
     if @post.error_message.present?
       @post.tanka = generate_tanka_from_error(@post.error_message)
     end
 
+    # 保存処理（1回だけ！）
     if @post.save
-      # ★ 変更：一覧ではなく今作った短歌の詳細画面（結果画面）へリダイレクト！
       redirect_to post_path(@post), notice: "短歌が詠まれました！"
     else
       render :new, status: :unprocessable_entity
     end
-     @post = Post.new(post_params)
-       @post.user = current_user if user_signed_in? # ログイン中ならユーザーを紐付け！
-
-      if @post.save
-         redirect_to @post
-       else
-         render :new
-      end
   end
 
   private

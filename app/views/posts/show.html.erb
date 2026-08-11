@@ -1,12 +1,12 @@
 <div style="max-width: 1000px; margin: 40px auto; padding: 20px; font-family: sans-serif;">
   <div style="display: flex; gap: 40px; align-items: center; justify-content: center; flex-wrap: wrap;">
     
-    <!-- 左側：アクションボタン群（ラフ画像1の左側エリア） -->
+    <!-- 左側：アクションボタン群 -->
     <div style="display: flex; flex-direction: column; gap: 15px; min-width: 220px;">
       <%= link_to "← TOPへもどる", root_path, style: "padding: 12px 20px; background: #f0f0f0; border-radius: 8px; text-decoration: none; color: #333; text-align: center; font-weight: bold;" %>
       
       <!-- X (Twitter) シェアボタン -->
-      <% share_text = "【絶望えらあ短歌】\n#{@post.tanka}\n作者: #{@post.author_name || '名無し'}\n" %>
+      <% share_text = "【絶望えらあ短歌】\n#{@post.tanka}\n詠み手: #{@post.author_name.presence || '名無し法師'}\n" %>
       <%= link_to "X でシェア", "https://twitter.com/intent/tweet?text=#{CGI.escape(share_text)}", target: "_blank", style: "padding: 12px 20px; background: #000; color: #fff; border-radius: 8px; text-decoration: none; text-align: center; font-weight: bold;" %>
 
       <%= link_to "ギャラリーへ", posts_path, style: "padding: 12px 20px; background: #e2e8f0; border-radius: 8px; text-decoration: none; color: #333; text-align: center; font-weight: bold;" %>
@@ -14,21 +14,49 @@
       <%= link_to "もう一度詠む", new_post_path, style: "padding: 12px 20px; background: #2563eb; color: #fff; border-radius: 8px; text-decoration: none; text-align: center; font-weight: bold;" %>
     </div>
 
-    <!-- 右側：和紙・短冊風結果表示エリア（ラフ画像1の右側エリア） -->
+    <!-- 右側：和紙・短冊風結果表示エリア -->
     <div style="background: #faf6ed; border: 2px solid #d4c5b0; border-radius: 12px; padding: 40px 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 320px; min-height: 480px; display: flex; flex-direction: column; justify-content: space-between; align-items: center;">
-      <div style="font-size: 14px; color: #888; border-bottom: 1px solid #ddd; padding-bottom: 8px; width: 100%; text-align: center;">
+      <div style="font-size: 14px; color: #888; border-bottom: 1px solid #ddd; padding-bottom: 8px; width: 100%; text-align: center; font-family: 'Shippori Mincho', serif;">
         絶望えらあ短歌
       </div>
 
-      <!-- 縦書き短歌表示 -->
-      <div style="writing-mode: vertical-rl; text-orientation: upright; font-size: 24px; letter-spacing: 4px; line-height: 2.2; height: 320px; color: #1a1a1a; font-family: 'serif'; margin: 20px 0;">
-        <%= @post.tanka %>
+      <!-- 縦書き短歌表示（JSアニメーション用のidとdata属性を付与） -->
+      <div 
+        id="typewriter-tanka" 
+        data-tanka="<%= @post.tanka %>"
+        style="writing-mode: vertical-rl; text-orientation: upright; font-size: 26px; letter-spacing: 6px; line-height: 2.2; height: 320px; color: #1a1a1a; font-family: 'Yuji Syuku', 'Shippori Mincho', serif; font-weight: 700; margin: 20px 0; min-height: 320px;"
+      >
+        <!-- JSで1文字ずつ注入されます -->
       </div>
 
-      <div style="font-size: 14px; color: #555; text-align: right; width: 100%;">
+      <div style="font-size: 14px; color: #555; text-align: right; width: 100%; font-family: 'Shippori Mincho', serif;">
         詠み手：<%= @post.author_name.presence || "名無し法師" %>
       </div>
     </div>
 
   </div>
 </div>
+
+<!-- 📜 Step 4-2: 怪しいタイピングアニメーション（Vanilla JS） -->
+<script>
+  document.addEventListener("turbo:load", function() {
+    const tankaElement = document.getElementById("typewriter-tanka");
+    if (!tankaElement) return;
+
+    const fullText = tankaElement.dataset.tanka || "";
+    tankaElement.textContent = ""; // 一旦空にする
+
+    let index = 0;
+    function typeNextChar() {
+      if (index < fullText.length) {
+        tankaElement.textContent += fullText.charAt(index);
+        index++;
+        // 1文字あたり 120ms 間隔で「じわっ...じわっ...」と表示
+        setTimeout(typeNextChar, 120);
+      }
+    }
+
+    // 画面開いて少し溜めてから（300ms後）タイピング開始
+    setTimeout(typeNextChar, 300);
+  });
+</script>
