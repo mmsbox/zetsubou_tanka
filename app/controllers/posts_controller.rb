@@ -1,30 +1,61 @@
 class PostsController < ApplicationController
   def index
-    # 新しい投稿順（降順）に全件取得
     @posts = Post.all.order(created_at: :desc)
   end
 
   def new
-    # フォーム用の空のPostインスタンスを作成
     @post = Post.new
   end
 
   def create
     @post = Post.new(post_params)
+
+    if @post.error_message.present?
+      @post.tanka = generate_tanka_from_error(@post.error_message)
+    end
+
     if @post.save
-      # 保存成功したら一覧画面へリダイレクト
-      redirect_to posts_path, notice: "投稿が完了しました！"
+      redirect_to posts_path, notice: "短歌が詠まれました！"
     else
-      # 保存失敗したら新規作成画面を再描画
       render :new, status: :unprocessable_entity
     end
   end
 
   private
 
-  # Strong Parameters（安全にデータを保存するためのフィルタ）
   def post_params
-    params.require(:post).permit(:error_message, :tanka, :likes_count)
-    end
+    params.require(:post).permit(:author_name, :error_message, :tanka, :likes_count)
+  end
 
- end
+  def generate_tanka_from_error(error_message)
+    client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
+
+    prompt = <<~PROMPT
+      あなたは「プログラミングのエラーに苦しむ駆け出しエンジニアの気持ちを詠む短歌名人」です。
+
+      ユーザーからプログラミングのエラーログが入力されます。
+      そのエラーの悲劇さや「あるある」を捉えて、クスッと笑える・共感できる短歌（5・7・5・7・7）を1首だけ生成してください。
+
+      【制約事項】
+      ・必ず 5・7・5・7・7 のリズムを守ってください。
+      ・解説や前置き、挨拶は一切不要です。短歌のみを出力してください。
+      ・短歌の句と句の間にはスペースを入れてください。
+
+      【エラーログ】
+      #{error_message}
+    PROMPT
+
+    response = client.chat(
+      parameters: {
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7
+      }
+    )
+
+    response.dig("choices", 0, "message", "content")&.strip
+  rescue StandardError => e
+    Rails.logger.error("OpenAI API Error: #{e.message}")
+    "エラー吐き 詠めぬ短歌の 虚しさよ（※AI連携でエラーが発生しました）"
+  end
+end
