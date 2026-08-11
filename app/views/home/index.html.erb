@@ -1,4 +1,11 @@
 <style>
+  /* TOP画面だけ親コンテナの幅制限を解除して画面いっぱいに広げる */
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
   .btn-tanka {
     display: flex;
     align-items: center;
@@ -15,7 +22,7 @@
     border: 2px solid #d4c5b0;
     border-radius: 8px;
     text-decoration: none;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
     transition: all 0.25s ease;
   }
   .btn-tanka:hover {
@@ -39,7 +46,7 @@
     border: 2px solid #555;
     border-radius: 8px;
     text-decoration: none;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
     transition: all 0.25s ease;
   }
   .btn-gallery:hover {
@@ -49,37 +56,35 @@
   }
 </style>
 
-<!-- TOPヒーローエリア (和風ファーストビュー) -->
+<!-- TOPヒーローエリア (全画面和風ファーストビュー) -->
 <div style="
   position: relative;
-  width: 100%;
-  height: 88vh;
-  min-height: 580px;
+  width: 100vw;
+  height: calc(100vh - 60px);
+  min-height: 600px;
   background: #1a1a1a url('/bg.jpg') center/cover no-repeat;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: -20px;
-  border-bottom: 3px solid #8c1d1d;
-  box-shadow: inset 0 0 50px rgba(0,0,0,0.6);
   box-sizing: border-box;
+  overflow: hidden;
 ">
   <!-- 黒グラデーションオーバーレイ -->
   <div style="
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.75) 100%);
+    background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.65) 100%);
   "></div>
 
-  <!-- メインレイアウト（ボタン群 ＆ ロゴ） -->
+  <!-- メインレイアウト（ボタン群 ＆ ロゴ画像） -->
   <div style="
     position: relative;
     z-index: 2;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 40px;
-    height: 70%;
+    gap: 50px;
+    height: 80%;
   ">
 
     <!-- 左側：ボタン2つ（横並び） -->
@@ -97,30 +102,17 @@
 
     </div>
 
-    <!-- 右側：タイトルロゴ（縦書き 3行表示UI） -->
+    <!-- 右側：オリジナル手描きロゴ画像 -->
     <div style="
-      background: rgba(250, 246, 237, 0.88);
-      border: 3px solid #333;
-      padding: 36px 28px;
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     ">
-      <h1 style="
-        writing-mode: vertical-rl;
-        text-orientation: upright;
-        font-family: 'Shippori Mincho', serif;
-        font-size: 38px;
-        font-weight: 800;
-        letter-spacing: 0.2em;
-        color: #1a1a1a;
-        margin: 0;
-        line-height: 1.8;
+      <img src="/logo.png" alt="絶望えらぁ短歌" style="
+        max-height: 480px;
+        width: auto;
+        filter: drop-shadow(0 10px 25px rgba(0,0,0,0.8));
       ">
-        絶望<br>
-        えらぁ<br>
-        短歌
-      </h1>
     </div>
 
   </div>
