@@ -1,25 +1,40 @@
-<h1>絶望短歌 一覧</h1>
+<div style="max-width: 1000px; margin: 40px auto; padding: 0 20px; font-family: sans-serif;">
 
-<p><%= link_to "新しい絶望を投稿する", new_post_path %></p>
+  <!-- ヘッダータイトル -->
+  <div style="text-align: center; margin-bottom: 30px;">
+    <h1 style="font-family: 'Shippori Mincho', serif; font-size: 28px; color: #8c1d1d; margin-bottom: 8px;">
+      🎋 絶望短歌 展覧会
+    </h1>
+    <p style="font-size: 14px; color: #666; font-family: 'Shippori Mincho', serif;">
+      世のエンジニアたちが詠みし 悲痛なる短歌の数々（左右にスクロールできます）
+    </p>
+  </div>
 
-<hr>
-
-<% if @posts.any? %>
-  <% @posts.each do |post| %>
-    <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px;">
-      <% if post.author_name.present? %>
-        <p><strong>作者:</strong> <%= post.author_name %></p>
+  <!-- 横スクロールコンテナ -->
+  <div style="
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    padding: 20px 10px 40px 10px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  ">
+    <% if @posts.any? %>
+      <% @posts.each do |post| %>
+        <div style="scroll-snap-align: start;">
+          <%= render 'posts/tanka_card', post: post %>
+        </div>
       <% end %>
+    <% else %>
+      <div style="width: 100%; text-align: center; padding: 60px 0; color: #888;">
+        まだ短歌が詠まれておりません。第一号を詠んでみませんか？
+      </div>
+    <% end %>
+  </div>
 
-      <h3>エラー内容</h3>
-      <pre style="background: #f4f4f4; padding: 10px;"><%= post.error_message %></pre>
+  <!-- 投稿へいくボタン -->
+  <div style="text-align: center; margin-top: 20px;">
+    <%= link_to "自分も短歌を詠む 🔥", new_post_path, style: "display: inline-block; padding: 12px 28px; background: #8c1d1d; color: #fff; font-size: 15px; font-weight: bold; font-family: 'Shippori Mincho', serif; border-radius: 30px; text-decoration: none; box-shadow: 0 4px 12px rgba(140,29,29,0.3);" %>
+  </div>
 
-      <h3>短歌</h3>
-      <p style="font-size: 1.2em; font-weight: bold;"><%= simple_format(post.tanka) %></p>
-
-      <small>投稿日時: <%= post.created_at.strftime("%Y/%m/%d %H:%M") %></small>
-    </div>
-  <% end %>
-<% else %>
-  <p>まだ投稿がありません。</p>
-<% end %>
+</div>
