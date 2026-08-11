@@ -3,27 +3,32 @@ class PostsController < ApplicationController
     @posts = Post.all.order(created_at: :desc)
   end
 
-  # 結果画面（詳細表示）
   def show
     @post = Post.find(params[:id])
   end
 
   def new
     @post = Post.new
+    # ユーザー登録時の「お名前（雅号）」を自動で初期セット！
+    if user_signed_in? && current_user.name.present?
+      @post.author_name = current_user.name
+    end
   end
 
   def create
     @post = Post.new(post_params)
 
-    # ログイン中ならユーザーを紐付け
-    @post.user = current_user if user_signed_in?
+    # ログイン中なら、この短歌に user を紐付ける！
+    if user_signed_in?
+      @post.user = current_user
+    end
 
-    # エラーメッセージがあれば OpenAI で短歌を生成
-    if @post.error_message.present?
+    # 短歌の生成（まだ入っていない場合のみ）
+    if @post.tanka.blank?
       @post.tanka = generate_tanka_from_error(@post.error_message)
     end
 
-    # 保存処理（1回だけ！）
+    # 保存処理
     if @post.save
       redirect_to post_path(@post), notice: "短歌が詠まれました！"
     else

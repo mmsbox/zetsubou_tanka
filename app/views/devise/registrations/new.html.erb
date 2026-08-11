@@ -3,6 +3,10 @@
 <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
   <%= render "devise/shared/error_messages", resource: resource %>
 
+  <div class="field" style="margin-bottom: 16px;">
+  <%= f.label :name, "お名前（雅号）", style: "display: block; font-weight: bold; margin-bottom: 6px;" %><br />
+  <%= f.text_field :name, autofocus: true, placeholder: "例: 迷えるエンジニア", style: "width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;" %>
+</div>
   <div class="field">
     <p><%= f.label :email %></p>
     <p><%= f.email_field :email, autofocus: true, autocomplete: "email" %></p>
