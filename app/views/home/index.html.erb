@@ -1,29 +1,34 @@
 <style>
-  /* TOP画面だけ親コンテナの幅制限を解除して画面いっぱいに広げる */
+  /* 全体コンテナの幅制限解除 */
   main {
     max-width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
   }
 
-  .btn-tanka {
+  /* ボタン共通スタイル */
+  .btn-tanka, .btn-gallery {
     display: flex;
     align-items: center;
     justify-content: center;
     writing-mode: vertical-rl;
     text-orientation: upright;
+    font-family: 'Shippori Mincho', serif;
+    border-radius: 8px;
+    text-decoration: none;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+    transition: all 0.25s ease;
+    box-sizing: border-box;
+  }
+
+  .btn-tanka {
     background: rgba(140, 29, 29, 0.92);
     color: #ffffff;
-    font-family: 'Shippori Mincho', serif;
     font-size: 20px;
     font-weight: bold;
     letter-spacing: 0.2em;
     padding: 32px 16px;
     border: 2px solid #d4c5b0;
-    border-radius: 8px;
-    text-decoration: none;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
-    transition: all 0.25s ease;
   }
   .btn-tanka:hover {
     transform: translateY(-6px);
@@ -31,37 +36,50 @@
   }
 
   .btn-gallery {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    writing-mode: vertical-rl;
-    text-orientation: upright;
     background: rgba(26, 26, 26, 0.88);
     color: #d4c5b0;
-    font-family: 'Shippori Mincho', serif;
     font-size: 18px;
     font-weight: bold;
     letter-spacing: 0.2em;
     padding: 32px 16px;
     border: 2px solid #555;
-    border-radius: 8px;
-    text-decoration: none;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
-    transition: all 0.25s ease;
   }
   .btn-gallery:hover {
     transform: translateY(-6px);
     border-color: #d4c5b0;
     color: #ffffff;
   }
+
+  /* 📱 スマホ用スタイル調整（画面幅768px以下の場合） */
+  @media (max-width: 768px) {
+    .hero-layout {
+      flex-direction: column-reverse !important;
+      gap: 24px !important;
+      height: auto !important;
+      padding: 40px 16px !important;
+    }
+
+    .hero-logo-img {
+      max-height: 240px !important;
+      width: auto !important;
+    }
+
+    .btn-container {
+      gap: 12px !important;
+    }
+
+    .btn-tanka, .btn-gallery {
+      font-size: 16px !important;
+      padding: 20px 12px !important;
+    }
+  }
 </style>
 
 <!-- TOPヒーローエリア (全画面和風ファーストビュー) -->
 <div style="
   position: relative;
-  width: 100vw;
-  height: calc(100vh - 60px);
-  min-height: 600px;
+  width: 100%;
+  min-height: calc(100vh - 60px);
   background: #1a1a1a url('/bg.jpg') center/cover no-repeat;
   display: flex;
   justify-content: center;
@@ -73,11 +91,11 @@
   <div style="
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.65) 100%);
+    background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%);
   "></div>
 
-  <!-- メインレイアウト（ボタン群 ＆ ロゴ画像） -->
-  <div style="
+  <!-- メインレイアウト -->
+  <div class="hero-layout" style="
     position: relative;
     z-index: 2;
     display: flex;
@@ -85,30 +103,23 @@
     align-items: center;
     gap: 50px;
     height: 80%;
+    width: 100%;
   ">
 
-    <!-- 左側：ボタン2つ（横並び） -->
-    <div style="display: flex; gap: 20px; align-items: center;">
-
-      <!-- ボタン①：短歌を詠む -->
+    <!-- 左側：ボタン2つ -->
+    <div class="btn-container" style="display: flex; gap: 20px; align-items: center;">
       <%= link_to new_post_path, class: "btn-tanka" do %>
         短歌を詠む
       <% end %>
 
-      <!-- ボタン②：みんなのギャラリー -->
       <%= link_to posts_path, class: "btn-gallery" do %>
         みんなのギャラリー
       <% end %>
-
     </div>
 
-    <!-- 右側：オリジナル手描きロゴ画像 -->
-    <div style="
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    ">
-      <img src="/logo.png" alt="絶望えらぁ短歌" style="
+    <!-- 右側：ロゴ画像 -->
+    <div style="display: flex; align-items: center; justify-content: center;">
+      <img src="/logo.png" alt="絶望えらぁ短歌" class="hero-logo-img" style="
         max-height: 480px;
         width: auto;
         filter: drop-shadow(0 10px 25px rgba(0,0,0,0.8));
