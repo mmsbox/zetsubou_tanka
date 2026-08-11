@@ -68,3 +68,7 @@ end
 
   gem "ruby-openai"
   gem "dotenv-rails", groups: [:development, :test]
+
+gem "devise", "~> 5.0"
+
+gem "devise-i18n", "~> 1.16"

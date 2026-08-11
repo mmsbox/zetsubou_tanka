@@ -3,6 +3,11 @@ class PostsController < ApplicationController
     @posts = Post.all.order(created_at: :desc)
   end
 
+  # ★ 追加：結果画面（詳細表示）
+  def show
+    @post = Post.find(params[:id])
+  end
+
   def new
     @post = Post.new
   end
@@ -15,10 +20,19 @@ class PostsController < ApplicationController
     end
 
     if @post.save
-      redirect_to posts_path, notice: "短歌が詠まれました！"
+      # ★ 変更：一覧ではなく今作った短歌の詳細画面（結果画面）へリダイレクト！
+      redirect_to post_path(@post), notice: "短歌が詠まれました！"
     else
       render :new, status: :unprocessable_entity
     end
+     @post = Post.new(post_params)
+       @post.user = current_user if user_signed_in? # ログイン中ならユーザーを紐付け！
+
+      if @post.save
+         redirect_to @post
+       else
+         render :new
+      end
   end
 
   private
