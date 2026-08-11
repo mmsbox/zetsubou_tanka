@@ -1,49 +1,72 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "App" %></title>
+    <title>絶望えらぁ短歌</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="App">
-    <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <%= yield :head %>
-
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-
-    <!-- Google Fonts: 毛筆・和風明朝体 -->
+    <!-- Shippori Mincho フォントの読み込み -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Yuji+Syuku&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&display=swap" rel="stylesheet">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <%= yield %>
-  </body>
-  <header style="padding: 15px 30px; background: #111; color: #fff; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333;">
-  <div>
-    <%= link_to "絶望短歌", root_path, style: "color: #fff; text-decoration: none; font-size: 1.5rem; font-weight: bold;" %>
-  </div>
-  <nav>
-    <% if user_signed_in? %>
-      <%= link_to "マイページ（絶望ログ）", mypage_path, style: "color: #fff; margin-right: 15px; text-decoration: none;" %>
-      <%= link_to "ログアウト", destroy_user_session_path, data: { turbo_method: :delete }, style: "color: #aaa; text-decoration: none;" %>
-    <% else %>
-      <%= link_to "ログイン", new_user_session_path, style: "color: #fff; margin-right: 15px; text-decoration: none;" %>
-      <%= link_to "会員登録", new_user_registration_path, style: "color: #ff6b6b; text-decoration: none;" %>
-    <% end %>
-  </nav>
-</header>
-</html>
+  <body style="margin: 0; padding-top: 70px; background-color: #f7f5f0; color: #222; min-height: 100vh; font-family: 'Shippori Mincho', serif;">
+    
+    <!-- 上部固定ヘッダー -->
+    <header style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background: #111111;
+      border-bottom: 2px solid #8c1d1d;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      box-sizing: border-box;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    ">
+      <!-- タイトルロゴ -->
+      <div>
+        <%= link_to "絶望えらぁ短歌", root_path, style: "color: #ffffff; text-decoration: none; font-size: 20px; font-weight: 800; letter-spacing: 0.1em; font-family: 'Shippori Mincho', serif;" %>
+      </div>
 
+      <!-- ナビゲーションリンク -->
+      <nav style="display: flex; gap: 16px; align-items: center;">
+        <% if user_signed_in? %>
+          <%= link_to "マイページ（絶望ログ）", mypage_path, style: "color: #d4c5b0; text-decoration: none; font-size: 14px; transition: color 0.2s;" %>
+          <%= button_to "ログアウト", destroy_user_session_path, method: :delete, style: "background: none; border: none; color: #8c1d1d; cursor: pointer; font-size: 14px; font-family: 'Shippori Mincho', serif; font-weight: bold; padding: 0;" %>
+        <% else %>
+          <%= link_to "ログイン", new_user_session_path, style: "color: #d4c5b0; text-decoration: none; font-size: 14px;" %>
+          <%= link_to "会員登録", new_user_registration_path, style: "color: #ffffff; background: #8c1d1d; padding: 6px 14px; border-radius: 4px; text-decoration: none; font-size: 13px; font-weight: bold;" %>
+        <% end %>
+      </nav>
+    </header>
+
+    <!-- メインコンテンツ領域 -->
+    <main style="max-width: 1000px; margin: 0 auto; padding: 20px 16px;">
+      <!-- フラッシュメッセージ -->
+      <% if notice %>
+        <div style="background: #e6f4ea; color: #137333; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; text-align: center;">
+          <%= notice %>
+        </div>
+      <% end %>
+      <% if alert %>
+        <div style="background: #fce8e6; color: #c5221f; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; text-align: center;">
+          <%= alert %>
+        </div>
+      <% end %>
+
+      <%= yield %>
+    </main>
+
+  </body>
+</html>
