@@ -26,4 +26,19 @@
   <body>
     <%= yield %>
   </body>
+  <header style="padding: 15px 30px; background: #111; color: #fff; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333;">
+  <div>
+    <%= link_to "絶望短歌", root_path, style: "color: #fff; text-decoration: none; font-size: 1.5rem; font-weight: bold;" %>
+  </div>
+  <nav>
+    <% if user_signed_in? %>
+      <%= link_to "マイページ（絶望ログ）", mypage_path, style: "color: #fff; margin-right: 15px; text-decoration: none;" %>
+      <%= link_to "ログアウト", destroy_user_session_path, data: { turbo_method: :delete }, style: "color: #aaa; text-decoration: none;" %>
+    <% else %>
+      <%= link_to "ログイン", new_user_session_path, style: "color: #fff; margin-right: 15px; text-decoration: none;" %>
+      <%= link_to "会員登録", new_user_registration_path, style: "color: #ff6b6b; text-decoration: none;" %>
+    <% end %>
+  </nav>
+</header>
 </html>
+

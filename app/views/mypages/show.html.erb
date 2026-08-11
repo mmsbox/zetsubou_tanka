@@ -1,0 +1,33 @@
+<div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+  <h1>詠み人：<%= current_user.email %> の絶望ログ</h1>
+  
+  <p>これまでに蓄積された絶望：<strong><%= @posts.count %> 詠</strong></p>
+
+  <hr style="margin: 20px 0;">
+
+  <% if @posts.any? %>
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      <% @posts.each do |post| %>
+        <div style="border: 1px solid #444; padding: 15px; border-radius: 8px; background: #1a1a1a;">
+          <small style="color: #888;"><%= l post.created_at, format: :short %></small>
+          
+          <div style="margin: 10px 0; font-size: 1.2rem; font-weight: bold; color: #e6b422;">
+            <%= post.tanka_text %>
+          </div>
+
+          <p style="color: #ccc; font-size: 0.9rem;">
+            <strong>元のエラー・絶望：</strong><%= truncate(post.error_log, length: 50) %>
+          </p>
+
+          <%= link_to "詳細を見る", post_path(post), style: "color: #ff6b6b;" %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p>まだ詠まれた短歌はありません。日々のエラーを絶望短歌に昇華させましょう。</p>
+  <% end %>
+
+  <div style="margin-top: 30px;">
+    <%= link_to "新しい絶望を詠む", root_path %>
+  </div>
+</div>
