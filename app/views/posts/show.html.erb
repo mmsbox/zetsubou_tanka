@@ -37,9 +37,9 @@
       
 <% 
   # Xシェア用のテキスト・ハッシュタグ作成
-  share_text = "【絶望えらあ短歌】\n#{@post.tanka}\n\n詠み手：#{@post.author_name.presence || '名無し法師'}\n"
+  share_text = "【絶望えらぁ短歌】\n#{@post.tanka}\n\n詠み手：#{@post.author_name.presence || '名無し法師'}\n"
   share_url = post_url(@post)
-  hashtags = "絶望えらあ短歌"
+  hashtags = "絶望えらぁ短歌"
   twitter_share_url = "https://twitter.com/intent/tweet?text=#{CGI.escape(share_text)}&url=#{CGI.escape(share_url)}&hashtags=#{CGI.escape(hashtags)}"
 %>
 
@@ -68,7 +68,7 @@
     <div id="tanka-card" style="background: #faf6ed; border: 2px solid #d4c5b0; border-radius: 12px; padding: 30px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 320px; height: 520px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; position: relative; box-sizing: border-box;">
       
       <div style="font-size: 14px; color: #888; border-bottom: 1px solid #ddd; padding-bottom: 8px; width: 100%; text-align: center; font-family: 'Shippori Mincho', serif;">
-        絶望えらあ短歌
+        絶望えらぁ短歌
       </div>
 
       <!-- 縦書き短歌表示 -->
