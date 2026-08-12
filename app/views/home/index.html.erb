@@ -7,7 +7,7 @@
   }
 
   /* ボタン共通スタイル */
-  .btn-tanka, .btn-gallery {
+  .btn-tanka, .btn-gallery, .btn-omikuji {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -21,10 +21,27 @@
     box-sizing: border-box;
   }
 
-  .btn-tanka {
-    background: rgba(140, 29, 29, 0.92);
+  /* ⛩️ おみくじボタン（一番目立たせる深紅デザイン） */
+  .btn-omikuji {
+    background: rgba(140, 29, 29, 0.95);
     color: #ffffff;
     font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 0.2em;
+    padding: 32px 16px;
+    border: 2px solid #e2a93b; /* 金風の枠線 */
+  }
+  .btn-omikuji:hover {
+    transform: translateY(-6px);
+    background: #a62424;
+    border-color: #ffffff;
+  }
+
+  /* ✍️ 短歌を詠むボタン */
+  .btn-tanka {
+    background: rgba(30, 30, 30, 0.92);
+    color: #ffffff;
+    font-size: 19px;
     font-weight: bold;
     letter-spacing: 0.2em;
     padding: 32px 16px;
@@ -32,11 +49,13 @@
   }
   .btn-tanka:hover {
     transform: translateY(-6px);
-    background: #a62424;
+    background: #333333;
+    border-color: #ffffff;
   }
 
+  /* 🖼️ ギャラリーボタン */
   .btn-gallery {
-    background: rgba(26, 26, 26, 0.88);
+    background: rgba(15, 15, 15, 0.88);
     color: #d4c5b0;
     font-size: 18px;
     font-weight: bold;
@@ -60,17 +79,17 @@
     }
 
     .hero-logo-img {
-      max-height: 240px !important;
+      max-height: 220px !important;
       width: auto !important;
     }
 
     .btn-container {
-      gap: 12px !important;
+      gap: 10px !important;
     }
 
-    .btn-tanka, .btn-gallery {
-      font-size: 16px !important;
-      padding: 20px 12px !important;
+    .btn-tanka, .btn-gallery, .btn-omikuji {
+      font-size: 15px !important;
+      padding: 20px 10px !important;
     }
   }
 </style>
@@ -101,13 +120,17 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 50px;
+    gap: 40px;
     height: 80%;
     width: 100%;
   ">
 
-    <!-- 左側：ボタン2つ -->
-    <div class="btn-container" style="display: flex; gap: 20px; align-items: center;">
+    <!-- 左側：縦書きボタン3つ -->
+    <div class="btn-container" style="display: flex; gap: 16px; align-items: center;">
+      <%= link_to omikuji_path, class: "btn-omikuji" do %>
+        本日の絶望おみくじ
+      <% end %>
+
       <%= link_to new_post_path, class: "btn-tanka" do %>
         短歌を詠む
       <% end %>
@@ -125,6 +148,5 @@
         filter: drop-shadow(0 10px 25px rgba(0,0,0,0.8));
       ">
     </div>
-
   </div>
 </div>

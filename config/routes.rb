@@ -3,6 +3,7 @@ Rails.application.routes.draw do
 
   # マイページ用ルーティング (/mypage)
   resource :mypage, only: [ :show ]
+  resource :omikuji, only: [ :show ]
 
   get "up" => "rails/health#show", as: :rails_health_check
 
