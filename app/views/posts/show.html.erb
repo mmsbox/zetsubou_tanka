@@ -1,3 +1,12 @@
+<% content_for :head do %>
+  <!-- X (Twitter) Card Metadata -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:title" content="【絶望えらあ短歌】<%= @post.tanka.truncate(24) %>">
+  <meta property="og:description" content="エンジニアのエラーから詠まれた絶望の短歌。詠み手：<%= @post.author_name.presence || '名無し法師' %>">
+  <meta property="og:image" content="<%= ogp_post_url(@post, format: :png) %>">
+  <meta property="og:url" content="<%= post_url(@post) %>">
+<% end %>
+
 <div style="max-width: 1000px; margin: 40px auto; padding: 20px; font-family: sans-serif;">
   <div style="display: flex; gap: 40px; align-items: flex-start; justify-content: center; flex-wrap: wrap;">
     
@@ -26,53 +35,75 @@
       <!-- アクションボタン群 -->
       <%= link_to "← TOPへもどる", root_path, style: "padding: 12px 20px; background: #f0f0f0; border-radius: 8px; text-decoration: none; color: #333; text-align: center; font-weight: bold;" %>
       
-      <% share_text = "【絶望えらあ短歌】\n#{@post.tanka}\n詠み手: #{@post.author_name.presence || '名無し法師'}\n" %>
-      <%= link_to "X でシェア", "https://twitter.com/intent/tweet?text=#{CGI.escape(share_text)}", target: "_blank", style: "padding: 12px 20px; background: #000; color: #fff; border-radius: 8px; text-decoration: none; text-align: center; font-weight: bold;" %>
+<% 
+  # Xシェア用のテキスト・ハッシュタグ作成
+  share_text = "【絶望えらあ短歌】\n#{@post.tanka}\n\n詠み手：#{@post.author_name.presence || '名無し法師'}\n"
+  share_url = post_url(@post)
+  hashtags = "絶望えらあ短歌"
+  twitter_share_url = "https://twitter.com/intent/tweet?text=#{CGI.escape(share_text)}&url=#{CGI.escape(share_url)}&hashtags=#{CGI.escape(hashtags)}"
+%>
 
-      <%= link_to "ギャラリーへ", posts_path, style: "padding: 12px 20px; background: #e2e8f0; border-radius: 8px; text-decoration: none; color: #333; text-align: center; font-weight: bold;" %>
-      <%= link_to "もう一度詠む", new_post_path, style: "padding: 12px 20px; background: #2563eb; color: #fff; border-radius: 8px; text-decoration: none; color: #fff; text-align: center; font-weight: bold;" %>
-    </div>
+<div style="max-width: 900px; margin: 0 auto; padding: 20px;">
+  <!-- ボタン・アクションエリア -->
+  <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+    <%= link_to twitter_share_url, target: "_blank", rel: "noopener noreferrer", style: "padding: 12px 20px; background: #000; color: #fff; border-radius: 8px; text-decoration: none; text-align: center; font-weight: bold; display: flex; align-items: center; gap: 6px;" do %>
+      <svg style="width: 16px; height: 16px; fill: currentColor;" viewBox="0 0 24 24">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+      </svg>
+      X でシェア
+    <% end %>
 
-    <!-- 右側：和紙・短冊風結果表示エリア -->
-    <div style="display: flex; flex-direction: column; align-items: center;">
-      <div style="background: #faf6ed; border: 2px solid #d4c5b0; border-radius: 12px; padding: 30px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 320px; height: 520px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; position: relative; box-sizing: border-box;">
-        
-        <div style="font-size: 14px; color: #888; border-bottom: 1px solid #ddd; padding-bottom: 8px; width: 100%; text-align: center; font-family: 'Shippori Mincho', serif;">
-          絶望えらあ短歌
-        </div>
+    <!-- 画像保存ボタン -->
+    <button id="download-card-btn" style="padding: 12px 20px; background: #8c1d1d; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+      📸 短冊を画像保存
+    </button>
 
-        <!-- 縦書き短歌表示 -->
-        <div style="width: 100%; height: 380px; display: flex; justify-content: center; align-items: center; overflow: hidden;">
-          <div 
-            id="typewriter-tanka" 
-            data-tanka="<%= @post.tanka %>"
-            style="writing-mode: vertical-rl; text-orientation: upright; font-size: 22px; letter-spacing: 4px; line-height: 2.0; height: 360px; max-width: 260px; color: #1a1a1a; font-family: 'Yuji Syuku', 'Shippori Mincho', serif; font-weight: 700;"
-          >
-            <!-- JSで1文字ずつ表示 -->
-          </div>
-        </div>
+    <%= link_to "ギャラリーへ", posts_path, style: "padding: 12px 20px; background: #e2e8f0; border-radius: 8px; text-decoration: none; color: #333; text-align: center; font-weight: bold;" %>
+    <%= link_to "もう一度詠む", new_post_path, style: "padding: 12px 20px; background: #2563eb; color: #fff; border-radius: 8px; text-decoration: none; text-align: center; font-weight: bold;" %>
+  </div>
 
-        <div style="font-size: 14px; color: #555; text-align: right; width: 100%; font-family: 'Shippori Mincho', serif;">
-          詠み手：<%= @post.author_name.presence || "名無し法師" %>
+  <!-- 右側：和紙・短冊風結果表示エリア -->
+  <div style="display: flex; flex-direction: column; align-items: center;">
+    <!-- html2canvas 対象となるカード要素（id="tanka-card"） -->
+    <div id="tanka-card" style="background: #faf6ed; border: 2px solid #d4c5b0; border-radius: 12px; padding: 30px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 320px; height: 520px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; position: relative; box-sizing: border-box;">
+      
+      <div style="font-size: 14px; color: #888; border-bottom: 1px solid #ddd; padding-bottom: 8px; width: 100%; text-align: center; font-family: 'Shippori Mincho', serif;">
+        絶望えらあ短歌
+      </div>
+
+      <!-- 縦書き短歌表示 -->
+      <div style="width: 100%; height: 380px; display: flex; justify-content: center; align-items: center; overflow: hidden;">
+        <div 
+          id="typewriter-tanka" 
+          data-tanka="<%= @post.tanka %>"
+          style="writing-mode: vertical-rl; text-orientation: upright; font-size: 22px; letter-spacing: 4px; line-height: 2.0; height: 360px; max-width: 260px; color: #1a1a1a; font-family: 'Yuji Syuku', 'Shippori Mincho', serif; font-weight: 700;"
+        >
+          <!-- JSで1文字ずつ表示 -->
         </div>
       </div>
 
-      <!-- 共感ボタンエリア (Step 4-4) -->
-      <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center; width: 100%;">
-        <button class="empathy-btn" style="padding: 8px 16px; background: #fff; border: 1px solid #d4c5b0; border-radius: 20px; cursor: pointer; font-family: 'Shippori Mincho', serif; font-weight: bold; color: #333; transition: all 0.1s ease;">
-          💡 わかる <span class="count" style="color: #8c1d1d;">0</span>
-        </button>
-        <button class="empathy-btn" style="padding: 8px 16px; background: #fff; border: 1px solid #d4c5b0; border-radius: 20px; cursor: pointer; font-family: 'Shippori Mincho', serif; font-weight: bold; color: #333; transition: all 0.1s ease;">
-          🍂 深し… <span class="count" style="color: #8c1d1d;">0</span>
-        </button>
-        <button class="empathy-btn" style="padding: 8px 16px; background: #fff; border: 1px solid #d4c5b0; border-radius: 20px; cursor: pointer; font-family: 'Shippori Mincho', serif; font-weight: bold; color: #333; transition: all 0.1s ease;">
-          💧 哀れ <span class="count" style="color: #8c1d1d;">0</span>
-        </button>
+      <div style="font-size: 14px; color: #555; text-align: right; width: 100%; font-family: 'Shippori Mincho', serif;">
+        詠み手：<%= @post.author_name.presence || "名無し法師" %>
       </div>
     </div>
 
+    <!-- 共感ボタンエリア (Step 4-4) -->
+    <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center; width: 100%;">
+      <button class="empathy-btn" style="padding: 8px 16px; background: #fff; border: 1px solid #d4c5b0; border-radius: 20px; cursor: pointer; font-family: 'Shippori Mincho', serif; font-weight: bold; color: #333; transition: all 0.1s ease;">
+        💡 わかる <span class="count" style="color: #8c1d1d;">0</span>
+      </button>
+      <button class="empathy-btn" style="padding: 8px 16px; background: #fff; border: 1px solid #d4c5b0; border-radius: 20px; cursor: pointer; font-family: 'Shippori Mincho', serif; font-weight: bold; color: #333; transition: all 0.1s ease;">
+        🍂 深し… <span class="count" style="color: #8c1d1d;">0</span>
+      </button>
+      <button class="empathy-btn" style="padding: 8px 16px; background: #fff; border: 1px solid #d4c5b0; border-radius: 20px; cursor: pointer; font-family: 'Shippori Mincho', serif; font-weight: bold; color: #333; transition: all 0.1s ease;">
+        💧 哀れ <span class="count" style="color: #8c1d1d;">0</span>
+      </button>
+    </div>
   </div>
 </div>
+
+<!-- 📜 html2canvas の読み込み -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <!-- 📜 JS演出（安全に動作させるスクリプト） -->
 <script>
@@ -152,11 +183,48 @@
       });
     }
 
+    function initImageDownload() {
+      const downloadBtn = document.getElementById("download-card-btn");
+      const cardElement = document.getElementById("tanka-card");
+      const tankaElement = document.getElementById("typewriter-tanka");
+
+      if (!downloadBtn || !cardElement) return;
+
+      downloadBtn.onclick = function() {
+        // 画像生成時はタイピング演出を中断して全文字を表示させる
+        if (tankaElement && tankaElement.dataset.tanka) {
+          tankaElement.textContent = tankaElement.dataset.tanka;
+        }
+
+        downloadBtn.innerText = "生成中...";
+        downloadBtn.disabled = true;
+
+        html2canvas(cardElement, {
+          scale: 2, // 高画質化
+          backgroundColor: "#faf6ed"
+        }).then(canvas => {
+          const link = document.createElement("a");
+          link.download = "zetsubou_tanka.png";
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+
+          downloadBtn.innerText = "📸 短冊を画像保存";
+          downloadBtn.disabled = false;
+        }).catch(err => {
+          console.error(err);
+          alert("画像の生成に失敗しました。");
+          downloadBtn.innerText = "📸 短冊を画像保存";
+          downloadBtn.disabled = false;
+        });
+      };
+    }
+
     document.addEventListener("turbo:load", function() {
       isTyping = false;
       startTypewriter();
       animateScore();
       initEmpathyButtons();
+      initImageDownload();
     });
   })();
 </script>

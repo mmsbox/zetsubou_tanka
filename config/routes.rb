@@ -8,5 +8,9 @@ Rails.application.routes.draw do
 
   root "home#index"
 
-  resources :posts, only: [ :index, :show, :new, :create ]
+  resources :posts, only: [ :index, :show, :new, :create ] do
+    member do
+      get :ogp
+    end
+  end
 end
