@@ -1,13 +1,24 @@
 <div style="max-width: 1000px; margin: 40px auto; padding: 0 20px; font-family: sans-serif;">
 
   <!-- ヘッダータイトル -->
-  <div style="text-align: center; margin-bottom: 30px;">
+  <div style="text-align: center; margin-bottom: 20px;">
     <h1 style="font-family: 'Shippori Mincho', serif; font-size: 28px; color: #8c1d1d; margin-bottom: 8px;">
       🎋 絶望短歌 展覧会
     </h1>
     <p style="font-size: 14px; color: #666; font-family: 'Shippori Mincho', serif;">
       世のエンジニアたちが詠みし 悲痛なる短歌の数々（左右にスクロールできます）
     </p>
+  </div>
+
+  <!-- ソート切り替えタブ (data: { turbo: false } で最新DB状態をパッと読み直す) -->
+  <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 30px; font-family: 'Shippori Mincho', serif;">
+    <%= link_to posts_path(sort: "latest"), data: { turbo: false }, style: "padding: 8px 20px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 15px; transition: all 0.2s;" + (@sort == "latest" ? " background: #8c1d1d; color: #fff; border: 1px solid #8c1d1d;" : " background: #fff; color: #555; border: 1px solid #d4c5b0;") do %>
+      🌸 新着順
+    <% end %>
+
+    <%= link_to posts_path(sort: "likes"), data: { turbo: false }, style: "padding: 8px 20px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 15px; transition: all 0.2s;" + (@sort == "likes" ? " background: #8c1d1d; color: #fff; border: 1px solid #8c1d1d;" : " background: #fff; color: #555; border: 1px solid #d4c5b0;") do %>
+      🔥 共感順（人気）
+    <% end %>
   </div>
 
   <!-- 横スクロールコンテナ -->
@@ -38,3 +49,44 @@
   </div>
 
 </div>
+
+<script>
+  function setupGalleryLikes() {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+    document.querySelectorAll(".gallery-like-btn").forEach(btn => {
+      if (btn.dataset.initialized) return;
+      btn.dataset.initialized = "true";
+
+      btn.addEventListener("click", function(e) {
+        e.preventDefault();
+        const postId = this.dataset.postId;
+        const countSpan = document.querySelector(`.like-count-${postId}`);
+
+        if (countSpan) {
+          let currentCount = parseInt(countSpan.textContent, 10) || 0;
+          countSpan.textContent = currentCount + 1;
+        }
+
+        fetch(`/posts/${postId}/like`, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-Token': csrfToken,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && countSpan) {
+            countSpan.textContent = data.likes_count;
+          }
+        })
+        .catch(err => console.error("Like error:", err));
+      });
+    });
+  }
+
+  document.addEventListener("turbo:load", setupGalleryLikes);
+  document.addEventListener("DOMContentLoaded", setupGalleryLikes);
+</script>

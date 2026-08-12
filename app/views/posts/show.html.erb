@@ -162,23 +162,35 @@
       }
     }
 
-    function initEmpathyButtons() {
+function initEmpathyButtons() {
       const empathyBtns = document.querySelectorAll(".empathy-btn");
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
       empathyBtns.forEach(btn => {
         btn.onclick = function() {
           const countSpan = this.querySelector(".count");
           if (!countSpan) return;
 
+          // UI上のカウントを即座に+1（サクサク感を演出）
           let currentCount = parseInt(countSpan.textContent, 10) || 0;
           countSpan.textContent = currentCount + 1;
 
+          // アニメーション演出
           this.style.transform = "scale(1.2)";
           this.style.borderColor = "#8c1d1d";
 
           setTimeout(() => {
             this.style.transform = "scale(1)";
           }, 120);
+
+          // サーバー（DB）へ非同期でいいね(+1)を保存！
+          fetch(`/posts/<%= @post.id %>/like`, {
+            method: 'POST',
+            headers: {
+              'X-CSRF-Token': csrfToken,
+              'Content-Type': 'application/json'
+            }
+          }).catch(err => console.error("Like error:", err));
         };
       });
     }
