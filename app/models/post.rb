@@ -4,8 +4,7 @@ class Post < ApplicationRecord
   validates :error_message, presence: true
 
   # ソート用スコープ
-  scope :latest, -> { order(created_at: :desc) }
-  scope :most_liked, -> { order(likes_count: :desc, created_at: :desc) }
-  # もし絶望度(despair_scoreなど)のカラムがあれば以下も有効化
-  # scope :most_desperate, -> { order(despair_score: :desc, created_at: :desc) }
+  scope :latest, -> { reorder(created_at: :desc) }
+  # likes_count が nil の場合も 0 として安全に降順ソート
+  scope :most_liked, -> { reorder(Arel.sql("COALESCE(likes_count, 0) DESC, created_at DESC")) }
 end

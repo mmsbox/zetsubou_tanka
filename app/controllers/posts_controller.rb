@@ -1,12 +1,12 @@
 class PostsController < ApplicationController
-  def index
-    @sort = params[:sort] || "latest"
+def index
+    @sort = params[:sort].to_s.strip
 
     @posts = case @sort
              when "likes"
-               Post.order(likes_count: :desc, created_at: :desc)
+               Post.most_liked
              else
-               Post.order(created_at: :desc)
+               Post.latest
              end
   end
 
