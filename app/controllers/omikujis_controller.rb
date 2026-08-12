@@ -1,10 +1,20 @@
 class OmikujisController < ApplicationController
+  # 運勢のバリエーション（結果とカラー）
+  RESULTS = [
+    { result: "大凶", color: "#8c1d1d" },
+    { result: "極凶", color: "#5b1d8c" },
+    { result: "崩壊", color: "#8c531d" },
+    { result: "終焉", color: "#1d6f8c" },
+    { result: "無",   color: "#333333" }
+  ].freeze
+
+  # 絶望テーマと助言のリスト
   THEMES = [
-    { result: "大凶", color: "#8c1d1d", theme: "git push -f を誤って叩いてリポが吹き飛んだ絶望", advice: "本日は丁寧なコミットとバックアップを心がけましょう。" },
-    { result: "極凶", color: "#5b1d8c", theme: "ローカルでは動いたのに本番で500エラーが出る絶望", advice: "環境変数とDockerコンテナの再起動を確認するべし。" },
-    { result: "崩壊", color: "#8c531d", theme: "依存ライブラリのバージョン競合でビルドが通らない絶望", advice: "安易な bundle update は控え、ロックファイルを慈しみましょう。" },
-    { result: "終焉", color: "#1d6f8c", theme: "タイポ一つを探すためだけに3時間が消えた虚しさ", advice: "目を休め、エラーログをChatGPTにそのまま投げるのが吉。" },
-    { result: "無",   color: "#333333", theme: "ログに何も出ず原因不明のまま静まり返る夜の絶望", advice: "サーバーが起動しているか、ポート番号を今一度見直すべし。" }
+    { theme: "git push -f を誤って叩いてリポが吹き飛んだ絶望", advice: "本日は丁寧なコミットとバックアップを心がけましょう。" },
+    { theme: "ローカルでは動いたのに本番で500エラーが出る絶望", advice: "環境変数とDockerコンテナの再起動を確認するべし。" },
+    { theme: "依存ライブラリのバージョン競合でビルドが通らない絶望", advice: "安易な bundle update は控え、ロックファイルを慈しみましょう。" },
+    { theme: "タイポ一つを探すためだけに3時間が消えた虚しさ", advice: "目を休め、エラーログをAIにそのまま投げるのが吉。" },
+    { theme: "ログに何も出ず原因不明のまま静まり返る夜の絶望", advice: "サーバーが起動しているか、ポート番号を今一度見直すべし。" }
   ].freeze
 
   SMALL_KANA = %w[ぁ ぃ ぅ ぇ ぉ ゃ ゅ ょ ァ ィ ゥ ェ ォ ャ ュ ョ].freeze
@@ -13,20 +23,21 @@ class OmikujisController < ApplicationController
     today_key = "omikuji_#{Date.today}"
     cached_data = session[today_key]
 
-    # すでにハッシュデータとして保存されている場合
     if cached_data.is_a?(Hash)
       @fortune = cached_data.deep_symbolize_keys
       @already_drawn = true
     else
-      # 新しくAIおみくじを生成
-      selected = THEMES.sample
-      tanka = generate_ai_tanka(selected[:theme])
+      # ★ 運勢とテーマをそれぞれランダムに抽選！
+      selected_result = RESULTS.sample
+      selected_theme  = THEMES.sample
+
+      tanka = generate_ai_tanka(selected_theme[:theme])
 
       @fortune = {
-        result: selected[:result],
-        color: selected[:color],
+        result: selected_result[:result],
+        color: selected_result[:color],
         tanka: tanka,
-        advice: selected[:advice]
+        advice: selected_theme[:advice]
       }
 
       session[today_key] = @fortune
@@ -54,6 +65,9 @@ class OmikujisController < ApplicationController
         各句の「kana」（全ひらがな）の音数を厳格に守ってください。
         - ku1: 5音, ku2: 7音, ku3: 5音, ku4: 7音, ku5: 7音
 
+        【表現のルール】
+        - 毎回異なる切り口や表現で詠んでください。
+
         【出力フォーマット】
         以下のJSON形式のみを出力してください。
         {
@@ -70,7 +84,9 @@ class OmikujisController < ApplicationController
           model: "gpt-4o-mini",
           messages: [{ role: "user", content: prompt }],
           response_format: { type: "json_object" },
-          temperature: 0.7
+          temperature: 0.9,
+          frequency_penalty: 0.5,
+          presence_penalty: 0.3
         }
       )
 
@@ -115,7 +131,7 @@ class OmikujisController < ApplicationController
       actual_count = count_mora(kana)
       target_count = expected[idx]
 
-      if actual_count != target_count
+      if (actual_count - target_count).abs > 1
         errors << "#{key}の読み「#{kana}」は#{actual_count}音です（目標: #{target_count}音）。"
       end
     end
