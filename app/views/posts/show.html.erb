@@ -1,7 +1,7 @@
 <% content_for :head do %>
   <!-- X (Twitter) Card Metadata -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta property="og:title" content="【絶望えらあ短歌】<%= @post.tanka.truncate(24) %>">
+  <meta property="og:title" content="【絶望えらぁ短歌】<%= @post.tanka.to_s.truncate(24) %>">
   <meta property="og:description" content="エンジニアのエラーから詠まれた絶望の短歌。詠み手：<%= @post.author_name.presence || '名無し法師' %>">
   <meta property="og:image" content="<%= ogp_post_url(@post, format: :png) %>">
   <meta property="og:url" content="<%= post_url(@post) %>">
