@@ -12,11 +12,11 @@
           <small style="color: #888;"><%= l post.created_at, format: :short %></small>
           
           <div style="margin: 10px 0; font-size: 1.2rem; font-weight: bold; color: #e6b422;">
-            <%= post.tanka_text %>
+            <%= post.tanka %>
           </div>
 
           <p style="color: #ccc; font-size: 0.9rem;">
-            <strong>元のエラー・絶望：</strong><%= truncate(post.error_log, length: 50) %>
+            <strong>元のエラー・絶望：</strong><%= truncate(post.error_message, length: 50) %>
           </p>
 
           <%= link_to "詳細を見る", post_path(post), style: "color: #ff6b6b;" %>
