@@ -1,78 +1,160 @@
-<div style="max-width: 1000px; margin: 40px auto; padding: 0 20px; font-family: sans-serif;">
+<!-- 画面全域を隙間なく覆う固定ダーク背景ラッパー -->
+<div style="
+  position: fixed;
+  top: 60px;
+  left: 0;
+  width: 100vw;
+  height: calc(100vh - 60px);
+  background: radial-gradient(circle at center, #230d0d 0%, #0d0808 70%, #050303 100%);
+  z-index: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  font-family: 'Shippori Mincho', serif;
+  color: #f0e6d2;
+  padding: 30px 0 60px 0;
+">
+  <div style="min-height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+    
+    <!-- ヘッダーエリア -->
+    <div style="text-align: center; margin-bottom: 25px; padding: 0 16px;">
+      <h1 style="
+        font-size: 32px;
+        color: #f5e6c8;
+        text-shadow: 0 0 12px rgba(140, 29, 29, 0.8), 0 2px 4px #000;
+        border-bottom: 2px solid #8c1d1d;
+        display: inline-block;
+        padding-bottom: 8px;
+        margin: 0 0 10px 0;
+        letter-spacing: 0.15em;
+      ">
+        🎏 絶望短歌 展覧会
+      </h1>
+      <p style="font-size: 13px; color: #a39382; margin: 0 0 20px 0; letter-spacing: 0.08em;">
+        世のエンジニアたちが詠みし 悲痛なる短歌の数々（左右にスクロールできます）
+      </p>
 
-  <!-- ヘッダータイトル -->
-  <div style="text-align: center; margin-bottom: 20px;">
-    <h1 style="font-family: 'Shippori Mincho', serif; font-size: 28px; color: #8c1d1d; margin-bottom: 8px;">
-      🎋 絶望短歌 展覧会
-    </h1>
-    <p style="font-size: 14px; color: #666; font-family: 'Shippori Mincho', serif;">
-      世のエンジニアたちが詠みし 悲痛なる短歌の数々（左右にスクロールできます）
-    </p>
-  </div>
+      <!-- ソートタブ -->
+      <div style="display: flex; justify-content: center; gap: 12px;">
+        <%= link_to posts_path(sort: "latest"), data: { turbo: false }, style: "
+          padding: 8px 20px;
+          border-radius: 20px;
+          text-decoration: none;
+          font-size: 14px;
+          font-weight: bold;
+          transition: all 0.3s ease;
+          #{@sort == 'likes' ? 'background: rgba(255,255,255,0.05); color: #887868; border: 1px solid #443535;' : 'background: #8c1d1d; color: #fff; border: 1px solid #b32424; box-shadow: 0 0 12px rgba(140, 29, 29, 0.6);'}
+        " do %>
+          🌸 新着順
+        <% end %>
 
-  <!-- ソート切り替えタブ (data: { turbo: false } で最新DB状態をパッと読み直す) -->
-  <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 30px; font-family: 'Shippori Mincho', serif;">
-    <%= link_to posts_path(sort: "latest"), data: { turbo: false }, style: "padding: 8px 20px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 15px; transition: all 0.2s;" + (@sort == "latest" ? " background: #8c1d1d; color: #fff; border: 1px solid #8c1d1d;" : " background: #fff; color: #555; border: 1px solid #d4c5b0;") do %>
-      🌸 新着順
-    <% end %>
+        <%= link_to posts_path(sort: "likes"), data: { turbo: false }, style: "
+          padding: 8px 20px;
+          border-radius: 20px;
+          text-decoration: none;
+          font-size: 14px;
+          font-weight: bold;
+          transition: all 0.3s ease;
+          #{@sort == 'likes' ? 'background: #8c1d1d; color: #fff; border: 1px solid #b32424; box-shadow: 0 0 12px rgba(140, 29, 29, 0.6);' : 'background: rgba(255,255,255,0.05); color: #887868; border: 1px solid #443535;'}
+        " do %>
+          🔥 共感順 (人気)
+        <% end %>
+      </div>
+    </div>
 
-    <%= link_to posts_path(sort: "likes"), data: { turbo: false }, style: "padding: 8px 20px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 15px; transition: all 0.2s;" + (@sort == "likes" ? " background: #8c1d1d; color: #fff; border: 1px solid #8c1d1d;" : " background: #fff; color: #555; border: 1px solid #d4c5b0;") do %>
-      🔥 共感順（人気）
-    <% end %>
-  </div>
-
-  <!-- 横スクロールコンテナ -->
-  <div style="
-    display: flex;
-    gap: 24px;
-    overflow-x: auto;
-    padding: 20px 10px 40px 10px;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-  ">
-    <% if @posts.any? %>
-      <% @posts.each do |post| %>
-        <div style="scroll-snap-align: start;">
-          <%= render 'posts/tanka_card', post: post %>
+    <!-- 画面横いっぱいに広がる全画面横スクロールエリア -->
+    <div class="gallery-scroll-container" style="
+      width: 100vw;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 20px 40px 30px 40px;
+      box-sizing: border-box;
+      display: flex;
+      gap: 24px;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    ">
+      <% if @posts.any? %>
+        <% @posts.each do |post| %>
+          <div class="gallery-card-wrapper" style="scroll-snap-align: start; flex: 0 0 auto; transition: transform 0.3s ease;">
+            <%= render 'posts/tanka_card', post: post %>
+          </div>
+        <% end %>
+      <% else %>
+        <div style="width: 100vw; text-align: center; padding: 60px 0; color: #a39382;">
+          まだ短歌が詠まれておりません。第一号を詠んでみませんか？
         </div>
       <% end %>
-    <% else %>
-      <div style="width: 100%; text-align: center; padding: 60px 0; color: #888;">
-        まだ短歌が詠まれておりません。第一号を詠んでみませんか？
-      </div>
-    <% end %>
-  </div>
+    </div>
 
-  <!-- 投稿へいくボタン -->
-  <div style="text-align: center; margin-top: 20px;">
-    <%= link_to "自分も短歌を詠む 🔥", new_post_path, style: "display: inline-block; padding: 12px 28px; background: #8c1d1d; color: #fff; font-size: 15px; font-weight: bold; font-family: 'Shippori Mincho', serif; border-radius: 30px; text-decoration: none; box-shadow: 0 4px 12px rgba(140,29,29,0.3);" %>
-  </div>
+    <!-- 投稿ボタン -->
+    <div style="text-align: center; margin-top: 20px;">
+      <%= link_to "自分も短歌を詠む 🔥", new_post_path, style: "
+        display: inline-block;
+        padding: 14px 32px;
+        background: linear-gradient(135deg, #8c1d1d 0%, #571010 100%);
+        color: #ffffff;
+        font-size: 16px;
+        font-weight: bold;
+        font-family: 'Shippori Mincho', serif;
+        border: 1px solid #b32424;
+        border-radius: 30px;
+        text-decoration: none;
+        box-shadow: 0 6px 20px rgba(140, 29, 29, 0.6);
+        transition: transform 0.2s ease;
+      " %>
+    </div>
 
+  </div>
 </div>
+
+<!-- スクロールバー装飾＆ホバー効果 -->
+<style>
+  /* 横スクロールバーを黒×赤の和風デザインに */
+  .gallery-scroll-container::-webkit-scrollbar {
+    height: 10px;
+  }
+  .gallery-scroll-container::-webkit-scrollbar-track {
+    background: #0d0808;
+    border-radius: 5px;
+    margin: 0 40px;
+  }
+  .gallery-scroll-container::-webkit-scrollbar-thumb {
+    background: #571c1c;
+    border-radius: 5px;
+    border: 1px solid #8c1d1d;
+  }
+  .gallery-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #8c1d1d;
+  }
+
+  /* カードホバー時の効果 */
+  .gallery-card-wrapper:hover {
+    transform: translateY(-6px);
+  }
+</style>
 
 <script>
   function setupGalleryLikes() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
     document.querySelectorAll(".gallery-like-btn").forEach(btn => {
-      // イベント重複登録防止
       if (btn.dataset.initialized) return;
       btn.dataset.initialized = "true";
 
       btn.addEventListener("click", function(e) {
         e.preventDefault();
-        e.stopPropagation(); // 予期せぬイベント伝播を防止
+        e.stopPropagation();
 
         const postId = this.dataset.postId;
         const countSpan = document.querySelector(`.like-count-${postId}`);
 
-        // ① 先に画面上の表示を +1 して体感レスポンスを高める
         if (countSpan) {
           let currentCount = parseInt(countSpan.textContent, 10) || 0;
           countSpan.textContent = currentCount + 1;
         }
 
-        // ② バックエンド（DB）へ確実に保存リクエストを送る
         fetch(`/posts/${postId}/like`, {
           method: 'POST',
           headers: {
@@ -82,20 +164,16 @@
           }
         })
         .then(response => {
-          if (!response.ok) {
-            throw new Error('ネットワーク応答が正常ではありませんでした');
-          }
+          if (!response.ok) throw new Error('ネットワーク応答エラー');
           return response.json();
         })
         .then(data => {
-          // ③ DB保存成功後、実際の正確な数値で上書きする
           if (data.likes_count !== undefined && countSpan) {
             countSpan.textContent = data.likes_count;
           }
         })
         .catch(err => {
           console.error("Like Error:", err);
-          // エラーが起きた場合は元に戻す
           if (countSpan) {
             let currentCount = parseInt(countSpan.textContent, 10) || 1;
             countSpan.textContent = Math.max(0, currentCount - 1);
@@ -105,7 +183,6 @@
     });
   }
 
-  // Turboと通常ページロードの両方でJSを発火させる
   document.addEventListener("turbo:load", setupGalleryLikes);
   document.addEventListener("DOMContentLoaded", setupGalleryLikes);
 </script>
