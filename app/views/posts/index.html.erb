@@ -1,4 +1,4 @@
-<!-- 画面全域を隙間なく覆う固定ダーク背景ラッパー -->
+<!-- 画面全域を覆う固定ダーク背景ラッパー（縦スクロール仕様） -->
 <div style="
   position: fixed;
   top: 60px;
@@ -12,12 +12,12 @@
   box-sizing: border-box;
   font-family: 'Shippori Mincho', serif;
   color: #f0e6d2;
-  padding: 30px 0 60px 0;
+  padding: 40px 16px 100px 16px;
 ">
-  <div style="min-height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+  <div style="max-width: 900px; margin: 0 auto;">
     
     <!-- ヘッダーエリア -->
-    <div style="text-align: center; margin-bottom: 25px; padding: 0 16px;">
+    <div style="text-align: center; margin-bottom: 50px;">
       <h1 style="
         font-size: 32px;
         color: #f5e6c8;
@@ -31,7 +31,7 @@
         🎏 絶望短歌 展覧会
       </h1>
       <p style="font-size: 13px; color: #a39382; margin: 0 0 20px 0; letter-spacing: 0.08em;">
-        世のエンジニアたちが詠みし 悲痛なる短歌の数々（左右にスクロールできます）
+        世のエンジニアたちが詠みし 悲痛なる短歌の数々
       </p>
 
       <!-- ソートタブ -->
@@ -62,37 +62,29 @@
       </div>
     </div>
 
-    <!-- 画面横いっぱいに広がる全画面横スクロールエリア -->
-    <div class="gallery-scroll-container" style="
-      width: 100vw;
-      overflow-x: auto;
-      overflow-y: hidden;
-      padding: 20px 40px 30px 40px;
-      box-sizing: border-box;
-      display: flex;
-      gap: 24px;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-    ">
+    <!-- 縦スクロール ＆ 交互斜め短冊レイアウト -->
+    <div class="tanka-gallery-vertical">
       <% if @posts.any? %>
-        <% @posts.each do |post| %>
-          <div class="gallery-card-wrapper" style="scroll-snap-align: start; flex: 0 0 auto; transition: transform 0.3s ease;">
-            <%= render 'posts/tanka_card', post: post %>
+        <% @posts.each_with_index do |post, idx| %>
+          <!-- 奇数・偶数で左右と傾きを切り替えるクラス（odd-card / even-card） -->
+          <div class="tanka-item-wrapper <%= idx.odd? ? 'even-card' : 'odd-card' %>">
+            <div class="tanka-card-inner">
+              <%= render 'posts/tanka_card', post: post %>
+            </div>
           </div>
         <% end %>
       <% else %>
-        <div style="width: 100vw; text-align: center; padding: 60px 0; color: #a39382;">
+        <div style="text-align: center; padding: 60px 0; color: #a39382;">
           まだ短歌が詠まれておりません。第一号を詠んでみませんか？
         </div>
       <% end %>
     </div>
 
-    <!-- 投稿ボタン -->
-    <div style="text-align: center; margin-top: 20px;">
+    <!-- 投稿ボタン（画面下部に固定風に置くか末尾に配置） -->
+    <div style="text-align: center; margin-top: 60px;">
       <%= link_to "自分も短歌を詠む 🔥", new_post_path, style: "
         display: inline-block;
-        padding: 14px 32px;
+        padding: 14px 36px;
         background: linear-gradient(135deg, #8c1d1d 0%, #571010 100%);
         color: #ffffff;
         font-size: 16px;
@@ -109,29 +101,65 @@
   </div>
 </div>
 
-<!-- スクロールバー装飾＆ホバー効果 -->
+<!-- 交互斜めレイアウト＆おどろおどろしい効果のCSS -->
 <style>
-  /* 横スクロールバーを黒×赤の和風デザインに */
-  .gallery-scroll-container::-webkit-scrollbar {
-    height: 10px;
-  }
-  .gallery-scroll-container::-webkit-scrollbar-track {
-    background: #0d0808;
-    border-radius: 5px;
-    margin: 0 40px;
-  }
-  .gallery-scroll-container::-webkit-scrollbar-thumb {
-    background: #571c1c;
-    border-radius: 5px;
-    border: 1px solid #8c1d1d;
-  }
-  .gallery-scroll-container::-webkit-scrollbar-thumb:hover {
-    background: #8c1d1d;
+  /* 全体コンテナ */
+  .tanka-gallery-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 40px; /* カード同士の縦間隔 */
+    padding: 10px;
   }
 
-  /* カードホバー時の効果 */
-  .gallery-card-wrapper:hover {
-    transform: translateY(-6px);
+  /* 共通カードラッパー */
+  .tanka-item-wrapper {
+    display: flex;
+    width: 100%;
+    transition: transform 0.4s ease, filter 0.4s ease;
+  }
+
+  /* 奇数番目（左寄せ ＋ 左に少し傾ける） */
+  .odd-card {
+    justify-content: flex-start;
+    padding-left: 5%;
+  }
+  .odd-card .tanka-card-inner {
+    transform: rotate(-3.5deg);
+  }
+
+  /* 偶数番目（右寄せ ＋ 右に少し傾ける） */
+  .even-card {
+    justify-content: flex-end;
+    padding-right: 5%;
+  }
+  .even-card .tanka-card-inner {
+    transform: rotate(3.5deg);
+  }
+
+  /* インナーカードのホバー効果（ホバーするとまっすぐになり、赤く妖しく光る） */
+  .tanka-card-inner {
+    transition: transform 0.3s ease, filter 0.3s ease;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8));
+  }
+
+  .tanka-card-inner:hover {
+    transform: rotate(0deg) scale(1.05) !important;
+    filter: drop-shadow(0 0 20px rgba(140, 29, 29, 0.8)) !important;
+    z-index: 10;
+  }
+
+  /* スマホ表示（画面が狭いときは中央寄せ＋控えめな傾き） */
+  @media (max-width: 600px) {
+    .odd-card, .even-card {
+      justify-content: center;
+      padding: 0;
+    }
+    .odd-card .tanka-card-inner {
+      transform: rotate(-2deg);
+    }
+    .even-card .tanka-card-inner {
+      transform: rotate(2deg);
+    }
   }
 </style>
 
