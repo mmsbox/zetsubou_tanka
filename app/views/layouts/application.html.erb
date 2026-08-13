@@ -70,8 +70,7 @@
 
       <%= yield %>
     </main>
-
-    <!-- 🎵 固定表示のBGMコントロールボタン（画面右下に配置） -->
+<!-- 🎵 固定表示のBGMコントロールボタン（画面右下に配置） -->
     <div id="bgm-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
       <button id="bgm-toggle-btn" style="
         background: #111111;
@@ -93,53 +92,23 @@
       </button>
     </div>
 
-    <!-- 音声タグ（public/audio/bgm.mp3 を自動ループ再生） -->
-    <audio id="bgm-player" src="/audio/bgm.mp3" loop preload="auto"></audio>
+    <!-- 🎵 音声タグ（data-turbo-permanent で画面遷移時もDOMを保持） -->
+    <audio id="bgm-player" src="/audio/bgm.mp3" loop preload="auto" data-turbo-permanent></audio>
 
-    <!-- 🎵 BGM制御用JavaScript -->
+    <!-- 🎵 画面遷移しても音が止まらない連続再生用JavaScript -->
     <script>
-      function setupBgmController() {
-        const audio = document.getElementById("bgm-player");
-        const btn = document.getElementById("bgm-toggle-btn");
-        const icon = document.getElementById("bgm-icon");
-        const text = document.getElementById("bgm-text");
-
-        if (!audio || !btn) return;
-
-        // 音量を少し控えめに設定（心地よい和風BGMレベル）
-        audio.volume = 0.2;
-
-        // セッションストレージから再生状態を取得
-        const isPlaying = sessionStorage.getItem("bgm_playing") === "true";
-
-        if (isPlaying) {
-          audio.play().then(() => {
-            updateBtnState(true);
-          }).catch(err => {
-            // ブラウザの自動再生制御に弾かれた場合
-            sessionStorage.setItem("bgm_playing", "false");
-            updateBtnState(false);
-          });
-        }
-
-        // 重複登録防止のフラグチェック
-        if (!btn.dataset.initialized) {
-          btn.dataset.initialized = "true";
-          btn.addEventListener("click", () => {
-            if (audio.paused) {
-              audio.play().then(() => {
-                sessionStorage.setItem("bgm_playing", "true");
-                updateBtnState(true);
-              });
-            } else {
-              audio.pause();
-              sessionStorage.setItem("bgm_playing", "false");
-              updateBtnState(false);
-            }
-          });
+      (function() {
+        function getAudio() {
+          return document.getElementById("bgm-player");
         }
 
         function updateBtnState(playing) {
+          const icon = document.getElementById("bgm-icon");
+          const text = document.getElementById("bgm-text");
+          const btn = document.getElementById("bgm-toggle-btn");
+
+          if (!icon || !text || !btn) return;
+
           if (playing) {
             icon.textContent = "🎵";
             text.textContent = "BGM 停止";
@@ -150,11 +119,72 @@
             btn.style.borderColor = "#8c1d1d";
           }
         }
-      }
 
-      // Turbo遷移・初回読み込みの両方で初期化
-      document.addEventListener("turbo:load", setupBgmController);
-      document.addEventListener("DOMContentLoaded", setupBgmController);
+        function setupBgmController() {
+          const audio = getAudio();
+          const btn = document.getElementById("bgm-toggle-btn");
+
+          if (!audio || !btn) return;
+
+          // 音量を控えめに設定（20%）
+          audio.volume = 0.2;
+
+          // 再生位置をリアルタイムに記憶
+          audio.removeEventListener("timeupdate", saveBgmTime);
+          audio.addEventListener("timeupdate", saveBgmTime);
+
+          function saveBgmTime() {
+            if (!audio.paused) {
+              sessionStorage.setItem("bgm_time", audio.currentTime);
+            }
+          }
+
+          // セッションストレージから再生状態と再生位置を取得
+          const isPlaying = sessionStorage.getItem("bgm_playing") === "true";
+          const savedTime = parseFloat(sessionStorage.getItem("bgm_time") || "0");
+
+          if (isPlaying) {
+            // リロード等で位置がズレた場合に元の位置から再開
+            if (savedTime > 0 && Math.abs(audio.currentTime - savedTime) > 2) {
+              audio.currentTime = savedTime;
+            }
+
+            if (audio.paused) {
+              audio.play().then(() => {
+                updateBtnState(true);
+              }).catch(err => {
+                // 自動再生ブロック対策
+                updateBtnState(false);
+              });
+            } else {
+              updateBtnState(true);
+            }
+          } else {
+            updateBtnState(false);
+          }
+
+          // ボタンクリックイベント（二重登録防止）
+          if (!btn.dataset.initialized) {
+            btn.dataset.initialized = "true";
+            btn.addEventListener("click", () => {
+              if (audio.paused) {
+                audio.play().then(() => {
+                  sessionStorage.setItem("bgm_playing", "true");
+                  updateBtnState(true);
+                });
+              } else {
+                audio.pause();
+                sessionStorage.setItem("bgm_playing", "false");
+                updateBtnState(false);
+              }
+            });
+          }
+        }
+
+        // Turbo遷移とDOM作成完了の両方に対応
+        document.addEventListener("turbo:load", setupBgmController);
+        document.addEventListener("DOMContentLoaded", setupBgmController);
+      })();
     </script>
   </body>
 </html>

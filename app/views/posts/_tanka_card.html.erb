@@ -13,20 +13,23 @@
   font-family: 'Shippori Mincho', serif;
   box-sizing: border-box;
 ">
-  <!-- 短歌縦書き表示エリア -->
+  <!-- 短歌縦書き表示エリア（★ 改行対応 ＆ flex配置の最適化） -->
   <div style="
     writing-mode: vertical-rl;
     text-orientation: upright;
     font-size: 18px;
-    line-height: 2.0;
+    line-height: 2.2;
     letter-spacing: 3px;
     color: #2d3748;
     height: 280px;
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
+    box-sizing: border-box;
   ">
-    <%= post.tanka %>
+    <!-- 半角・全角スペースを <br> に置換して句（5・7・5・7・7）ごとに改行 -->
+    <%= sanitize post.tanka.to_s.gsub(/[  ]+/, '<br>'), tags: %w[br] %>
   </div>
 
   <!-- 詠み手情報 -->
