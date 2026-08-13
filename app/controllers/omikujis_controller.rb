@@ -1,14 +1,17 @@
 class OmikujisController < ApplicationController
-  # 運勢のバリエーション（結果とカラー）
+  # 運勢・カラー・確率(weight)・背景スタイルの定義
   RESULTS = [
-    { result: "大凶", color: "#8c1d1d" },
-    { result: "極凶", color: "#5b1d8c" },
-    { result: "崩壊", color: "#8c531d" },
-    { result: "終焉", color: "#1d6f8c" },
-    { result: "無",   color: "#333333" }
+    { result: "大吉", color: "#d93838", weight: 10, bg_style: "linear-gradient(135deg, #fff5f5 0%, #ffe3e3 100%)" },
+    { result: "中吉", color: "#e67e22", weight: 15, bg_style: "linear-gradient(135deg, #fff9f2 0%, #ffe8d1 100%)" },
+    { result: "吉",   color: "#27ae60", weight: 20, bg_style: "linear-gradient(135deg, #f2faf5 0%, #d1f2dd 100%)" },
+    { result: "小吉", color: "#2980b9", weight: 20, bg_style: "linear-gradient(135deg, #f2f8fa 0%, #d1e8f2 100%)" },
+    { result: "大凶", color: "#8c1d1d", weight: 15, bg_style: "linear-gradient(135deg, #2b1111 0%, #1a0a0a 100%)" },
+    { result: "極凶", color: "#5b1d8c", weight: 10, bg_style: "linear-gradient(135deg, #1f112b 0%, #0d0614 100%)" },
+    { result: "崩壊", color: "#8c531d", weight: 5,  bg_style: "linear-gradient(135deg, #2b1f11 0%, #171008 100%)" },
+    { result: "終焉", color: "#1d6f8c", weight: 3,  bg_style: "linear-gradient(135deg, #11252b 0%, #081217 100%)" },
+    { result: "無",   color: "#333333", weight: 2,  bg_style: "linear-gradient(135deg, #1a1a1a 0%, #000000 100%)" }
   ].freeze
 
-  # 絶望テーマと助言のリスト
   THEMES = [
     { theme: "git push -f を誤って叩いてリポが吹き飛んだ絶望", advice: "本日は丁寧なコミットとバックアップを心がけましょう。" },
     { theme: "ローカルでは動いたのに本番で500エラーが出る絶望", advice: "環境変数とDockerコンテナの再起動を確認するべし。" },
@@ -27,8 +30,7 @@ class OmikujisController < ApplicationController
       @fortune = cached_data.deep_symbolize_keys
       @already_drawn = true
     else
-      # ★ 運勢とテーマをそれぞれランダムに抽選！
-      selected_result = RESULTS.sample
+      selected_result = draw_weighted_result(RESULTS)
       selected_theme  = THEMES.sample
 
       tanka = generate_ai_tanka(selected_theme[:theme])
@@ -36,6 +38,7 @@ class OmikujisController < ApplicationController
       @fortune = {
         result: selected_result[:result],
         color: selected_result[:color],
+        bg_style: selected_result[:bg_style],
         tanka: tanka,
         advice: selected_theme[:advice]
       }
@@ -46,6 +49,18 @@ class OmikujisController < ApplicationController
   end
 
   private
+
+  def draw_weighted_result(results)
+    total_weight = results.sum { |r| r[:weight] }
+    random_num = rand(total_weight)
+
+    results.each do |r|
+      return r if random_num < r[:weight]
+      random_num -= r[:weight]
+    end
+
+    results.first
+  end
 
   def count_mora(kana)
     kana.to_s.chars.reject { |c| SMALL_KANA.include?(c) }.size
