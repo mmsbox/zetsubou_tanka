@@ -19,6 +19,7 @@
         <%= f.label :error_message, "絶望のエラーメッセージ / 悲鳴", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #333; font-family: 'Shippori Mincho', serif; font-size: 15px;" %>
         <%= f.text_area :error_message, 
             rows: 5, 
+            required: true,
             placeholder: "例: NoMethodError: undefined method 'user=' for nil:NilClass\n（怒りや悲しみの叫びでも可）", 
             style: "width: 100%; padding: 12px; border: 1px solid #c8b9a6; border-radius: 8px; background: #fff; font-size: 14px; box-sizing: border-box; font-family: monospace; resize: vertical; line-height: 1.5;" 
         %>
@@ -33,9 +34,9 @@
         %>
       </div>
 
-      <!-- 送信ボタン（和風漆黒ボタン） -->
+      <!-- 送信ボタン（クリックでローディング起動） -->
       <div style="text-align: center;">
-        <%= f.submit "短歌を詠む 🔥", style: "width: 100%; padding: 14px; background: linear-gradient(135deg, #1a1a1a, #8c1d1d); color: #fff; font-size: 16px; font-weight: bold; font-family: 'Shippori Mincho', serif; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(140, 29, 29, 0.3); transition: all 0.2s ease;" %>
+        <%= f.submit "短歌を詠む 🔥", id: "tanka-submit-btn", style: "width: 100%; padding: 14px; background: linear-gradient(135deg, #1a1a1a, #8c1d1d); color: #fff; font-size: 16px; font-weight: bold; font-family: 'Shippori Mincho', serif; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(140, 29, 29, 0.3); transition: all 0.2s ease;" %>
       </div>
 
     <% end %>
@@ -47,3 +48,95 @@
   </div>
 
 </div>
+
+<!-- 🎃 短歌生成専用・全画面怨念ローディング画面（画面内に直接配置） -->
+<div id="post-loading-overlay" style="
+  display: none;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at center, #1a0808 0%, #080303 80%, #000000 100%);
+  z-index: 999999;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Shippori Mincho', serif;
+  color: #f0e6d2;
+">
+  <!-- 妖しく回転する呪印 -->
+  <div class="post-loading-circle"></div>
+
+  <!-- 中央のテキストエリア -->
+  <div style="position: relative; z-index: 2; text-align: center; padding: 0 20px;">
+    <p id="post-loading-text" style="
+      font-size: 22px;
+      letter-spacing: 0.2em;
+      color: #f5e6c8;
+      text-shadow: 0 0 12px rgba(140, 29, 29, 0.9), 0 0 20px #8c1d1d;
+      margin-bottom: 16px;
+      min-height: 32px;
+    ">
+      絶望の短歌を詠み上げております…
+    </p>
+    <p style="font-size: 13px; color: #887868; letter-spacing: 0.1em;">
+      AIが怨念を紐解くまで しばしお待ちくだされ
+    </p>
+  </div>
+</div>
+
+<style>
+  .post-loading-circle {
+    width: 140px;
+    height: 140px;
+    border: 3px solid rgba(140, 29, 29, 0.2);
+    border-top: 3px solid #8c1d1d;
+    border-right: 3px solid #b32424;
+    border-radius: 50%;
+    animation: spinRune 1.8s linear infinite;
+    box-shadow: 0 0 25px rgba(140, 29, 29, 0.6);
+    position: absolute;
+  }
+
+  @keyframes spinRune {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.08); box-shadow: 0 0 35px rgba(179, 36, 36, 0.9); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+</style>
+
+<script>
+  (function() {
+    function setupPostLoading() {
+      const btn = document.getElementById("tanka-submit-btn");
+      const overlay = document.getElementById("post-loading-overlay");
+      const textEl = document.getElementById("post-loading-text");
+      const textarea = document.querySelector("textarea");
+
+      if (!btn || !overlay) return;
+
+      btn.addEventListener("click", function(e) {
+        // エラーメッセージが空の時は発火させない
+        if (textarea && !textarea.value.trim()) return;
+
+        overlay.style.display = "flex";
+
+        const messages = [
+          "バグの怨念を集めております…",
+          "深層ログを紐解き中…",
+          "絶望の歌を詠み上げております…",
+          "構文エラーの呪いを編み込み中…",
+          "スタックトレースを解読中…"
+        ];
+        let idx = 0;
+        setInterval(() => {
+          idx = (idx + 1) % messages.length;
+          if (textEl) textEl.textContent = messages[idx];
+        }, 2000);
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", setupPostLoading);
+    document.addEventListener("turbo:load", setupPostLoading);
+  })();
+</script>
