@@ -1,50 +1,92 @@
-<div style="max-width: 600px; margin: 0 auto; padding: 20px; text-align: center; font-family: 'Shippori Mincho', serif;">
-  <h1 style="font-size: 28px; color: #1a1a1a; border-bottom: 2px solid #8c1d1d; display: inline-block; padding-bottom: 6px; margin-bottom: 30px;">
-    ⛩️ 本日の絶望おみくじ
-  </h1>
+<% 
+  # 背景画像の設定（old session対策）
+  bg_style = @fortune[:bg_style].presence
+  if bg_style.blank? || !bg_style.include?("url")
+    filename = case @fortune[:result]
+               when "大吉" then "daikichi.png"
+               when "中吉" then "chukichi.png"
+               when "吉"   then "kichi.png"
+               when "小吉" then "shokichi.png"
+               end
+    bg_style = filename ? "url('/images/omikuji/#{filename}') center/cover no-repeat" : (@fortune[:color] || "#2b1111")
+  end
+%>
 
-  <!-- おみくじ結果カードエリア -->
-  <div id="omikuji-card" style="background: #faf6ed; border: 3px double #d4c5b0; border-radius: 12px; padding: 30px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); margin-bottom: 30px; position: relative;">
+<!-- 画面全体に広げる背景ラッパー -->
+<div style="
+  position: fixed;
+  top: 60px;
+  left: 0;
+  width: 100vw;
+  height: calc(100vh - 60px);
+  background: <%= bg_style %>;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+  overflow-y: auto;
+  padding: 40px 16px;
+  box-sizing: border-box;
+  font-family: 'Shippori Mincho', serif;
+">
+  <div style="max-width: 600px; margin: 0 auto; text-align: center; position: relative; z-index: 1;">
     
-    <% if @already_drawn %>
-      <div style="font-size: 14px; color: #888; margin-bottom: 10px;">※ 本日は既におみくじを引いています</div>
-    <% end %>
+    <h1 style="font-size: 28px; color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.8); border-bottom: 2px solid #8c1d1d; display: inline-block; padding-bottom: 6px; margin-bottom: 30px;">
+      ⛩️ 本日の絶望おみくじ
+    </h1>
 
-    <!-- 運勢ヘッダー -->
-    <div style="font-size: 18px; color: #555; margin-bottom: 8px;">本日の運勢</div>
-    <div style="font-size: 56px; font-weight: bold; color: <%= @fortune[:color] %>; letter-spacing: 4px; margin: 15px 0;">
-      <%= @fortune[:result] %>
+    <!-- おみくじ結果カードエリア -->
+    <div id="omikuji-card" style="
+      background: rgba(250, 246, 237, 0.92);
+      backdrop-filter: blur(6px);
+      border: 3px double <%= @fortune[:color] %>;
+      border-radius: 12px;
+      padding: 30px 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+      margin-bottom: 30px;
+      position: relative;
+    ">
+      
+      <% if @already_drawn %>
+        <div style="font-size: 14px; color: #666; margin-bottom: 10px; background: rgba(255,255,255,0.85); display: inline-block; padding: 2px 12px; border-radius: 12px;">※ 本日は既におみくじを引いています</div>
+      <% end %>
+
+      <!-- 運勢ヘッダー -->
+      <div style="font-size: 18px; color: #555; margin-bottom: 8px; font-weight: bold;">本日の運勢</div>
+      <div style="font-size: 56px; font-weight: bold; color: <%= @fortune[:color] %>; letter-spacing: 4px; margin: 15px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <%= @fortune[:result] %>
+      </div>
+
+      <!-- おみくじ短歌 -->
+      <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0; font-size: 20px; line-height: 1.8; color: #2d3748; letter-spacing: 2px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <%= @fortune[:tanka] %>
+      </div>
+
+      <!-- 開発の助言 -->
+      <div style="text-align: left; background: #f7fafc; border-left: 4px solid <%= @fortune[:color] %>; padding: 12px 16px; border-radius: 0 8px 8px 0; margin-top: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <div style="font-size: 12px; font-weight: bold; color: #718096; margin-bottom: 4px;">💡 絶望回避の助言</div>
+        <div style="font-size: 14px; color: #2d3748;"><%= @fortune[:advice] %></div>
+      </div>
     </div>
 
-    <!-- おみくじ短歌 -->
-    <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0; font-size: 20px; line-height: 1.8; color: #2d3748; letter-spacing: 2px;">
-      <%= @fortune[:tanka] %>
+    <!-- シェア＆ナビゲーション -->
+    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+      <% 
+        share_text = "【本日の絶望おみくじ】\n運勢：#{@fortune[:result]}\n#{@fortune[:tanka]}\n\n"
+        share_url = omikuji_url
+        hashtags = "絶望おみくじ,絶望えらぁ短歌,RUNTEQ"
+        twitter_url = "https://twitter.com/intent/tweet?text=#{CGI.escape(share_text)}&url=#{CGI.escape(share_url)}&hashtags=#{CGI.escape(hashtags)}"
+      %>
+
+      <%= link_to twitter_url, target: "_blank", rel: "noopener noreferrer", style: "padding: 12px 24px; background: #000; color: #fff; border-radius: 8px; text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);" do %>
+        <svg style="width: 16px; height: 16px; fill: currentColor;" viewBox="0 0 24 24">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+        おみくじ結果をXで呟く
+      <% end %>
+
+      <%= link_to "短歌を詠む", new_post_path, style: "padding: 12px 24px; background: #8c1d1d; color: #fff; border-radius: 8px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3);" %>
+      <%= link_to "ギャラリーへ", posts_path, style: "padding: 12px 24px; background: #ffffff; color: #333; border-radius: 8px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3);" %>
     </div>
 
-    <!-- 開発の助言 -->
-    <div style="text-align: left; background: #f7fafc; border-left: 4px solid <%= @fortune[:color] %>; padding: 12px 16px; border-radius: 0 8px 8px 0; margin-top: 20px;">
-      <div style="font-size: 12px; font-weight: bold; color: #718096; margin-bottom: 4px;">💡 絶望回避の助言</div>
-      <div style="font-size: 14px; color: #2d3748;"><%= @fortune[:advice] %></div>
-    </div>
-  </div>
-
-  <!-- シェア＆ナビゲーション -->
-  <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-    <% 
-      share_text = "【本日の絶望おみくじ】\n運勢：#{@fortune[:result]}\n#{@fortune[:tanka]}\n\n"
-      share_url = omikuji_url
-      hashtags = "絶望おみくじ,バトラン,RUNTEQ"
-      twitter_url = "https://twitter.com/intent/tweet?text=#{CGI.escape(share_text)}&url=#{CGI.escape(share_url)}&hashtags=#{CGI.escape(hashtags)}"
-    %>
-
-    <%= link_to twitter_url, target: "_blank", rel: "noopener noreferrer", style: "padding: 12px 24px; background: #000; color: #fff; border-radius: 8px; text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 8px;" do %>
-      <svg style="width: 16px; height: 16px; fill: currentColor;" viewBox="0 0 24 24">
-        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-      </svg>
-      おみくじ結果をXで呟く
-    <% end %>
-
-    <%= link_to "短歌を詠む", new_post_path, style: "padding: 12px 24px; background: #8c1d1d; color: #fff; border-radius: 8px; text-decoration: none; font-weight: bold;" %>
-    <%= link_to "ギャラリーへ", posts_path, style: "padding: 12px 24px; background: #e2e8f0; color: #333; border-radius: 8px; text-decoration: none; font-weight: bold;" %>
   </div>
 </div>
