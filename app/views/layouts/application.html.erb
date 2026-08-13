@@ -70,7 +70,38 @@
 
       <%= yield %>
     </main>
-<!-- 🎵 固定表示のBGMコントロールボタン（画面右下に配置） -->
+
+    <!-- 🎵 固定表示のBGMコントロールボタン（画面右下に配置） -->
+   <!-- 🎃 おどろおどろしい画面遷移アニメーションCSS（画面消失防止・安全版） -->
+    <style>
+      /* ページ読み込み時に暗闇・ぼやけからじわっとピントが合う */
+      body {
+        animation: darkFadeIn 0.6s ease-out forwards;
+      }
+
+      /* Turboでの遷移時、一時的に少しぼやけて雰囲気を出す */
+      html.turbo-loading body {
+        filter: blur(6px) contrast(140%) brightness(50%);
+        transition: filter 0.3s ease;
+      }
+
+      @keyframes darkFadeIn {
+        0% {
+          filter: blur(8px) contrast(150%) brightness(40%);
+        }
+        100% {
+          filter: blur(0px) contrast(100%) brightness(100%);
+        }
+      }
+
+      /* ボタンやリンククリック時の不気味な妖しい赤光 */
+      a:active, button:active {
+        transition: filter 0.1s;
+        filter: drop-shadow(0 0 10px rgba(140, 29, 29, 0.9));
+      }
+    </style>
+
+    <!-- 🎵 固定表示のBGMコントロールボタン（画面右下に配置） -->
     <div id="bgm-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
       <button id="bgm-toggle-btn" style="
         background: #111111;
@@ -92,10 +123,10 @@
       </button>
     </div>
 
-    <!-- 🎵 音声タグ（data-turbo-permanent で画面遷移時もDOMを保持） -->
+    <!-- 🎵 音声タグ（data-turbo-permanent で画面遷移時も破棄せず保持） -->
     <audio id="bgm-player" src="/audio/bgm.mp3" loop preload="auto" data-turbo-permanent></audio>
 
-    <!-- 🎵 画面遷移しても音が止まらない連続再生用JavaScript -->
+    <!-- 🎵 BGM制御 ＆ シームレス再生JavaScript -->
     <script>
       (function() {
         function getAudio() {
@@ -126,10 +157,9 @@
 
           if (!audio || !btn) return;
 
-          // 音量を控えめに設定（20%）
-          audio.volume = 0.2;
+          audio.volume = 0.2; // 音量（20%）
 
-          // 再生位置をリアルタイムに記憶
+          // 1秒ごとに再生位置をセッションストレージに保存
           audio.removeEventListener("timeupdate", saveBgmTime);
           audio.addEventListener("timeupdate", saveBgmTime);
 
@@ -139,12 +169,11 @@
             }
           }
 
-          // セッションストレージから再生状態と再生位置を取得
           const isPlaying = sessionStorage.getItem("bgm_playing") === "true";
           const savedTime = parseFloat(sessionStorage.getItem("bgm_time") || "0");
 
           if (isPlaying) {
-            // リロード等で位置がズレた場合に元の位置から再開
+            // フルリロード時に再生位置を復元
             if (savedTime > 0 && Math.abs(audio.currentTime - savedTime) > 2) {
               audio.currentTime = savedTime;
             }
@@ -153,7 +182,6 @@
               audio.play().then(() => {
                 updateBtnState(true);
               }).catch(err => {
-                // 自動再生ブロック対策
                 updateBtnState(false);
               });
             } else {
@@ -163,7 +191,7 @@
             updateBtnState(false);
           }
 
-          // ボタンクリックイベント（二重登録防止）
+          // ボタンクリック処理（重複登録防止）
           if (!btn.dataset.initialized) {
             btn.dataset.initialized = "true";
             btn.addEventListener("click", () => {
@@ -181,7 +209,6 @@
           }
         }
 
-        // Turbo遷移とDOM作成完了の両方に対応
         document.addEventListener("turbo:load", setupBgmController);
         document.addEventListener("DOMContentLoaded", setupBgmController);
       })();
