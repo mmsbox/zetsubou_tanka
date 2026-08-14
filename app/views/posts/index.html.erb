@@ -73,9 +73,9 @@
               background: radial-gradient(circle, #fcf8f2 0%, #f3ece0 100%);
               border: 2px solid #c8b9a6;
               border-radius: 12px;
-              padding: 24px 28px;
+              padding: 86px 16px;
               width: 100%;
-              max-width: 440px;
+              max-width: 300px;
               box-sizing: border-box;
               position: relative;
               color: #2c221e;
@@ -88,18 +88,34 @@
               </div>
 
               <!-- 短歌本文（5・7・5・7・7改行 / post.body に対応） -->
+            <!-- 短歌本文（和風縦書き表示） -->
               <div style="
-                font-size: 19px;
-                line-height: 2.0;
-                letter-spacing: 0.1em;
-                color: #1a1008;
-                margin-bottom: 22px;
-                text-align: center;
-                font-weight: 500;
+                width: 100%;
+                height: 220px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-bottom: 18px;
+                overflow: hidden;
               ">
-                 <%= sanitize post.tanka.to_s.gsub(/[  ]+/, '<br>'), tags: %w[br] %>
+                <div style="
+                  writing-mode: vertical-rl;
+                  -webkit-writing-mode: vertical-rl;
+                  text-orientation: upright;
+                  -webkit-text-orientation: upright;
+                  font-size: 18px;
+                  line-height: 2.0;
+                  letter-spacing: 0.2em;
+                  color: #1a1008;
+                  font-weight: 500;
+                  height: 200px;
+                  max-width: 280px;
+                  word-break: break-all;
+                  font-family: 'Yuji Syuku', 'Shippori Mincho', serif;
+                ">
+                  <%= sanitize post.tanka.to_s.gsub(/[  ]+/, '<br>'), tags: %w[br] %>
+                </div>
               </div>
-
               <!-- カードフッター（共感ボタン・詳細リンク） -->
               <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2d7c7; padding-top: 12px; margin-top: 10px;">
                 <button class="gallery-like-btn" data-post-id="<%= post.id %>" style="
