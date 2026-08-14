@@ -1,79 +1,47 @@
-<!-- 画面全域を覆う固定ダーク背景ラッパー -->
+<!-- 画面全体の最外枠（100%幅でズレない安全設計 ＆ 修正版ダーク背景） -->
 <div style="
-  position: fixed;
-  top: 60px;
-  left: 0;
-  width: 100vw;
-  height: calc(100vh - 60px);
+  width: 100%;
+  min-height: calc(100vh - 60px);
   background: radial-gradient(circle at center, #230d0d 0%, #0d0808 70%, #050303 100%);
-  z-index: 10;
-  overflow-y: auto;
-  overflow-x: hidden;
+  padding: 40px 16px 80px;
   box-sizing: border-box;
   font-family: 'Shippori Mincho', serif;
-  color: #f0e6d2;
-  padding: 40px 16px 100px 16px;
+  position: relative;
 ">
-  <div style="max-width: 900px; margin: 0 auto;">
-    
-    <!-- ヘッダーエリア -->
-    <div style="text-align: center; margin-bottom: 50px;">
-      <h1 style="
-        font-size: 32px;
-        color: #f5e6c8;
-        text-shadow: 0 0 12px rgba(140, 29, 29, 0.8), 0 2px 4px #000;
-        border-bottom: 2px solid #8c1d1d;
-        display: inline-block;
-        padding-bottom: 8px;
-        margin: 0 0 10px 0;
-        letter-spacing: 0.15em;
-      ">
+  <div style="max-width: 900px; margin: 0 auto; position: relative; z-index: 1;">
+
+    <!-- 展覧会タイトル ＆ 説明 -->
+    <div style="text-align: center; margin-bottom: 40px;">
+      <h1 style="font-size: 28px; color: #f2e8d8; border-bottom: 2px solid #8c1d1d; display: inline-block; padding-bottom: 8px; margin-bottom: 12px; font-weight: 800;">
         🏛️ 絶望えらぁ短歌 展覧会
       </h1>
-      <p style="font-size: 13px; color: #a39382; margin: 0 0 20px 0; letter-spacing: 0.08em;">
+      <p style="font-size: 14px; color: #a39382; margin: 0;">
         世のエンジニアたちが詠みし 悲痛なる短歌の数々
       </p>
-
-      <!-- ソートタブ -->
-      <div style="display: flex; justify-content: center; gap: 12px;">
-        <%= link_to posts_path(sort: "latest"), data: { turbo: false }, style: "
-          padding: 8px 20px;
-          border-radius: 20px;
-          text-decoration: none;
-          font-size: 14px;
-          font-weight: bold;
-          transition: all 0.3s ease;
-          #{@sort == 'likes' ? 'background: rgba(255,255,255,0.05); color: #887868; border: 1px solid #443535;' : 'background: #8c1d1d; color: #fff; border: 1px solid #b32424; box-shadow: 0 0 12px rgba(140, 29, 29, 0.6);'}
-        " do %>
-          🌸 新着順
-        <% end %>
-
-        <%= link_to posts_path(sort: "likes"), data: { turbo: false }, style: "
-          padding: 8px 20px;
-          border-radius: 20px;
-          text-decoration: none;
-          font-size: 14px;
-          font-weight: bold;
-          transition: all 0.3s ease;
-          #{@sort == 'likes' ? 'background: #8c1d1d; color: #fff; border: 1px solid #b32424; box-shadow: 0 0 12px rgba(140, 29, 29, 0.6);' : 'background: rgba(255,255,255,0.05); color: #887868; border: 1px solid #443535;'}
-        " do %>
-          🔥 共感順 (人気)
-        <% end %>
-      </div>
     </div>
 
-    <!-- 縦スクロール ＆ 交互斜め短冊レイアウト -->
+    <!-- ソートタブ（新着順・人気順） -->
+    <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 40px;">
+      <%= link_to posts_path(sort: "latest"), style: "padding: 8px 20px; border-radius: 20px; text-decoration: none; font-size: 14px; font-weight: bold; #{params[:sort] != 'likes' ? 'background: #8c1d1d; color: #fff;' : 'background: #2a221d; color: #a39382; border: 1px solid #4a3d35;'}" do %>
+        🌸 新着順
+      <% end %>
+      <%= link_to posts_path(sort: "likes"), style: "padding: 8px 20px; border-radius: 20px; text-decoration: none; font-size: 14px; font-weight: bold; #{params[:sort] == 'likes' ? 'background: #8c1d1d; color: #fff;' : 'background: #2a221d; color: #a39382; border: 1px solid #4a3d35;'}" do %>
+        🔥 共感順 (人気)
+      <% end %>
+    </div>
+
+    <!-- 短歌ギャラリー領域 -->
     <div class="tanka-gallery-vertical">
-      <% if @posts.any? %>
-        <% @posts.each_with_index do |post, idx| %>
-          <div class="tanka-item-wrapper <%= idx.odd? ? 'odd-card' : 'even-card' %>">
+      <% if @posts.present? %>
+        <% @posts.each_with_index do |post, index| %>
+          <div class="tanka-item-wrapper <%= index.odd? ? 'odd-card' : 'even-card' %>">
             
-            <!-- 短歌和紙カード -->
+            <!-- 和紙風短歌カード -->
             <div class="tanka-card-inner" style="
-              background: radial-gradient(circle, #fcf8f2 0%, #f3ece0 100%);
+              background: #faf6ed url('/images/washi-bg.png') repeat;
               border: 2px solid #c8b9a6;
               border-radius: 12px;
-              padding: 86px 16px;
+              padding: 24px 16px;
               width: 100%;
               max-width: 300px;
               box-sizing: border-box;
@@ -87,8 +55,7 @@
                 <span style="font-size: 11px; color: #a09080;"><%= post.created_at.strftime("%Y/%m/%d") %></span>
               </div>
 
-              <!-- 短歌本文（5・7・5・7・7改行 / post.body に対応） -->
-            <!-- 短歌本文（和風縦書き表示） -->
+              <!-- 短歌本文（和風縦書き表示） -->
               <div style="
                 width: 100%;
                 height: 220px;
@@ -111,11 +78,12 @@
                   height: 200px;
                   max-width: 280px;
                   word-break: break-all;
-                  font-family: 'Yuji Syuku', 'Shippori Mincho', serif;
+                  font-family: 'Shippori Mincho', serif;
                 ">
                   <%= sanitize post.tanka.to_s.gsub(/[  ]+/, '<br>'), tags: %w[br] %>
                 </div>
               </div>
+
               <!-- カードフッター（共感ボタン・詳細リンク） -->
               <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2d7c7; padding-top: 12px; margin-top: 10px;">
                 <button class="gallery-like-btn" data-post-id="<%= post.id %>" style="
@@ -168,35 +136,37 @@
   </div>
 </div>
 
-<!-- CSSスタイル -->
+<!-- CSSスタイル（はみ出しズレを防止した安全設計） -->
 <style>
   .tanka-gallery-vertical {
     display: flex;
     flex-direction: column;
     gap: 40px;
-    padding: 10px;
+    padding: 10px 0;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .tanka-item-wrapper {
     display: flex;
     width: 100%;
-    transition: transform 0.4s ease, filter 0.4s ease;
+    box-sizing: border-box;
   }
 
   .odd-card {
     justify-content: flex-start;
-    padding-left: 15%;
   }
   .odd-card .tanka-card-inner {
     transform: rotate(-3.5deg);
+    margin-left: 5%;
   }
 
   .even-card {
     justify-content: flex-end;
-    padding-right: 5%;
   }
   .even-card .tanka-card-inner {
     transform: rotate(3.5deg);
+    margin-right: 5%;
   }
 
   .tanka-card-inner {
@@ -205,7 +175,7 @@
   }
 
   .tanka-card-inner:hover {
-    transform: rotate(0deg) scale(1.05) !important;
+    transform: rotate(0deg) scale(1.03) !important;
     filter: drop-shadow(0 0 20px rgba(140, 29, 29, 0.8)) !important;
     z-index: 10;
   }
@@ -213,18 +183,14 @@
   @media (max-width: 600px) {
     .odd-card, .even-card {
       justify-content: center;
-      padding: 0;
     }
-    .odd-card .tanka-card-inner {
-      transform: rotate(-2deg);
-    }
-    .even-card .tanka-card-inner {
-      transform: rotate(2deg);
+    .odd-card .tanka-card-inner, .even-card .tanka-card-inner {
+      margin: 0;
     }
   }
 </style>
 
-<!-- JavaScript -->
+<!-- JavaScript (共感ボタン) -->
 <script>
   function setupGalleryLikes() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;

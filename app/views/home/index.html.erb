@@ -86,26 +86,26 @@
   }
 </style>
 
-<!-- TOPヒーローエリア (全画面和風ファーストビュー・固定表示版) -->
+<!-- TOPヒーローエリア（上下の隙間ゼロ・完全全画面表示） -->
 <div style="
-  position: fixed;
-  top: 60px;
-  left: 0;
-  width: 100vw;
+  width: 100%;
   height: calc(100vh - 60px);
+  margin: 0;
+  padding: 0;
   background: #1a1a1a url('/bg.jpg') center/cover no-repeat;
   display: flex;
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
   overflow: hidden;
-  z-index: 1;
+  position: relative;
 ">
-  <!-- 黒グラデーションオーバーレイ -->
+  <!-- 黒グラデーションオーバーレイ（薄膜加工） -->
   <div style="
     position: absolute;
     inset: 0;
     background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%);
+    pointer-events: none;
   "></div>
 
   <!-- メインレイアウト -->
@@ -148,66 +148,3 @@
     </div>
   </div>
 </div>
-<!-- TOPヒーローエリア (全画面和風ファーストビュー) -->
-<!-- TOPヒーローエリア (全画面和風ファーストビュー・固定表示版) -->
-<div style="
-  position: fixed;
-  top: 60px; /* ヘッダーの高さ分下げる */
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: #1a1a1a url('/bg.jpg') center/cover no-repeat;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
-  overflow: hidden; /* スクロールを完全に禁止！ */
-  z-index: 1;
-">
-  <!-- 黒グラデーションオーバーレイ -->
-  <div style="
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%);
-  "></div>
-
-  <!-- メインレイアウト -->
-  <div class="hero-layout" style="
-    position: relative;
-    z-index: 2;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 40px;
-    height: 100%;
-    width: 100%;
-    max-width: 1200px;
-    padding: 0 20px;
-    box-sizing: border-box;
-  ">
-
-    <!-- 左側：縦書きボタン3つ -->
-    <div class="btn-container" style="display: flex; gap: 16px; align-items: center;">
-      <%= link_to omikuji_path, class: "btn-omikuji" do %>
-        本日の絶望おみくじ
-      <% end %>
-
-      <%= link_to new_post_path, class: "btn-tanka" do %>
-        短歌を詠む
-      <% end %>
-
-      <%= link_to posts_path, class: "btn-gallery" do %>
-        みんなのギャラリー
-      <% end %>
-    </div>
-
-    <!-- 右側：ロゴ画像 -->
-    <div style="display: flex; align-items: center; justify-content: center;">
-      <img src="/logo.png" alt="絶望えらぁ短歌" class="hero-logo-img" style="
-        max-height: 480px;
-        width: auto;
-        filter: drop-shadow(0 10px 25px rgba(0,0,0,0.8));
-      ">
-    </div>
-  </div>
-</div></div>

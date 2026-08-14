@@ -16,13 +16,12 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body style="margin: 0; padding-top: 70px; background-color: #f7f5f0; color: #222; min-height: 100vh; font-family: 'Shippori Mincho', serif;">
+  <body style="margin: 0; background-color: #0d0808; color: #f2e8d8; min-height: 100vh; font-family: 'Shippori Mincho', serif; overflow-x: hidden;">
     
-    <!-- 上部固定ヘッダー -->
+    <!-- 上部固定ヘッダー (position: sticky) -->
     <header style="
-      position: fixed;
+      position: sticky;
       top: 0;
-      left: 0;
       width: 100%;
       height: 60px;
       background: #111111;
@@ -55,33 +54,30 @@
       </nav>
     </header>
 
-    <!-- メインコンテンツ領域 -->
-    <main style="max-width: 1000px; margin: 0 auto; padding: 20px 16px;">
-      <!-- フラッシュメッセージ -->
-      <% if notice %>
-        <div style="background: #e6f4ea; color: #137333; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; text-align: center;">
-          <%= notice %>
-        </div>
-      <% end %>
-      <% if alert %>
-        <div style="background: #fce8e6; color: #c5221f; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; text-align: center;">
-          <%= alert %>
-        </div>
-      <% end %>
+    <!-- フラッシュメッセージ（ヘッダー直下に配置） -->
+    <% if notice %>
+      <div style="max-width: 1000px; margin: 10px auto; background: #e6f4ea; color: #137333; padding: 12px 16px; border-radius: 6px; font-size: 14px; text-align: center;">
+        <%= notice %>
+      </div>
+    <% end %>
+    <% if alert %>
+      <div style="max-width: 1000px; margin: 10px auto; background: #fce8e6; color: #c5221f; padding: 12px 16px; border-radius: 6px; font-size: 14px; text-align: center;">
+        <%= alert %>
+      </div>
+    <% end %>
 
+    <!-- メインコンテンツ領域 -->
+    <main style="width: 100%; box-sizing: border-box;">
       <%= yield %>
     </main>
 
-    <!-- 🎵 固定表示のBGMコントロールボタン（画面右下に配置） -->
-   <!-- 🎃 おどろおどろしい画面遷移アニメーションCSS（画面消失防止・安全版） -->
+    <!-- 🎃 おどろおどろしい画面遷移アニメーションCSS -->
     <style>
-      /* ページ読み込み時に暗闇・ぼやけからじわっとピントが合う */
-      body {
+      main {
         animation: darkFadeIn 0.6s ease-out forwards;
       }
 
-      /* Turboでの遷移時、一時的に少しぼやけて雰囲気を出す */
-      html.turbo-loading body {
+      html.turbo-loading main {
         filter: blur(6px) contrast(140%) brightness(50%);
         transition: filter 0.3s ease;
       }
@@ -95,14 +91,13 @@
         }
       }
 
-      /* ボタンやリンククリック時の不気味な妖しい赤光 */
       a:active, button:active {
         transition: filter 0.1s;
         filter: drop-shadow(0 0 10px rgba(140, 29, 29, 0.9));
       }
     </style>
 
-    <!-- 🎵 固定表示のBGMコントロールボタン（画面右下に配置） -->
+    <!-- 🎵 固定表示のBGMコントロールボタン -->
     <div id="bgm-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
       <button id="bgm-toggle-btn" style="
         background: #111111;
@@ -124,7 +119,7 @@
       </button>
     </div>
 
-    <!-- 🎵 音声タグ（data-turbo-permanent で画面遷移時も破棄せず保持） -->
+    <!-- 🎵 音声タグ -->
     <audio id="bgm-player" src="/audio/bgm.mp3" loop preload="auto" data-turbo-permanent></audio>
 
     <!-- 🎵 BGM制御 ＆ シームレス再生JavaScript -->
@@ -158,9 +153,8 @@
 
           if (!audio || !btn) return;
 
-          audio.volume = 0.2; // 音量（20%）
+          audio.volume = 0.2;
 
-          // 1秒ごとに再生位置をセッションストレージに保存
           audio.removeEventListener("timeupdate", saveBgmTime);
           audio.addEventListener("timeupdate", saveBgmTime);
 
@@ -174,7 +168,6 @@
           const savedTime = parseFloat(sessionStorage.getItem("bgm_time") || "0");
 
           if (isPlaying) {
-            // フルリロード時に再生位置を復元
             if (savedTime > 0 && Math.abs(audio.currentTime - savedTime) > 2) {
               audio.currentTime = savedTime;
             }
@@ -192,7 +185,6 @@
             updateBtnState(false);
           }
 
-          // ボタンクリック処理（重複登録防止）
           if (!btn.dataset.initialized) {
             btn.dataset.initialized = "true";
             btn.addEventListener("click", () => {
