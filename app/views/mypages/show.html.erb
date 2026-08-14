@@ -1,49 +1,97 @@
-  <div style="min-height: 100vh; background: #f7f5f0; padding: 40px 16px; box-sizing: border-box; font-family: 'Shippori Mincho', serif; color: #2c221e;">
+<!-- 最外枠（100%幅＆ダーク背景で崩れ・ズレを完全防止） -->
+<div style="
+  width: 100%;
+  min-height: calc(100vh - 60px);
+  background: #0d0808;
+  padding: 40px 16px 80px;
+  box-sizing: border-box;
+  font-family: 'Shippori Mincho', serif;
+  color: #f2e8d8;
+  position: relative;
+">
+  <div style="max-width: 800px; margin: 0 auto; position: relative; z-index: 1;">
 
-  <div style="max-width: 800px; margin: 0 auto;">
+    <!-- タイトルヘッダー ＆ 設定変更ボタン -->
+    <div style="margin-bottom: 35px; border-bottom: 1px solid #3a2e2b; padding-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <h1 style="font-size: 26px; font-weight: bold; color: #f2e8d8; margin: 0 0 8px 0;">
+            詠み人：<%= current_user.respond_to?(:name) && current_user.name.present? ? current_user.name : current_user.email %> の絶望ログ
+          </h1>
+          <p style="font-size: 14px; color: #a39382; margin: 0;">
+            これまでに蓄積された絶望：<strong style="font-size: 18px; color: #e5c158;"><%= @posts.count %> 詠</strong>
+          </p>
+        </div>
 
-    <!-- タイトルヘッダー（名前表示対応！） -->
-    <div style="margin-bottom: 30px;">
-      <h1 style="font-size: 28px; font-weight: bold; color: #1a1008; margin-bottom: 8px;">
-        詠み人：<%= current_user.name.presence || current_user.email %> の絶望ログ
-      </h1>
-      <p style="font-size: 14px; color: #666;">
-        これまでに蓄積された絶望：<strong style="font-size: 16px; color: #1a1008;"><%= @posts.count %> 詠</strong>
-      </p>
-      <hr style="border: none; border-bottom: 1px solid #ccc; margin-top: 16px;">
+        <!-- ⚙️ アカウント設定変更ボタン (edit_user_registration_path へ遷移) -->
+        <div>
+          <%= link_to edit_user_registration_path, style: "
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            background: #2a221d;
+            border: 1px solid #5a4a3e;
+            border-radius: 20px;
+            color: #d4c5b0;
+            font-size: 13px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.2s;
+          " do %>
+            <span>⚙️ ユーザー情報を編集</span>
+          <% end %>
+        </div>
+      </div>
     </div>
 
     <!-- 絶望ログ一覧 -->
     <div style="display: flex; flex-direction: column; gap: 20px;">
       <% if @posts.any? %>
         <% @posts.each do |post| %>
-          <div style="background: #1a1a1a; border-radius: 10px; padding: 20px 24px; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+          <div style="
+            background: #1a1512;
+            border: 1px solid #3a2e2b;
+            border-radius: 12px;
+            padding: 24px;
+            color: #f2e8d8;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+            transition: transform 0.2s ease;
+          ">
             <!-- 投稿日時 -->
-            <div style="font-size: 12px; color: #888; margin-bottom: 10px;">
-              <%= post.created_at.strftime("%m/%d %H:%M") %>
+            <div style="font-size: 12px; color: #887868; margin-bottom: 12px;">
+              <%= post.created_at.strftime("%Y/%m/%d %H:%M") %>
             </div>
 
-            <!-- 短歌本文（金・黄色の和風フォント） -->
-            <div style="font-size: 18px; color: #f39c12; font-weight: bold; line-height: 1.8; margin-bottom: 14px; letter-spacing: 1px;">
+            <!-- 短歌本文（金・和風フォント） -->
+            <div style="
+              font-size: 19px;
+              color: #e5c158;
+              font-weight: bold;
+              line-height: 1.8;
+              margin-bottom: 16px;
+              letter-spacing: 1.5px;
+            ">
               <%= sanitize post.tanka.to_s.gsub(/[  ]+/, ' '), tags: %w[] %>
             </div>
 
             <!-- 元のエラー文 -->
-            <div style="font-size: 13px; color: #aaa; margin-bottom: 16px; font-family: monospace;">
-              元のエラー・絶望：<%= truncate(post.error_message.presence || "指定なし", length: 50) %>
+            <div style="font-size: 13px; color: #a39382; margin-bottom: 18px; font-family: monospace; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px;">
+              元のエラー・絶望：<%= truncate(post.error_message.presence || "指定なし", length: 60) %>
             </div>
 
             <!-- 詳細を見るリンク -->
-            <div>
-              <%= link_to "詳細を見る", post_path(post), style: "color: #e74c3c; font-size: 13px; font-weight: bold; text-decoration: underline;" %>
+            <div style="text-align: right;">
+              <%= link_to "鑑賞・詳細を見る →", post_path(post), onclick: "showLoading('作品を鑑賞中…')", style: "color: #ff6b6b; font-size: 13px; font-weight: bold; text-decoration: none;" %>
             </div>
           </div>
         <% end %>
       <% else %>
-        <div style="text-align: center; padding: 40px; color: #888;">
-          まだ絶望ログがありません。
+        <div style="text-align: center; padding: 60px 0; color: #887868; background: #1a1512; border: 1px dashed #3a2e2b; border-radius: 12px;">
+          まだ絶望ログがありません。まずは一首、詠んでみませんか？
         </div>
       <% end %>
     </div>
 
   </div>
+</div>
