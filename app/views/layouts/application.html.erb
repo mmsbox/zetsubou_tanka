@@ -34,6 +34,42 @@
     <!-- 上部固定ヘッダー -->
     <header style="
       position: sticky;
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>絶望えらぁ短歌</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <!-- Shippori Mincho フォントの読み込み -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="/images/favicon.ico">
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <!-- body におどろおどろしい走査線ノイズ ＆ 赤い暗黒グラデーションを適用 -->
+  <body style="
+    margin: 0;
+    background-color: #050202;
+    background-image: 
+      radial-gradient(circle at 50% 20%, rgba(140, 29, 29, 0.3) 0%, transparent 60%),
+      radial-gradient(circle at 80% 80%, rgba(80, 0, 0, 0.4) 0%, transparent 50%),
+      repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.25) 0px, rgba(0, 0, 0, 0.25) 1px, transparent 1px, transparent 3px);
+    background-attachment: fixed;
+    color: #f2e8d8;
+    min-height: 100vh;
+    font-family: 'Shippori Mincho', serif;
+    overflow-x: hidden;
+  ">
+    
+    <!-- 上部固定ヘッダー -->
+    <header style="
+      position: sticky;
       top: 0;
       width: 100%;
       height: 60px;
@@ -47,12 +83,10 @@
       z-index: 1000;
       box-shadow: 0 4px 15px rgba(140, 29, 29, 0.4);
     ">
-      <!-- タイトルロゴ -->
       <div>
         <%= link_to "絶望えらぁ短歌", root_path, style: "color: #ffffff; text-decoration: none; font-size: 20px; font-weight: 800; letter-spacing: 0.1em; font-family: 'Shippori Mincho', serif;" %>
       </div>
 
-      <!-- ナビゲーションリンク -->
       <nav style="display: flex; gap: 16px; align-items: center;">
         <%= link_to "🎏 展覧会", posts_path, style: "color: #d4c5b0; text-decoration: none; font-size: 14px;" %>
         <%= link_to "⛩️ おみくじ", omikuji_path, style: "color: #d4c5b0; text-decoration: none; font-size: 14px;" %>
@@ -67,7 +101,7 @@
       </nav>
     </header>
 
-    <!-- フラッシュメッセージ（ヘッダー直下に配置） -->
+    <!-- フラッシュメッセージ -->
     <% if notice %>
       <div style="max-width: 1000px; margin: 10px auto; background: rgba(20, 50, 30, 0.9); color: #82e0aa; border: 1px solid #27ae60; padding: 12px 16px; border-radius: 6px; font-size: 14px; text-align: center;">
         <%= notice %>
@@ -84,113 +118,175 @@
       <%= yield %>
     </main>
 
-    <!-- 🎃 おどろおどろしい画面遷移アニメーションCSS -->
+    <!-- 🎃 全画面怨念ローディング画面 -->
+    <div id="global-loading-overlay" style="
+      display: none;
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at center, #1a0808 0%, #080303 80%, #000000 100%);
+      z-index: 999999;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Shippori Mincho', serif;
+      color: #f0e6d2;
+    ">
+      <div class="global-loading-circle"></div>
+      <div style="position: relative; z-index: 2; text-align: center; padding: 0 20px;">
+        <p id="global-loading-text" style="
+          font-size: 22px;
+          letter-spacing: 0.2em;
+          color: #f5e6c8;
+          text-shadow: 0 0 12px rgba(140, 29, 29, 0.9), 0 0 20px #8c1d1d;
+          margin-bottom: 16px;
+          min-height: 32px;
+        ">
+          処理を執り行っております…
+        </p>
+        <p style="font-size: 13px; color: #887868; letter-spacing: 0.1em;">
+          AIとバグの神々が怨念を解読するまで しばしお待ちくだされ
+        </p>
+      </div>
+    </div>
+
+    <!-- 🎃 CSS -->
     <style>
       main {
         animation: darkFadeIn 0.6s ease-out forwards;
       }
 
-      html.turbo-loading main {
-        filter: blur(6px) contrast(140%) brightness(50%);
-        transition: filter 0.3s ease;
-      }
-
       @keyframes darkFadeIn {
-        0% {
-          filter: blur(8px) contrast(150%) brightness(40%);
-        }
-        100% {
-          filter: blur(0px) contrast(100%) brightness(100%);
-        }
+        0% { filter: blur(8px) contrast(150%) brightness(40%); }
+        100% { filter: blur(0px) contrast(100%) brightness(100%); }
       }
 
-      a:active, button:active {
-        transition: filter 0.1s;
-        filter: drop-shadow(0 0 10px rgba(140, 29, 29, 0.9));
+      .global-loading-circle {
+        width: 140px;
+        height: 140px;
+        border: 3px solid rgba(140, 29, 29, 0.2);
+        border-top: 3px solid #8c1d1d;
+        border-right: 3px solid #b32424;
+        border-radius: 50%;
+        animation: spinRune 1.8s linear infinite;
+        box-shadow: 0 0 25px rgba(140, 29, 29, 0.6);
+        position: absolute;
+      }
+
+      @keyframes spinRune {
+        0% { transform: rotate(0deg) scale(1); }
+        50% { transform: rotate(180deg) scale(1.08); box-shadow: 0 0 35px rgba(179, 36, 36, 0.9); }
+        100% { transform: rotate(360deg) scale(1); }
       }
     </style>
 
-    <!-- 🎵 固定表示のBGMコントロールボタン -->
+    <!-- 🎵 BGM コントローラー -->
     <div id="bgm-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
       <button id="bgm-toggle-btn" style="
-        background: #111111;
-        color: #faf6ed;
-        border: 1px solid #8c1d1d;
-        padding: 10px 18px;
-        border-radius: 30px;
-        font-size: 14px;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-family: 'Shippori Mincho', serif;
-        transition: all 0.3s ease;
+        background: #111111; color: #faf6ed; border: 1px solid #8c1d1d; padding: 10px 18px; border-radius: 30px; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.6); display: flex; align-items: center; gap: 8px; font-family: 'Shippori Mincho', serif; transition: all 0.3s ease;
       ">
         <span id="bgm-icon">🔇</span>
         <span id="bgm-text">BGM 演奏</span>
       </button>
     </div>
 
-    <!-- 🎵 音声タグ -->
     <audio id="bgm-player" src="/audio/bgm.mp3" loop preload="auto" data-turbo-permanent></audio>
 
-    <!-- 🎵 BGM制御 ＆ シームレス再生JavaScript -->
+    <!-- 📜 強化版ローディング ＆ BGM制御 JS -->
     <script>
       (function() {
-        function getAudio() {
-          return document.getElementById("bgm-player");
-        }
+        let msgInterval = null;
+
+        window.showLoading = function(text, customMessages) {
+          const overlay = document.getElementById("global-loading-overlay");
+          const textEl = document.getElementById("global-loading-text");
+          if (!overlay) return;
+
+          if (text && textEl) textEl.textContent = text;
+          overlay.style.display = "flex";
+
+          const messages = customMessages || [
+            "バグの神々の宣託を受信中…",
+            "深層ログを紐解き中…",
+            "絶望の歌を詠み上げております…",
+            "構文エラーの呪いを編み込み中…",
+            "スタックトレースを解読中…"
+          ];
+
+          if (msgInterval) clearInterval(msgInterval);
+          let idx = 0;
+          msgInterval = setInterval(() => {
+            idx = (idx + 1) % messages.length;
+            if (textEl) textEl.textContent = messages[idx];
+          }, 2000);
+        };
+
+        window.hideLoading = function() {
+          const overlay = document.getElementById("global-loading-overlay");
+          if (overlay) overlay.style.display = "none";
+          if (msgInterval) clearInterval(msgInterval);
+        };
+
+        // 1. フォーム送信時 (短歌投稿など)
+        document.addEventListener("turbo:submit-start", function() {
+          showLoading("絶望の短歌を詠み上げております…");
+        });
+
+        // 2. リンククリック時 (おみくじ等) ★ここを強化！
+        document.addEventListener("turbo:click", function(e) {
+          const anchor = e.target.closest("a");
+          if (anchor && anchor.getAttribute("href") && anchor.getAttribute("href").includes("omikuji")) {
+            showLoading("本日の運勢を占っております…", [
+              "本日の運勢を占っております…",
+              "バグの神々の宣託を受信中…",
+              "スタックオーバーフローの神託…",
+              "凶か吉か、絶望ログを解読中…"
+            ]);
+          }
+        });
+
+        // 3. ページ読み込み完了時に消す
+        document.addEventListener("turbo:load", function() {
+          hideLoading();
+        });
+
+        // BGM 制御機能
+        function getAudio() { return document.getElementById("bgm-player"); }
 
         function updateBtnState(playing) {
           const icon = document.getElementById("bgm-icon");
           const text = document.getElementById("bgm-text");
           const btn = document.getElementById("bgm-toggle-btn");
-
           if (!icon || !text || !btn) return;
 
           if (playing) {
-            icon.textContent = "🎵";
-            text.textContent = "BGM 停止";
-            btn.style.borderColor = "#27ae60";
+            icon.textContent = "🎵"; text.textContent = "BGM 停止"; btn.style.borderColor = "#27ae60";
           } else {
-            icon.textContent = "🔇";
-            text.textContent = "BGM 演奏";
-            btn.style.borderColor = "#8c1d1d";
+            icon.textContent = "🔇"; text.textContent = "BGM 演奏"; btn.style.borderColor = "#8c1d1d";
           }
         }
 
         function setupBgmController() {
           const audio = getAudio();
           const btn = document.getElementById("bgm-toggle-btn");
-
           if (!audio || !btn) return;
 
           audio.volume = 0.2;
-
           audio.removeEventListener("timeupdate", saveBgmTime);
           audio.addEventListener("timeupdate", saveBgmTime);
 
           function saveBgmTime() {
-            if (!audio.paused) {
-              sessionStorage.setItem("bgm_time", audio.currentTime);
-            }
+            if (!audio.paused) sessionStorage.setItem("bgm_time", audio.currentTime);
           }
 
           const isPlaying = sessionStorage.getItem("bgm_playing") === "true";
           const savedTime = parseFloat(sessionStorage.getItem("bgm_time") || "0");
 
           if (isPlaying) {
-            if (savedTime > 0 && Math.abs(audio.currentTime - savedTime) > 2) {
-              audio.currentTime = savedTime;
-            }
-
+            if (savedTime > 0 && Math.abs(audio.currentTime - savedTime) > 2) audio.currentTime = savedTime;
             if (audio.paused) {
-              audio.play().then(() => {
-                updateBtnState(true);
-              }).catch(err => {
-                updateBtnState(false);
-              });
+              audio.play().then(() => updateBtnState(true)).catch(() => updateBtnState(false));
             } else {
               updateBtnState(true);
             }
