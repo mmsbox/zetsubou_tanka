@@ -1,5 +1,5 @@
 <%
-  # 背景画像の設定（old session対策）
+  # 背景画像の設定（old session対策・全運勢フル対応）
   bg_style = @fortune[:bg_style].presence
   if bg_style.blank? || !bg_style.include?("url")
     filename = case @fortune[:result]
@@ -7,6 +7,11 @@
                when "中吉" then "chukichi.png"
                when "吉"   then "kichi.png"
                when "小吉" then "shokichi.png"
+               when "大凶" then "daikyou.png"
+               when "極凶" then "gokukyou.png"
+               when "崩壊" then "houkai.png"
+               when "終焉" then "syuuen.png"
+               when "無"   then "mu.png"
                end
     bg_style = filename ? "url('/images/omikuji/#{filename}') center/cover no-repeat" : (@fortune[:color] || "#2b1111")
   end

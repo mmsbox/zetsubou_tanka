@@ -1,18 +1,19 @@
 class OmikujisController < ApplicationController
-  # 運勢・カラー・確率(weight)・背景スタイルの定義
   # ※ 画像（PNG / WEBP / JPG）が用意できたものから url('/images/omikuji/filename.png') に差し替え可能です！
+  # 運勢・カラー・確率(weight)・背景スタイルの定義
   RESULTS = [
-    { result: "大吉", color: "#d93838", weight: 10, bg_style: "url('/images/omikuji/daikichi.png') center/cover, linear-gradient(135deg, #fff5f5 0%, #ffe3e3 100%)" },
-    { result: "中吉", color: "#e67e22", weight: 15, bg_style: "url('/images/omikuji/chukichi.png') center/cover, linear-gradient(135deg, #fff9f2 0%, #ffe8d1 100%)" },
-    { result: "吉",   color: "#27ae60", weight: 20, bg_style: "url('/images/omikuji/kichi.png') center/cover, linear-gradient(135deg, #f2faf5 0%, #d1f2dd 100%)" },
-    { result: "小吉", color: "#2980b9", weight: 20, bg_style: "url('/images/omikuji/shokichi.png') center/cover, linear-gradient(135deg, #f2f8fa 0%, #d1e8f2 100%)" },
-    { result: "大凶", color: "#8c1d1d", weight: 15, bg_style: "linear-gradient(135deg, #2b1111 0%, #1a0a0a 100%)" },
-    { result: "極凶", color: "#5b1d8c", weight: 10, bg_style: "linear-gradient(135deg, #1f112b 0%, #0d0614 100%)" },
-    { result: "崩壊", color: "#8c531d", weight: 5,  bg_style: "linear-gradient(135deg, #2b1f11 0%, #171008 100%)" },
-    { result: "終焉", color: "#1d6f8c", weight: 3,  bg_style: "linear-gradient(135deg, #11252b 0%, #081217 100%)" },
-    { result: "無",   color: "#ffffff", weight: 2,  bg_style: "linear-gradient(135deg, #1a1a1a 0%, #000000 100%)" }
+    { result: "大吉", color: "#d93838", weight: 10, bg_style: "url('/images/omikuji/daikichi.png') center/cover no-repeat" },
+    { result: "中吉", color: "#e67e22", weight: 15, bg_style: "url('/images/omikuji/chukichi.png') center/cover no-repeat" },
+    { result: "吉",   color: "#27ae60", weight: 20, bg_style: "url('/images/omikuji/kichi.png') center/cover no-repeat" },
+    { result: "小吉", color: "#2980b9", weight: 20, bg_style: "url('/images/omikuji/shokichi.png') center/cover no-repeat" },
+    { result: "大凶", color: "#8c1d1d", weight: 15, bg_style: "url('/images/omikuji/daikyou.png') center/cover no-repeat"  },
+    { result: "極凶", color: "#5b1d8c", weight: 10, bg_style: "url('/images/omikuji/gokukyou.png') center/cover no-repeat" },
+    { result: "崩壊", color: "#8c531d", weight: 5,  bg_style: "url('/images/omikuji/houkai.png') center/cover no-repeat" },
+    { result: "終焉", color: "#1d6f8c", weight: 3,  bg_style: "url('/images/omikuji/syuuen.png') center/cover no-repeat"  },
+    { result: "無",   color: "#ffffff", weight: 2,  bg_style: "url('/images/omikuji/mu.png') center/cover no-repeat" }
   ].freeze
 
+  # ... （以下の処理はそのまま） ...
   THEMES = [
     { theme: "git push -f を誤って叩いてリポが吹き飛んだ絶望", advice: "本日は丁寧なコミットとバックアップを心がけましょう。" },
     { theme: "ローカルでは動いたのに本番で500エラーが出る絶望", advice: "環境変数とDockerコンテナの再起動を確認するべし。" },
