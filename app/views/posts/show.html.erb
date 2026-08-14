@@ -31,12 +31,7 @@
           ></div>
         </div>
       </div>
-
-      <!-- アクションボタン群 -->
-      <%= link_to "← TOPへもどる", root_path, style: "padding: 12px 20px; background: #f0f0f0; border-radius: 8px; text-decoration: none; color: #333; text-align: center; font-weight: bold;" %>
-      
 <% 
-  # Xシェア用のテキスト・ハッシュタグ作成
   share_text = "【絶望えらぁ短歌】\n#{@post.tanka}\n\n詠み手：#{@post.author_name.presence || '名無し法師'}\n"
   share_url = post_url(@post)
   hashtags = "絶望えらぁ短歌"
@@ -45,7 +40,7 @@
 
 <div style="max-width: 900px; margin: 0 auto; padding: 20px;">
   <!-- ボタン・アクションエリア -->
-  <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+  <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center;">
     <%= link_to twitter_share_url, target: "_blank", rel: "noopener noreferrer", style: "padding: 12px 20px; background: #000; color: #fff; border-radius: 8px; text-decoration: none; text-align: center; font-weight: bold; display: flex; align-items: center; gap: 6px;" do %>
       <svg style="width: 16px; height: 16px; fill: currentColor;" viewBox="0 0 24 24">
         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -58,36 +53,57 @@
       📸 短冊を画像保存
     </button>
 
-    <%= link_to "ギャラリーへ", posts_path, style: "padding: 12px 20px; background: #e2e8f0; border-radius: 8px; text-decoration: none; color: #333; text-align: center; font-weight: bold;" %>
+    <%= link_to "ギャラリーへ", posts_path, onclick: "showLoading('展覧会へご案内中…')", style: "padding: 12px 20px; background: #e2e8f0; border-radius: 8px; text-decoration: none; color: #333; text-align: center; font-weight: bold;" %>
     <%= link_to "もう一度詠む", new_post_path, style: "padding: 12px 20px; background: #2563eb; color: #fff; border-radius: 8px; text-decoration: none; text-align: center; font-weight: bold;" %>
   </div>
 
   <!-- 右側：和紙・短冊風結果表示エリア -->
   <div style="display: flex; flex-direction: column; align-items: center;">
     <!-- html2canvas 対象となるカード要素（id="tanka-card"） -->
-    <div id="tanka-card" style="background: #faf6ed; border: 2px solid #d4c5b0; border-radius: 12px; padding: 30px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 320px; height: 520px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; position: relative; box-sizing: border-box;">
+    <div id="tanka-card" style="background: #faf6ed; border: 2px solid #d4c5b0; border-radius: 12px; padding: 24px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 340px; min-height: 540px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; position: relative; box-sizing: border-box;">
       
       <div style="font-size: 14px; color: #888; border-bottom: 1px solid #ddd; padding-bottom: 8px; width: 100%; text-align: center; font-family: 'Shippori Mincho', serif;">
         絶望えらぁ短歌
       </div>
 
       <!-- 縦書き短歌表示 -->
-      <div style="width: 100%; height: 380px; display: flex; justify-content: center; align-items: center; overflow: hidden;">
+      <div style="width: 100%; height: 320px; display: flex; justify-content: center; align-items: center; overflow: hidden; margin: 10px 0;">
         <div 
           id="typewriter-tanka" 
           data-tanka="<%= @post.tanka %>"
-          style="writing-mode: vertical-rl; text-orientation: upright; font-size: 22px; letter-spacing: 4px; line-height: 2.0; height: 360px; max-width: 260px; color: #1a1a1a; font-family: 'Yuji Syuku', 'Shippori Mincho', serif; font-weight: 700;"
+          style="writing-mode: vertical-rl; text-orientation: upright; font-size: 21px; letter-spacing: 4px; line-height: 2.0; height: 310px; max-width: 260px; color: #1a1a1a; font-family: 'Yuji Syuku', 'Shippori Mincho', serif; font-weight: 700;"
         >
           <!-- JSで1文字ずつ表示 -->
         </div>
       </div>
 
-      <div style="font-size: 14px; color: #555; text-align: right; width: 100%; font-family: 'Shippori Mincho', serif;">
+      <!-- ★ 打ち込まれた絶望のエラー文（ターミナル風表示） -->
+      <% if @post.respond_to?(:error_message) && @post.error_message.present? %>
+        <div style="
+          width: 100%;
+          background: #1a1a1a;
+          color: #ff79c6;
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-family: monospace;
+          font-size: 11px;
+          line-height: 1.4;
+          box-sizing: border-box;
+          word-break: break-all;
+          margin-bottom: 12px;
+          border-left: 3px solid #8c1d1d;
+          text-align: left;
+        ">
+          <span style="color: #6272a4; font-weight: bold;">$ error:</span> <%= @post.error_message %>
+        </div>
+      <% end %>
+
+      <div style="font-size: 13px; color: #555; text-align: right; width: 100%; font-family: 'Shippori Mincho', serif;">
         詠み手：<%= @post.author_name.presence || "名無し法師" %>
       </div>
     </div>
 
-    <!-- 共感ボタンエリア (Step 4-4) -->
+    <!-- 共感ボタンエリア -->
     <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center; width: 100%;">
       <button class="empathy-btn" style="padding: 8px 16px; background: #fff; border: 1px solid #d4c5b0; border-radius: 20px; cursor: pointer; font-family: 'Shippori Mincho', serif; font-weight: bold; color: #333; transition: all 0.1s ease;">
         💡 わかる <span class="count" style="color: #8c1d1d;">0</span>
@@ -162,7 +178,7 @@
       }
     }
 
-function initEmpathyButtons() {
+    function initEmpathyButtons() {
       const empathyBtns = document.querySelectorAll(".empathy-btn");
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
@@ -171,11 +187,9 @@ function initEmpathyButtons() {
           const countSpan = this.querySelector(".count");
           if (!countSpan) return;
 
-          // UI上のカウントを即座に+1（サクサク感を演出）
           let currentCount = parseInt(countSpan.textContent, 10) || 0;
           countSpan.textContent = currentCount + 1;
 
-          // アニメーション演出
           this.style.transform = "scale(1.2)";
           this.style.borderColor = "#8c1d1d";
 
@@ -183,7 +197,6 @@ function initEmpathyButtons() {
             this.style.transform = "scale(1)";
           }, 120);
 
-          // サーバー（DB）へ非同期でいいね(+1)を保存！
           fetch(`/posts/<%= @post.id %>/like`, {
             method: 'POST',
             headers: {
@@ -203,7 +216,6 @@ function initEmpathyButtons() {
       if (!downloadBtn || !cardElement) return;
 
       downloadBtn.onclick = function() {
-        // 画像生成時はタイピング演出を中断して全文字を表示させる
         if (tankaElement && tankaElement.dataset.tanka) {
           tankaElement.textContent = tankaElement.dataset.tanka;
         }
@@ -212,7 +224,7 @@ function initEmpathyButtons() {
         downloadBtn.disabled = true;
 
         html2canvas(cardElement, {
-          scale: 2, // 高画質化
+          scale: 2,
           backgroundColor: "#faf6ed"
         }).then(canvas => {
           const link = document.createElement("a");

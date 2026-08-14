@@ -1,4 +1,4 @@
-<!-- 画面全域を覆う固定ダーク背景ラッパー（z-index: 10 で確実に前面に表示） -->
+<!-- 画面全域を覆う固定ダーク背景ラッパー -->
 <div style="
   position: fixed;
   top: 60px;
@@ -28,7 +28,7 @@
         margin: 0 0 10px 0;
         letter-spacing: 0.15em;
       ">
-        🎏 絶望短歌 展覧会
+        🏛️ 絶望えらぁ短歌 展覧会
       </h1>
       <p style="font-size: 13px; color: #a39382; margin: 0 0 20px 0; letter-spacing: 0.08em;">
         世のエンジニアたちが詠みし 悲痛なる短歌の数々
@@ -66,10 +66,63 @@
     <div class="tanka-gallery-vertical">
       <% if @posts.any? %>
         <% @posts.each_with_index do |post, idx| %>
-          <!-- 奇数・偶数で左右と傾きを切り替えるクラス（odd-card / even-card） -->
-          <div class="tanka-item-wrapper <%= idx.odd? ? 'even-card' : 'odd-card' %>">
-            <div class="tanka-card-inner">
-              <%= render 'posts/tanka_card', post: post %>
+          <div class="tanka-item-wrapper <%= idx.odd? ? 'odd-card' : 'even-card' %>">
+            
+            <!-- 短歌和紙カード -->
+            <div class="tanka-card-inner" style="
+              background: radial-gradient(circle, #fcf8f2 0%, #f3ece0 100%);
+              border: 2px solid #c8b9a6;
+              border-radius: 12px;
+              padding: 24px 28px;
+              width: 100%;
+              max-width: 440px;
+              box-sizing: border-box;
+              position: relative;
+              color: #2c221e;
+            ">
+              
+              <!-- 詠み手（名前） -->
+              <div style="font-size: 13px; color: #7a6b5d; font-weight: bold; border-bottom: 1px dashed #d4c5b0; padding-bottom: 8px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
+                <span>詠み手：<%= post.author_name.presence || "名無し法師" %></span>
+                <span style="font-size: 11px; color: #a09080;"><%= post.created_at.strftime("%Y/%m/%d") %></span>
+              </div>
+
+              <!-- 短歌本文（5・7・5・7・7改行 / post.body に対応） -->
+              <div style="
+                font-size: 19px;
+                line-height: 2.0;
+                letter-spacing: 0.1em;
+                color: #1a1008;
+                margin-bottom: 22px;
+                text-align: center;
+                font-weight: 500;
+              ">
+                 <%= sanitize post.tanka.to_s.gsub(/[  ]+/, '<br>'), tags: %w[br] %>
+              </div>
+
+              <!-- カードフッター（共感ボタン・詳細リンク） -->
+              <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2d7c7; padding-top: 12px; margin-top: 10px;">
+                <button class="gallery-like-btn" data-post-id="<%= post.id %>" style="
+                  background: none;
+                  border: 1px solid #b32424;
+                  border-radius: 20px;
+                  color: #8c1d1d;
+                  padding: 4px 14px;
+                  font-size: 13px;
+                  font-weight: bold;
+                  cursor: pointer;
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                  transition: all 0.2s;
+                ">
+                  <span>🙏 共感</span>
+                  <span class="like-count-<%= post.id %>"><%= post.likes_count || 0 %></span>
+                </button>
+
+                <%= link_to "鑑賞する →", post_path(post), onclick: "showLoading('作品を鑑賞中…')", style: "font-size: 13px; color: #8c1d1d; text-decoration: none; font-weight: bold;" %>
+              </div>
+
             </div>
           </div>
         <% end %>
@@ -82,15 +135,13 @@
 
     <!-- 投稿ボタン -->
     <div style="text-align: center; margin-top: 60px;">
-      <%= link_to "自分も短歌を詠む 🔥", new_post_path, style: "
+      <%= link_to "自分も短歌を詠む 🔥", new_post_path, onclick: "showLoading('案内中…')", style: "
         display: inline-block;
         padding: 14px 36px;
         background: linear-gradient(135deg, #8c1d1d 0%, #571010 100%);
-        color: #ffffff;
+        color: #fff;
         font-size: 16px;
         font-weight: bold;
-        font-family: 'Shippori Mincho', serif;
-        border: 1px solid #b32424;
         border-radius: 30px;
         text-decoration: none;
         box-shadow: 0 6px 20px rgba(140, 29, 29, 0.6);
@@ -101,9 +152,8 @@
   </div>
 </div>
 
-<!-- 交互斜めレイアウト＆おどろおどろしい効果のCSS -->
+<!-- CSSスタイル -->
 <style>
-  /* 全体コンテナ */
   .tanka-gallery-vertical {
     display: flex;
     flex-direction: column;
@@ -111,14 +161,12 @@
     padding: 10px;
   }
 
-  /* 共通カードラッパー */
   .tanka-item-wrapper {
     display: flex;
     width: 100%;
     transition: transform 0.4s ease, filter 0.4s ease;
   }
 
-  /* 奇数番目（左寄せ ＋ 左に少し傾ける） */
   .odd-card {
     justify-content: flex-start;
     padding-left: 15%;
@@ -127,7 +175,6 @@
     transform: rotate(-3.5deg);
   }
 
-  /* 偶数番目（右寄せ ＋ 右に少し傾ける） */
   .even-card {
     justify-content: flex-end;
     padding-right: 5%;
@@ -136,7 +183,6 @@
     transform: rotate(3.5deg);
   }
 
-  /* インナーカードのホバー効果 */
   .tanka-card-inner {
     transition: transform 0.3s ease, filter 0.3s ease;
     filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8));
@@ -162,6 +208,7 @@
   }
 </style>
 
+<!-- JavaScript -->
 <script>
   function setupGalleryLikes() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
