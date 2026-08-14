@@ -99,7 +99,7 @@ class OmikujisController < ApplicationController
       response = client.chat(
         parameters: {
           model: "gpt-4o-mini",
-          messages: [{ role: "user", content: prompt }],
+          messages: [ { role: "user", content: prompt } ],
           response_format: { type: "json_object" },
           temperature: 0.9,
           frequency_penalty: 0.5,
@@ -136,13 +136,13 @@ class OmikujisController < ApplicationController
   end
 
   def validate_tanka_mora(data)
-    expected = [5, 7, 5, 7, 7]
-    keys = ["ku1", "ku2", "ku3", "ku4", "ku5"]
+    expected = [ 5, 7, 5, 7, 7 ]
+    keys = [ "ku1", "ku2", "ku3", "ku4", "ku5" ]
     errors = []
 
     keys.each_with_index do |key, idx|
       phrase_data = data[key]
-      return [false, "#{key} のデータが存在しません。"] unless phrase_data && phrase_data["kana"]
+      return [ false, "#{key} のデータが存在しません。" ] unless phrase_data && phrase_data["kana"]
 
       kana = phrase_data["kana"].to_s.gsub(/[[:space:]]/, "")
       actual_count = count_mora(kana)
@@ -153,6 +153,6 @@ class OmikujisController < ApplicationController
       end
     end
 
-    [errors.empty?, errors.join("\n")]
+    [ errors.empty?, errors.join("\n") ]
   end
 end

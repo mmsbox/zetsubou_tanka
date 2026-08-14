@@ -3,11 +3,11 @@ def index
     @sort = params[:sort].to_s.strip
 
     @posts = case @sort
-             when "likes"
+    when "likes"
                Post.most_liked
-             else
+    else
                Post.latest
-             end
+    end
   end
 
   def show
@@ -171,13 +171,13 @@ def index
   end
 
   def validate_tanka_mora(data)
-    expected = [5, 7, 5, 7, 7]
-    keys = ["ku1", "ku2", "ku3", "ku4", "ku5"]
+    expected = [ 5, 7, 5, 7, 7 ]
+    keys = [ "ku1", "ku2", "ku3", "ku4", "ku5" ]
     errors = []
 
     keys.each_with_index do |key, idx|
       phrase_data = data[key]
-      return [false, "#{key} のデータが存在しません。"] unless phrase_data && phrase_data["kana"]
+      return [ false, "#{key} のデータが存在しません。" ] unless phrase_data && phrase_data["kana"]
 
       kana = phrase_data["kana"].to_s.gsub(/[[:space:]]/, "")
       actual_count = count_mora(kana)
@@ -190,9 +190,9 @@ def index
     end
 
     if errors.empty?
-      [true, nil]
+      [ true, nil ]
     else
-      [false, errors.join("\n")]
+      [ false, errors.join("\n") ]
     end
   end
 end
