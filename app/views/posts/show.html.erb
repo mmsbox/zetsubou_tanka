@@ -8,7 +8,11 @@
 <% end %>
 
 <% 
-  share_text = "【絶望えらぁ短歌】\n#{@post.tanka}\n\n詠み手：#{@post.author_name.presence || '名無し法師'}\n"
+  # スペース（全角・半角）を改行コード \n に変換してXで57577の改行表示にする
+  formatted_tanka = @post.tanka.to_s.gsub(/[  ]+/, "\n")
+  author_name = @post.author_name.presence || '名無し法師'
+
+  share_text = "【絶望えらぁ短歌】\n#{formatted_tanka}\n\n詠み手：#{author_name}\n"
   share_url = post_url(@post)
   hashtags = "絶望えらぁ短歌"
   twitter_share_url = "https://twitter.com/intent/tweet?text=#{CGI.escape(share_text)}&url=#{CGI.escape(share_url)}&hashtags=#{CGI.escape(hashtags)}"

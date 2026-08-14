@@ -65,7 +65,10 @@
     <!-- シェア＆ナビゲーション -->
     <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px;">
       <% 
-        share_text = "【本日の絶望おみくじ】\n運勢：#{@fortune[:result]}\n#{@fortune[:tanka]}\n\n"
+        # おみくじ短歌もスペースを改行コード \n に変換してXで改行表示
+        formatted_omikuji_tanka = @fortune[:tanka].to_s.gsub(/[  ]+/, "\n")
+
+        share_text = "【本日の絶望おみくじ】\n運勢：#{@fortune[:result]}\n\n#{formatted_omikuji_tanka}\n\n"
         share_url = omikuji_url
         hashtags = "絶望おみくじ,絶望えらぁ短歌"
         twitter_url = "https://twitter.com/intent/tweet?text=#{CGI.escape(share_text)}&url=#{CGI.escape(share_url)}&hashtags=#{CGI.escape(hashtags)}"
@@ -78,101 +81,10 @@
         おみくじ結果をXで呟く
       <% end %>
 
-      <!-- ボタン遷移時に怨念ローディング起動 -->
-      <%= link_to "短歌を詠む", new_post_path, onclick: "triggerOmikujiLoading('絶望の短歌を詠み上げております…')", style: "padding: 12px 24px; background: #8c1d1d; color: #fff; border-radius: 8px; text-decoration: none; font-weight: bold;" %>
-      <%= link_to "ギャラリーへ", posts_path, onclick: "triggerOmikujiLoading('展覧会へご案内中…')", style: "padding: 12px 24px; background: #2a221d; border: 1px solid #5a4a3e; color: #d4c5b0; border-radius: 8px; text-decoration: none; font-weight: bold;" %>
+      <!-- ボタン遷移時に共通怨念ローディング起動 -->
+      <%= link_to "短歌を詠む", new_post_path, onclick: "showLoading('絶望の短歌を詠み上げております…')", style: "padding: 12px 24px; background: #8c1d1d; color: #fff; border-radius: 8px; text-decoration: none; font-weight: bold;" %>
+      <%= link_to "ギャラリーへ", posts_path, onclick: "showLoading('展覧会へご案内中…')", style: "padding: 12px 24px; background: #2a221d; border: 1px solid #5a4a3e; color: #d4c5b0; border-radius: 8px; text-decoration: none; font-weight: bold;" %>
     </div>
 
   </div>
 </div>
-
-<!-- 🎃 おみくじ用・全画面怨念ローディング画面 -->
-<div id="omikuji-loading-overlay" style="
-  display: none;
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  background: radial-gradient(circle at center, #1a0808 0%, #080303 80%, #000000 100%);
-  z-index: 999999;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Shippori Mincho', serif;
-  color: #f0e6d2;
-">
-  <!-- 妖しく回転する呪印 -->
-  <div class="omikuji-loading-circle"></div>
-
-  <!-- 中央のテキストエリア -->
-  <div style="position: relative; z-index: 2; text-align: center; padding: 0 20px;">
-    <p id="omikuji-loading-text" style="
-      font-size: 22px;
-      letter-spacing: 0.2em;
-      color: #f5e6c8;
-      text-shadow: 0 0 12px rgba(140, 29, 29, 0.9), 0 0 20px #8c1d1d;
-      margin-bottom: 16px;
-      min-height: 32px;
-    ">
-      本日の運勢を占っております…
-    </p>
-    <p style="font-size: 13px; color: #887868; letter-spacing: 0.1em;">
-      バグの神々が宣託を授けるまで しばしお待ちくだされ
-    </p>
-  </div>
-</div>
-
-<style>
-  .omikuji-loading-circle {
-    width: 140px;
-    height: 140px;
-    border: 3px solid rgba(140, 29, 29, 0.2);
-    border-top: 3px solid #8c1d1d;
-    border-right: 3px solid #b32424;
-    border-radius: 50%;
-    animation: spinRune 1.8s linear infinite;
-    box-shadow: 0 0 25px rgba(140, 29, 29, 0.6);
-    position: absolute;
-  }
-
-  @keyframes spinRune {
-    0% { transform: rotate(0deg) scale(1); }
-    50% { transform: rotate(180deg) scale(1.08); box-shadow: 0 0 35px rgba(179, 36, 36, 0.9); }
-    100% { transform: rotate(360deg) scale(1); }
-  }
-</style>
-
-<script>
-  function triggerOmikujiLoading(customText) {
-    const overlay = document.getElementById("omikuji-loading-overlay");
-    const textEl = document.getElementById("omikuji-loading-text");
-    if (!overlay) return;
-
-    if (customText && textEl) {
-      textEl.textContent = customText;
-    }
-
-    overlay.style.display = "flex";
-
-    const messages = [
-      "本日の運勢を占っております…",
-      "バグの神々の宣託を受信中…",
-      "スタックオーバーフローの神託…",
-      "凶か吉か、怨念を解読中…",
-      "絶望の歌を授かっております…"
-    ];
-    let idx = 0;
-    setInterval(() => {
-      idx = (idx + 1) % messages.length;
-      if (textEl && !customText) textEl.textContent = messages[idx];
-    }, 2000);
-  }
-
-  // Turbo遷移時のおみくじリンククリック判定
-  document.addEventListener("turbo:click", function(e) {
-    const link = e.target.closest("a");
-    if (link && link.getAttribute("href") && link.getAttribute("href").includes("omikuji")) {
-      triggerOmikujiLoading("本日の運勢を占っております…");
-    }
-  });
-</script>
