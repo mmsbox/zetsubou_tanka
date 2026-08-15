@@ -9,11 +9,11 @@
     <!-- 🌐 基本 OGP & Twitter Card 設定 -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@zetsubou_tanka">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="article">
     <meta property="og:site_name" content="絶望えらぁ短歌">
     <meta property="og:url" content="<%= request.original_url %>">
 
-    <!-- ページの文脈に応じた動的なタイトル指定 -->
+    <!-- タイトルの動的指定 -->
     <% if content_for?(:ogp_title) %>
       <meta property="og:title" content="<%= yield(:ogp_title) %>">
       <meta name="twitter:title" content="<%= yield(:ogp_title) %>">
@@ -25,16 +25,17 @@
       <meta name="twitter:title" content="絶望えらぁ短歌 - エラーの絶望を笑いと芸術へ">
     <% end %>
 
+    <!-- 説明文 -->
     <meta property="og:description" content="プログラミングのエラーメッセージをAIが風情溢れる和風短歌（5・7・5・7・7）へ変換。絶望を笑いに昇華させるWebサービスです。">
     <meta name="twitter:description" content="プログラミングのエラーメッセージをAIが風情溢れる和風短歌（5・7・5・7・7）へ変換。絶望を笑いに昇華させるWebサービスです。">
 
-    <!-- ★ 最重要：動的OGP画像の自動切り替えロジック -->
+    <!-- 動的OGP画像（絶対URLで出力） -->
     <% if content_for?(:ogp_image) %>
       <meta property="og:image" content="<%= yield(:ogp_image) %>">
       <meta name="twitter:image" content="<%= yield(:ogp_image) %>">
     <% elsif @post.present? && @post.persisted? %>
-      <meta property="og:image" content="<%= ogp_post_url(@post) %>">
-      <meta name="twitter:image" content="<%= ogp_post_url(@post) %>">
+      <meta property="og:image" content="<%= ogp_post_url(@post, format: :png) %>">
+      <meta name="twitter:image" content="<%= ogp_post_url(@post, format: :png) %>">
     <% else %>
       <meta property="og:image" content="<%= image_url('default_ogp.jpg') %>">
       <meta name="twitter:image" content="<%= image_url('default_ogp.jpg') %>">
@@ -50,7 +51,6 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <!-- body におどろおどろしい走査線ノイズ ＆ 赤い暗黒グラデーションを適用 -->
   <body style="
     margin: 0;
     background-color: #050202;
@@ -226,12 +226,12 @@
           if (msgInterval) clearInterval(msgInterval);
         };
 
-        // 1. フォーム送信時 (短歌投稿など)
+        // 1. フォーム送信時
         document.addEventListener("turbo:submit-start", function() {
           showLoading("絶望の短歌を詠み上げております…");
         });
 
-        // 2. リンククリック時 (おみくじ等)
+        // 2. リンククリック時
         document.addEventListener("turbo:click", function(e) {
           const anchor = e.target.closest("a");
           if (anchor && anchor.getAttribute("href") && anchor.getAttribute("href").includes("omikuji")) {
@@ -244,7 +244,7 @@
           }
         });
 
-        // 3. ページ読み込み完了時に消す
+        // 3. ページ読み込み完了時
         document.addEventListener("turbo:load", function() {
           hideLoading();
         });

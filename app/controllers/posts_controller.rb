@@ -33,10 +33,11 @@ class PostsController < ApplicationController
     end
   end
 
-  def ogp
+def ogp
     post = Post.find(params[:id])
-    tanka_text  = post.tanka.presence || "エラー吐き 詠めぬ短歌の 虚しさよ"
-    author_text = "詠み手：#{post.author_name.presence || '名無し法師'}"
+    # 文字列の改行をスペースに置換し、シングルクォートをエスケープしてImageMagickのエラーを防ぐ
+    tanka_text  = (post.tanka.presence || "エラー吐き 詠めぬ短歌の 虚しさよ").gsub("\n", " ").gsub("'", "\\\\'")
+    author_text = "詠み手：#{(post.author_name.presence || '名無し法師')}".gsub("'", "\\\\'")
 
     # キャンバス画像を生成
     image = MiniMagick::Image.open("xc:#{OGP_BG_COLOR}") do |b|
@@ -45,7 +46,7 @@ class PostsController < ApplicationController
 
     image.combine_options do |c|
       c.fill OGP_TEXT_COLOR
-      c.font "Noto-Sans-CJK-JP-Bold"
+      c.font "Noto-Sans-CJK-JP-Bold" # もしエラーが出る場合はこの行を一度コメントアウトしてみてください
       c.pointsize "38"
       c.gravity "center"
       c.draw "text 0,-30 '#{tanka_text}'"
@@ -54,6 +55,17 @@ class PostsController < ApplicationController
       c.draw "text 0,150 '#{author_text}'"
     end
 
+    send_data image.to_blob, type: "image/png", disposition: "inline"
+  rescue StandardError => e
+    Rails.logger.error("OGP Generation Failure: #{e.class} - #{e.message}\n#{e.backtrace&.first(3)&.join("\n")}")
+    
+    default_image_path = Rails.root.join("app/assets/images/default_ogp.jpg")
+    if File.exist?(default_image_path)
+      send_file default_image_path, type: "image/jpeg", disposition: "inline"
+    else
+      head :internal_server_error
+    end
+  end
     send_data image.to_blob, type: "image/png", disposition: "inline"
   rescue StandardError => e
     Rails.logger.error("OGP Generation Failure: #{e.class} - #{e.message}\n#{e.backtrace&.first(3)&.join("\n")}")
