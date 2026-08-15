@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-  <head>
+ <head>
     <title>絶望えらぁ短歌</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
@@ -13,33 +13,24 @@
     <meta property="og:site_name" content="絶望えらぁ短歌">
     <meta property="og:url" content="<%= request.original_url %>">
 
-    <!-- タイトルの動的指定 -->
-    <% if content_for?(:ogp_title) %>
-      <meta property="og:title" content="<%= yield(:ogp_title) %>">
-      <meta name="twitter:title" content="<%= yield(:ogp_title) %>">
-    <% elsif @post.present? && @post.persisted? %>
-      <meta property="og:title" content="『<%= @post.tanka.truncate(20) %>』| 絶望えらぁ短歌">
-      <meta name="twitter:title" content="『<%= @post.tanka.truncate(20) %>』| 絶望えらぁ短歌">
-    <% else %>
-      <meta property="og:title" content="絶望えらぁ短歌 - エラーの絶望を笑いと芸術へ">
-      <meta name="twitter:title" content="絶望えらぁ短歌 - エラーの絶望を笑いと芸術へ">
-    <% end %>
+    <!-- タイトル -->
+    <% title_text = @post&.persisted? ? "『#{@post.tanka.truncate(20)}』| 絶望えらぁ短歌" : "絶望えらぁ短歌 - エラーの絶望を笑いと芸術へ" %>
+    <% final_title = content_for?(:ogp_title) ? yield(:ogp_title) : title_text %>
+    <meta property="og:title" content="<%= final_title %>">
+    <meta name="twitter:title" content="<%= final_title %>">
 
     <!-- 説明文 -->
     <meta property="og:description" content="プログラミングのエラーメッセージをAIが風情溢れる和風短歌（5・7・5・7・7）へ変換。絶望を笑いに昇華させるWebサービスです。">
     <meta name="twitter:description" content="プログラミングのエラーメッセージをAIが風情溢れる和風短歌（5・7・5・7・7）へ変換。絶望を笑いに昇華させるWebサービスです。">
 
-    <!-- 動的OGP画像（絶対URLで出力） -->
-    <% if content_for?(:ogp_image) %>
-      <meta property="og:image" content="<%= yield(:ogp_image) %>">
-      <meta name="twitter:image" content="<%= yield(:ogp_image) %>">
-    <% elsif @post.present? && @post.persisted? %>
-      <meta property="og:image" content="<%= ogp_post_url(@post, format: :png) %>">
-      <meta name="twitter:image" content="<%= ogp_post_url(@post, format: :png) %>">
-    <% else %>
-      <meta property="og:image" content="<%= image_url('default_ogp.jpg') %>">
-      <meta name="twitter:image" content="<%= image_url('default_ogp.jpg') %>">
-    <% end %>
+    <!-- ★ 最重要：動的OGP画像（@post が存在すれば確実に png パスを出力） -->
+    <% 
+      default_img = image_url('default_ogp.jpg')
+      post_ogp_img = @post&.persisted? ? ogp_post_url(@post, format: :png) : nil
+      final_ogp_img = content_for?(:ogp_image) ? yield(:ogp_image) : (post_ogp_img || default_img)
+    %>
+    <meta property="og:image" content="<%= final_ogp_img %>">
+    <meta name="twitter:image" content="<%= final_ogp_img %>">
 
     <!-- Shippori Mincho フォントの読み込み -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,7 +41,7 @@
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-
+  
   <body style="
     margin: 0;
     background-color: #050202;
