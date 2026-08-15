@@ -33,7 +33,7 @@ class PostsController < ApplicationController
     end
   end
 
-  def ogp
+def ogp
     post = Post.find(params[:id])
     
     tanka_text  = (post.tanka.presence || "エラー吐き 詠めぬ短歌の 虚しさよ").tr("\n", " ")
@@ -45,8 +45,8 @@ class PostsController < ApplicationController
     end
 
     image.combine_options do |c|
-     # c.fill OGP_TEXT_COLOR
-      c.font "Noto-Sans-CJK-JP-Bold"
+      c.fill OGP_TEXT_COLOR 
+      # c.font はLinuxのシステム自動判定に任せるためコメントアウト
       c.pointsize "38"
       c.gravity "center"
       c.draw "text 0,-30 #{tanka_text.inspect}"
@@ -55,6 +55,17 @@ class PostsController < ApplicationController
       c.draw "text 0,150 #{author_text.inspect}"
     end
 
+    send_data image.to_blob, type: "image/png", disposition: "inline"
+  rescue StandardError => e
+    Rails.logger.error("OGP Generation Failure: #{e.class} - #{e.message}\n#{e.backtrace&.first(3)&.join("\n")}")
+    
+    default_image_path = Rails.root.join("app/assets/images/default_ogp.jpg")
+    if File.exist?(default_image_path)
+      send_file default_image_path, type: "image/jpeg", disposition: "inline"
+    else
+      head :internal_server_error
+    end
+  end
     send_data image.to_blob, type: "image/png", disposition: "inline"
   rescue StandardError => e
     Rails.logger.error("OGP Generation Failure: #{e.class} - #{e.message}\n#{e.backtrace&.first(3)&.join("\n")}")
