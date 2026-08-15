@@ -1,76 +1,85 @@
 class PostsController < ApplicationController
-def index
-    @sort = params[:sort].to_s.strip
+  OGP_BG_COLOR     = "#1c1917".freeze
+  OGP_TEXT_COLOR   = "#faf6ed".freeze
+  OGP_AUTHOR_COLOR = "#8c1d1d".freeze
+  SMALL_KANA       = %w[ぁ ぃ ぅ ぇ ぉ ゃ ゅ ょ ァ ィ ゥ ェ ォ ャ ュ ョ].freeze
 
-    @posts = case @sort
-    when "likes"
-               Post.most_liked
-    else
-               Post.latest
-    end
+  def index
+    @posts = case params[:sort]
+             when "likes"
+               Post.order(likes_count: :desc)
+             else
+               Post.order(created_at: :desc)
+             end
+  end
+
+  def new
+    @post = Post.new
   end
 
   def show
     @post = Post.find(params[:id])
   end
 
-  def new
-    @post = Post.new
-    if user_signed_in? && current_user.name.present?
-      @post.author_name = current_user.name
-    end
-  end
-
   def create
     @post = Post.new(post_params)
-    @post.user = current_user if user_signed_in?
-
-    if @post.tanka.blank?
+    
+    if @post.error_message.present? && @post.tanka.blank?
       @post.tanka = generate_tanka_from_error(@post.error_message)
     end
 
     if @post.save
-      redirect_to post_path(@post), notice: "短歌が詠まれました！"
+      redirect_to @post, notice: "短歌が詠まれました。"
     else
       render :new, status: :unprocessable_entity
     end
   end
 
   def ogp
-    @post = Post.find(params[:id])
-
-    tanka_text = @post.tanka.presence || "エラー吐き 詠めぬ短歌の 虚しさよ"
-    author_text = "詠み手：#{@post.author_name.presence || '名無し法師'}"
+    post = Post.find(params[:id])
+    tanka_text  = post.tanka.presence || "エラー吐き 詠めぬ短歌の 虚しさよ"
+    author_text = "詠み手：#{post.author_name.presence || '名無し法師'}"
 
     image = ImageProcessing::MiniMagick
-              .source(MiniMagick::Image.create { |f|
-                f.write "blank.png"
-              }.tap do |img|
-                img.combine_options do |c|
-                  c.size "1200x630"
-                  c.canvas "#1c1917"
-                end
-              end.path)
-              .fill("#faf6ed")
+              .source(
+                MiniMagick::Image.create do |f|
+                  f.write("blank.png")
+                end.tap do |img|
+                  img.combine_options do |c|
+                    c.size("1200x630")
+                    c.canvas OGP_BG_COLOR
+                  end
+                end.path
+              )
+              .fill(OGP_TEXT_COLOR)
               .font("Noto-Sans-CJK-JP-Bold")
               .pointsize(38)
               .gravity("center")
               .draw("text 0,-30 '#{tanka_text}'")
-              .fill("#8c1d1d")
+              .fill(OGP_AUTHOR_COLOR)
               .pointsize(24)
               .draw("text 0,150 '#{author_text}'")
               .call
 
     send_file image.path, type: "image/png", disposition: "inline"
   rescue StandardError => e
-    Rails.logger.error("OGP Generation Error: #{e.message}")
+    Rails.logger.error("OGP Generation Failure: #{e.class} - #{e.message}")
     head :internal_server_error
   end
 
-  # POST /posts/:id/like
   def like
     @post = Post.find(params[:id])
+
+    session[:liked_post_ids] ||= []
+
+    if session[:liked_post_ids].include?(@post.id)
+      render json: { error: "すでに「わかる」を押しています", likes_count: @post.likes_count }, status: :unprocessable_entity
+      return
+    end
+
     @post.increment!(:likes_count)
+    session[:liked_post_ids] << @post.id
+
     render json: { likes_count: @post.likes_count }
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Post not found" }, status: :not_found
@@ -82,8 +91,6 @@ def index
     params.require(:post).permit(:author_name, :error_message, :tanka, :likes_count)
   end
 
-  SMALL_KANA = %w[ぁ ぃ ぅ ぇ ぉ ゃ ゅ ょ ァ ィ ゥ ェ ォ ャ ュ ョ].freeze
-
   def count_mora(kana)
     kana.to_s.chars.reject { |c| SMALL_KANA.include?(c) }.size
   end
@@ -93,7 +100,7 @@ def index
       あなたはプログラミングのエラーに苦しむエンジニアの悲惨さを詠む「短歌名人」です。
       入力されたエラーログをもとに、共感と絶望感が漂う短歌（5・7・5・7・7）を1首生成してください。
 
-      #{feedback ? "【前回の音数ミスの修正指示】\n#{feedback}\nこれを踏まえて必ず正しい音数で作り直してください。\n" : ""}
+      #{feedback ? "【前回の音数ミスの修正指示】\n#{feedback}\nこれを踏まえて必ず正しい音数で作り直してください。\n" : ''}
       【最重要ルール：音数（モーラ数）】
       各句の「kana」（全ひらがな）の音数を厳格に守ってください。
       - ku1 (初句): 5音
@@ -183,7 +190,6 @@ def index
       actual_count = count_mora(kana)
       target_count = expected[idx]
 
-      # ★ 字余り・字足らずを±1音許容してフォールバック落ちを防ぐ
       if (actual_count - target_count).abs > 1
         errors << "#{key}の読み「#{kana}」は#{actual_count}音です（目標: #{target_count}音）。"
       end
