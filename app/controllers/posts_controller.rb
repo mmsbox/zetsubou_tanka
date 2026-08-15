@@ -45,7 +45,7 @@ class PostsController < ApplicationController
     end
 
     image.combine_options do |c|
-      c.fill OGP_TEXT_COLOR
+     # c.fill OGP_TEXT_COLOR
       c.font "Noto-Sans-CJK-JP-Bold"
       c.pointsize "38"
       c.gravity "center"
