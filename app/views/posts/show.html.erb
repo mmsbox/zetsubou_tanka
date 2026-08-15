@@ -122,10 +122,9 @@
                 color: #1a1008;
                 font-family: 'Shippori Mincho', serif;
                 font-weight: 600;
+                white-space: pre-wrap;
               "
-            >
-              <!-- JSで1文字ずつ表示 -->
-            </div>
+            ></div>
           </div>
 
           <!-- ★ 打ち込まれた絶望のエラー文（ターミナル風表示） -->
@@ -157,7 +156,7 @@
         <!-- 共感ボタンエリア -->
         <div style="margin-top: 20px; display: flex; gap: 8px; justify-content: center; width: 100%; flex-wrap: wrap;">
           <button class="empathy-btn" style="padding: 8px 14px; background: #1a1512; border: 1px solid #5a4a3e; border-radius: 20px; cursor: pointer; font-family: 'Shippori Mincho', serif; font-weight: bold; color: #d4c5b0; transition: all 0.2s ease;">
-            💡 わかる <span class="count" style="color: #ff6b6b;">0</span>
+            💡 わかる <span class="count" style="color: #ff6b6b;"><%= @post.likes_count.to_i %></span>
           </button>
           <button class="empathy-btn" style="padding: 8px 14px; background: #1a1512; border: 1px solid #5a4a3e; border-radius: 20px; cursor: pointer; font-family: 'Shippori Mincho', serif; font-weight: bold; color: #d4c5b0; transition: all 0.2s ease;">
             🍂 深し… <span class="count" style="color: #ff6b6b;">0</span>
@@ -177,33 +176,31 @@
 <!-- 📜 html2canvas の読み込み -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<!-- 📜 JS演出（安全に動作させるスクリプト） -->
+<!-- 📜 JS演出（重複防止・安全動作用スクリプト） -->
 <script>
   (function() {
-    let isTyping = false;
+    let activeTimer = null;
 
     function startTypewriter() {
       const tankaElement = document.getElementById("typewriter-tanka");
       if (!tankaElement) return;
 
-      if (isTyping) return;
-      isTyping = true;
-
-      const fullText = tankaElement.dataset.tanka || "";
+      // 既存のタイマーを破棄＆初期化
+      if (activeTimer) clearInterval(activeTimer);
       tankaElement.textContent = "";
 
+      const fullText = tankaElement.dataset.tanka || "";
       let index = 0;
-      function typeNextChar() {
-        if (index < fullText.length) {
-          tankaElement.textContent += fullText.charAt(index);
-          index++;
-          setTimeout(typeNextChar, 100);
-        } else {
-          isTyping = false;
-        }
-      }
 
-      setTimeout(typeNextChar, 300);
+      activeTimer = setInterval(() => {
+        if (index < fullText.length) {
+          tankaElement.textContent = fullText.slice(0, index + 1);
+          index++;
+        } else {
+          clearInterval(activeTimer);
+          activeTimer = null;
+        }
+      }, 80);
     }
 
     function animateScore() {
@@ -303,7 +300,6 @@
     }
 
     function setupAll() {
-      isTyping = false;
       startTypewriter();
       animateScore();
       initEmpathyButtons();

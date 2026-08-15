@@ -35,36 +35,41 @@ class PostsController < ApplicationController
     end
   end
 
-  def ogp
+def ogp
     post = Post.find(params[:id])
     tanka_text  = post.tanka.presence || "エラー吐き 詠めぬ短歌の 虚しさよ"
     author_text = "詠み手：#{post.author_name.presence || '名無し法師'}"
 
-    image = ImageProcessing::MiniMagick
-              .source(
-                MiniMagick::Image.create do |f|
-                  f.write("blank.png")
-                end.tap do |img|
-                  img.combine_options do |c|
-                    c.size("1200x630")
-                    c.canvas OGP_BG_COLOR
-                  end
-                end.path
-              )
-              .fill(OGP_TEXT_COLOR)
-              .font("Noto-Sans-CJK-JP-Bold")
-              .pointsize(38)
-              .gravity("center")
-              .draw("text 0,-30 '#{tanka_text}'")
-              .fill(OGP_AUTHOR_COLOR)
-              .pointsize(24)
-              .draw("text 0,150 '#{author_text}'")
-              .call
+    # MiniMagickで直接描画してバイナリデータを取得
+    image = MiniMagick::Image.create do |f|
+      f.write("blank.png")
+    end
 
-    send_file image.path, type: "image/png", disposition: "inline"
+    image.combine_options do |c|
+      c.size "1200x630"
+      c.canvas OGP_BG_COLOR
+      c.fill OGP_TEXT_COLOR
+      c.font "Noto-Sans-CJK-JP-Bold" # もしエラーが出る場合はこの行をコメントアウトか "DejaVu-Sans" に変更
+      c.pointsize "38"
+      c.gravity "center"
+      c.draw "text 0,-30 '#{tanka_text}'"
+      c.fill OGP_AUTHOR_COLOR
+      c.pointsize "24"
+      c.draw "text 0,150 '#{author_text}'"
+    end
+
+    # send_data で直接バイナリを送信
+    send_data image.to_blob, type: "image/png", disposition: "inline"
   rescue StandardError => e
-    Rails.logger.error("OGP Generation Failure: #{e.class} - #{e.message}")
-    head :internal_server_error
+    Rails.logger.error("OGP Generation Failure: #{e.class} - #{e.message}\n#{e.backtrace&.first(3)&.join("\n")}")
+    
+    # 万が一エラーが起きた場合はデフォルト画像を返すフォールバック処理
+    default_image_path = Rails.root.join("app/assets/images/default_ogp.jpg")
+    if File.exist?(default_image_path)
+      send_file default_image_path, type: "image/jpeg", disposition: "inline"
+    else
+      head :internal_server_error
+    end
   end
 
   def like
