@@ -6,41 +6,38 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <!-- Shippori Mincho フォントの読み込み -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="icon" href="/images/favicon.ico">
+    <!-- 🌐 基本 OGP & Twitter Card 設定 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@zetsubou_tanka">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="絶望えらぁ短歌">
+    <meta property="og:url" content="<%= request.original_url %>">
 
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
-  </head>
+    <!-- ページの文脈（投稿詳細・おみくじ・トップ）に応じた動的なタイトルと画像指定 -->
+    <% if content_for?(:ogp_title) %>
+      <meta property="og:title" content="<%= yi｀eld(:ogp_title) %>">
+      <meta name="twitter:title" content="<%= yield(:ogp_title) %>">
+    <% elsif @post.present? && @post.persisted? %>
+      <meta property="og:title" content="『<%= @post.tanka.truncate(20) %>』| 絶望えらぁ短歌">
+      <meta name="twitter:title" content="『<%= @post.tanka.truncate(20) %>』| 絶望えらぁ短歌">
+    <% else %>
+      <meta property="og:title" content="絶望えらぁ短歌 - エラーの絶望を笑いと芸術へ">
+      <meta name="twitter:title" content="絶望えらぁ短歌 - エラーの絶望を笑いと芸術へ">
+    <% end %>
 
-  <!-- body におどろおどろしい走査線ノイズ ＆ 赤い暗黒グラデーションを適用 -->
-  <body style="
-    margin: 0;
-    background-color: #050202;
-    background-image: 
-      radial-gradient(circle at 50% 20%, rgba(140, 29, 29, 0.3) 0%, transparent 60%),
-      radial-gradient(circle at 80% 80%, rgba(80, 0, 0, 0.4) 0%, transparent 50%),
-      repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.25) 0px, rgba(0, 0, 0, 0.25) 1px, transparent 1px, transparent 3px);
-    background-attachment: fixed;
-    color: #f2e8d8;
-    min-height: 100vh;
-    font-family: 'Shippori Mincho', serif;
-    overflow-x: hidden;
-  ">
-    
-    <!-- 上部固定ヘッダー -->
-    <header style="
-      position: sticky;
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>絶望えらぁ短歌</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
+    <meta property="og:description" content="プログラミングのエラーメッセージをAIが風情溢れる和風短歌（5・7・5・7・7）へ変換。絶望を笑いに昇華させるWebサービスです。">
+    <meta name="twitter:description" content="プログラミングのエラーメッセージをAIが風情溢れる和風短歌（5・7・5・7・7）へ変換。絶望を笑いに昇華させるWebサービスです。">
+
+    <% if content_for?(:ogp_image) %>
+      <meta property="og:image" content="<%= yield(:ogp_image) %>">
+      <meta name="twitter:image" content="<%= yield(:ogp_image) %>">
+    <% elsif @post.present? && @post.persisted? %>
+      <meta property="og:image" content="<%= ogp_post_url(@post) %>">
+      <meta name="twitter:image" content="<%= ogp_post_url(@post) %>">
+    <% else %>
+      <meta property="og:image" content="<%= image_url('default_ogp.jpg') %>">
+      <meta name="twitter:image" content="<%= image_url('default_ogp.jpg') %>">
+    <% end %>
 
     <!-- Shippori Mincho フォントの読み込み -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -233,7 +230,7 @@
           showLoading("絶望の短歌を詠み上げております…");
         });
 
-        // 2. リンククリック時 (おみくじ等) ★ここを強化！
+        // 2. リンククリック時 (おみくじ等)
         document.addEventListener("turbo:click", function(e) {
           const anchor = e.target.closest("a");
           if (anchor && anchor.getAttribute("href") && anchor.getAttribute("href").includes("omikuji")) {
