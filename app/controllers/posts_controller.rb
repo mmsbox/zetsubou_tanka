@@ -1,24 +1,22 @@
 class PostsController < ApplicationController
-  OGP_BG_COLOR     = "#1c1917".freeze
-  OGP_TEXT_COLOR   = "#faf6ed".freeze
+  # OGP画像用カラー定数
+  OGP_BG_COLOR     = "#050202".freeze
+  OGP_TEXT_COLOR   = "#f2e8d8".freeze
   OGP_AUTHOR_COLOR = "#8c1d1d".freeze
-  SMALL_KANA       = %w[ぁ ぃ ぅ ぇ ぉ ゃ ゅ ょ ァ ィ ゥ ェ ォ ャ ュ ョ].freeze
+
+  # 小さな「つ・ゃ・ゅ・ょ」などを除外して音数を数える用の定数
+  SMALL_KANA = %w[ぁ ぃ ぅ ぇ ぉ ゃ ゅ ょ ゎ ァ ィ ゥ ェ ォ ャ ュ ョ ヮ ッ ｯ].freeze
 
   def index
-    @posts = case params[:sort]
-             when "likes"
-               Post.order(likes_count: :desc)
-             else
-               Post.order(created_at: :desc)
-             end
-  end
-
-  def new
-    @post = Post.new
+    @posts = Post.order(created_at: :desc)
   end
 
   def show
     @post = Post.find(params[:id])
+  end
+
+  def new
+    @post = Post.new
   end
 
   def create
@@ -35,12 +33,12 @@ class PostsController < ApplicationController
     end
   end
 
-def ogp
+  def ogp
     post = Post.find(params[:id])
     tanka_text  = post.tanka.presence || "エラー吐き 詠めぬ短歌の 虚しさよ"
     author_text = "詠み手：#{post.author_name.presence || '名無し法師'}"
 
-    # キャンバス画像を正しく直接生成
+    # キャンバス画像を生成
     image = MiniMagick::Image.open("xc:#{OGP_BG_COLOR}") do |b|
       b.resize "1200x630!"
     end
@@ -60,19 +58,6 @@ def ogp
   rescue StandardError => e
     Rails.logger.error("OGP Generation Failure: #{e.class} - #{e.message}\n#{e.backtrace&.first(3)&.join("\n")}")
     
-    default_image_path = Rails.root.join("app/assets/images/default_ogp.jpg")
-    if File.exist?(default_image_path)
-      send_file default_image_path, type: "image/jpeg", disposition: "inline"
-    else
-      head :internal_server_error
-    end
-  end
-    # send_data で直接バイナリを送信
-    send_data image.to_blob, type: "image/png", disposition: "inline"
-  rescue StandardError => e
-    Rails.logger.error("OGP Generation Failure: #{e.class} - #{e.message}\n#{e.backtrace&.first(3)&.join("\n")}")
-    
-    # 万が一エラーが起きた場合はデフォルト画像を返すフォールバック処理
     default_image_path = Rails.root.join("app/assets/images/default_ogp.jpg")
     if File.exist?(default_image_path)
       send_file default_image_path, type: "image/jpeg", disposition: "inline"
