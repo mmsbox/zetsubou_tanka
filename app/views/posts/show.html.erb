@@ -1,4 +1,7 @@
 
+<% content_for :ogp_image, ogp_post_url(@post, format: :png) %>
+<% content_for :ogp_title, "『#{@post.tanka.truncate(20)}』| 絶望えらぁ短歌" %>
+
 <% 
   # スペース（全角・半角）を改行コード \n に変換してXで57577の改行表示にする
   formatted_tanka = @post.tanka.to_s.gsub(/[  ]+/, "\n")
