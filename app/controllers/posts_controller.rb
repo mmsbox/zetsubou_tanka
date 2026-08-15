@@ -21,7 +21,7 @@ class PostsController < ApplicationController
 
   def create
     @post = Post.new(post_params)
-    
+
     if @post.error_message.present? && @post.tanka.blank?
       @post.tanka = generate_tanka_from_error(@post.error_message)
     end
@@ -35,7 +35,7 @@ class PostsController < ApplicationController
 
 def ogp
     post = Post.find(params[:id])
-    
+
     tanka_text  = (post.tanka.presence || "エラー吐き 詠めぬ短歌の 虚しさよ").tr("\n", " ")
     author_text = "詠み手：#{post.author_name.presence || '名無し法師'}"
 
@@ -63,7 +63,7 @@ def ogp
     send_data image.to_blob, type: "image/png", disposition: "inline"
   rescue StandardError => e
     Rails.logger.error("OGP Generation Failure: #{e.class} - #{e.message}\n#{e.backtrace&.first(3)&.join("\n")}")
-    
+
     default_image_path = Rails.root.join("app/assets/images/default_ogp.jpg")
     if File.exist?(default_image_path)
       send_file default_image_path, type: "image/jpeg", disposition: "inline"
