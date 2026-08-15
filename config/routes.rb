@@ -11,8 +11,8 @@ Rails.application.routes.draw do
 
   resources :posts, only: [ :index, :show, :new, :create ] do
     member do
-    get :ogp, defaults: { format: :png, :jpg }
-    post :like
+      get :ogp, defaults: { format: :png }
+      post :like
     end
   end
 end
