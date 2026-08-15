@@ -13,9 +13,9 @@
     <meta property="og:site_name" content="絶望えらぁ短歌">
     <meta property="og:url" content="<%= request.original_url %>">
 
-    <!-- ページの文脈（投稿詳細・おみくじ・トップ）に応じた動的なタイトルと画像指定 -->
+    <!-- ページの文脈に応じた動的なタイトル指定 -->
     <% if content_for?(:ogp_title) %>
-      <meta property="og:title" content="<%= yi｀eld(:ogp_title) %>">
+      <meta property="og:title" content="<%= yield(:ogp_title) %>">
       <meta name="twitter:title" content="<%= yield(:ogp_title) %>">
     <% elsif @post.present? && @post.persisted? %>
       <meta property="og:title" content="『<%= @post.tanka.truncate(20) %>』| 絶望えらぁ短歌">
@@ -28,6 +28,7 @@
     <meta property="og:description" content="プログラミングのエラーメッセージをAIが風情溢れる和風短歌（5・7・5・7・7）へ変換。絶望を笑いに昇華させるWebサービスです。">
     <meta name="twitter:description" content="プログラミングのエラーメッセージをAIが風情溢れる和風短歌（5・7・5・7・7）へ変換。絶望を笑いに昇華させるWebサービスです。">
 
+    <!-- ★ 最重要：動的OGP画像の自動切り替えロジック -->
     <% if content_for?(:ogp_image) %>
       <meta property="og:image" content="<%= yield(:ogp_image) %>">
       <meta name="twitter:image" content="<%= yield(:ogp_image) %>">
