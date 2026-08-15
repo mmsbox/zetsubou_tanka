@@ -35,9 +35,10 @@ class PostsController < ApplicationController
 
 def ogp
     post = Post.find(params[:id])
-    # 文字列の改行をスペースに置換し、シングルクォートをエスケープしてImageMagickのエラーを防ぐ
-    tanka_text  = (post.tanka.presence || "エラー吐き 詠めぬ短歌の 虚しさよ").gsub("\n", " ").gsub("'", "\\\\'")
-    author_text = "詠み手：#{(post.author_name.presence || '名無し法師')}".gsub("'", "\\\\'")
+    
+    # 改行をスペースに置き換えるだけにする（クオートのエスケープによる構文エラーを防止）
+    tanka_text  = (post.tanka.presence || "エラー吐き 詠めぬ短歌の 虚しさよ").tr("\n", " ")
+    author_text = "詠み手：#{post.author_name.presence || '名無し法師'}"
 
     # キャンバス画像を生成
     image = MiniMagick::Image.open("xc:#{OGP_BG_COLOR}") do |b|
@@ -46,15 +47,26 @@ def ogp
 
     image.combine_options do |c|
       c.fill OGP_TEXT_COLOR
-      c.font "Noto-Sans-CJK-JP-Bold" # もしエラーが出る場合はこの行を一度コメントアウトしてみてください
+      c.font "Noto-Sans-CJK-JP-Bold"
       c.pointsize "38"
       c.gravity "center"
-      c.draw "text 0,-30 '#{tanka_text}'"
+      c.draw "text 0,-30 #{tanka_text.inspect}"  # inspect を使うことで安全に文字列化
       c.fill OGP_AUTHOR_COLOR
       c.pointsize "24"
-      c.draw "text 0,150 '#{author_text}'"
+      c.draw "text 0,150 #{author_text.inspect}"
     end
 
+    send_data image.to_blob, type: "image/png", disposition: "inline"
+  rescue StandardError => e
+    Rails.logger.error("OGP Generation Failure: #{e.class} - #{e.message}\n#{e.backtrace&.first(3)&.join("\n")}")
+    
+    default_image_path = Rails.root.join("app/assets/images/default_ogp.jpg")
+    if File.exist?(default_image_path)
+      send_file default_image_path, type: "image/jpeg", disposition: "inline"
+    else
+      head :internal_server_error
+    end
+  end
     send_data image.to_blob, type: "image/png", disposition: "inline"
   rescue StandardError => e
     Rails.logger.error("OGP Generation Failure: #{e.class} - #{e.message}\n#{e.backtrace&.first(3)&.join("\n")}")
