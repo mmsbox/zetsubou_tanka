@@ -40,16 +40,14 @@ def ogp
     tanka_text  = post.tanka.presence || "エラー吐き 詠めぬ短歌の 虚しさよ"
     author_text = "詠み手：#{post.author_name.presence || '名無し法師'}"
 
-    # MiniMagickで直接描画してバイナリデータを取得
-    image = MiniMagick::Image.create do |f|
-      f.write("blank.png")
+    # キャンバス画像を正しく直接生成
+    image = MiniMagick::Image.open("xc:#{OGP_BG_COLOR}") do |b|
+      b.resize "1200x630!"
     end
 
     image.combine_options do |c|
-      c.size "1200x630"
-      c.canvas OGP_BG_COLOR
       c.fill OGP_TEXT_COLOR
-      c.font "Noto-Sans-CJK-JP-Bold" # もしエラーが出る場合はこの行をコメントアウトか "DejaVu-Sans" に変更
+      c.font "Noto-Sans-CJK-JP-Bold"
       c.pointsize "38"
       c.gravity "center"
       c.draw "text 0,-30 '#{tanka_text}'"
@@ -58,6 +56,17 @@ def ogp
       c.draw "text 0,150 '#{author_text}'"
     end
 
+    send_data image.to_blob, type: "image/png", disposition: "inline"
+  rescue StandardError => e
+    Rails.logger.error("OGP Generation Failure: #{e.class} - #{e.message}\n#{e.backtrace&.first(3)&.join("\n")}")
+    
+    default_image_path = Rails.root.join("app/assets/images/default_ogp.jpg")
+    if File.exist?(default_image_path)
+      send_file default_image_path, type: "image/jpeg", disposition: "inline"
+    else
+      head :internal_server_error
+    end
+  end
     # send_data で直接バイナリを送信
     send_data image.to_blob, type: "image/png", disposition: "inline"
   rescue StandardError => e
