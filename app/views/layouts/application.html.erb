@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
- <head>
+  <head>
     <title>絶望えらぁ短歌</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
@@ -23,7 +23,7 @@
     <meta property="og:description" content="プログラミングのエラーメッセージをAIが風情溢れる和風短歌（5・7・5・7・7）へ変換。絶望を笑いに昇華させるWebサービスです。">
     <meta name="twitter:description" content="プログラミングのエラーメッセージをAIが風情溢れる和風短歌（5・7・5・7・7）へ変換。絶望を笑いに昇華させるWebサービスです。">
 
-    <!-- ★ 最重要：動的OGP画像（@post が存在すれば確実に png パスを出力） -->
+    <!-- ★ 動的OGP画像 -->
     <% 
       default_img = image_url('default_ogp.jpg')
       post_ogp_img = @post&.persisted? ? ogp_post_url(@post, format: :png) : nil
@@ -182,7 +182,7 @@
 
     <audio id="bgm-player" src="/audio/bgm.mp3" loop preload="auto" data-turbo-permanent></audio>
 
-    <!-- 📜 強化版ローディング ＆ BGM制御 JS -->
+    <!-- 📜 修正版ローディング ＆ BGM制御 JS -->
     <script>
       (function() {
         let msgInterval = null;
@@ -217,28 +217,11 @@
           if (msgInterval) clearInterval(msgInterval);
         };
 
-        // 1. フォーム送信時
-        document.addEventListener("turbo:submit-start", function() {
-          showLoading("絶望の短歌を詠み上げております…");
-        });
-
-        // 2. リンククリック時
-        document.addEventListener("turbo:click", function(e) {
-          const anchor = e.target.closest("a");
-          if (anchor && anchor.getAttribute("href") && anchor.getAttribute("href").includes("omikuji")) {
-            showLoading("本日の運勢を占っております…", [
-              "本日の運勢を占っております…",
-              "バグの神々の宣託を受信中…",
-              "スタックオーバーフローの神託…",
-              "凶か吉か、絶望ログを解読中…"
-            ]);
-          }
-        });
-
-        // 3. ページ読み込み完了時
-        document.addEventListener("turbo:load", function() {
-          hideLoading();
-        });
+        // ページ遷移が完了・開始・復元されたら確実にローディングを非表示にする
+        document.addEventListener("turbo:load", hideLoading);
+        document.addEventListener("turbo:before-render", hideLoading);
+        document.addEventListener("turbo:visit", hideLoading);
+        window.addEventListener("pageshow", hideLoading);
 
         // BGM 制御機能
         function getAudio() { return document.getElementById("bgm-player"); }
