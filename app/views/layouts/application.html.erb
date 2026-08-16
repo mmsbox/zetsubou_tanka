@@ -78,7 +78,7 @@
 
       <nav style="display: flex; gap: 16px; align-items: center;">
         <%= link_to "🎏 展覧会", posts_path, style: "color: #d4c5b0; text-decoration: none; font-size: 14px;" %>
-        <%= link_to "⛩️ おみくじ", omikuji_path, style: "color: #d4c5b0; text-decoration: none; font-size: 14px;" %>
+        <%= link_to "⛩️ おみくじ", omikuji_path, onclick: "showLoading('本日の運勢を占っております…', ['本日の運勢を占っております…', 'バグの神々の宣託を受信中…', 'スタックオーバーフローの神託…', '凶か吉か、絶望ログを解読中…'])", style: "color: #d4c5b0; text-decoration: none; font-size: 14px;" %>
         
         <% if user_signed_in? %>
           <%= link_to "マイページ", mypage_path, style: "color: #d4c5b0; text-decoration: none; font-size: 14px; transition: color 0.2s;" %>
