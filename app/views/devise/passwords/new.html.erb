@@ -1,16 +1,96 @@
-<h2><%= t('.forgot_your_password') %></h2>
+<div style="
+  width: 100%;
+  min-height: calc(100vh - 60px);
+  background: radial-gradient(circle at center, #230d0d 0%, #0d0808 70%, #050303 100%);
+  padding: 60px 16px 80px;
+  box-sizing: border-box;
+  font-family: 'Shippori Mincho', serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+">
+  <div style="
+    width: 100%;
+    max-width: 420px;
+    background: #1a1512;
+    border: 1px solid #3a2e2b;
+    border-radius: 12px;
+    padding: 36px 28px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(140, 29, 29, 0.3);
+    color: #f2e8d8;
+    box-sizing: border-box;
+  ">
+    <!-- ヘッダータイトル -->
+    <div style="text-align: center; margin-bottom: 28px;">
+      <h2 style="
+        font-size: 20px;
+        color: #f2e8d8;
+        border-bottom: 2px solid #8c1d1d;
+        display: inline-block;
+        padding-bottom: 8px;
+        margin: 0 0 8px 0;
+        font-weight: 800;
+      ">
+        🔮 闇の再発行 (<%= t('.forgot_your_password') %>)
+      </h2>
+      <p style="font-size: 13px; color: #a39382; margin: 0;">
+        暗証文をお忘れの方へ、再設定の文言をお送りいたします
+      </p>
+    </div>
 
-<%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
+    <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f| %>
+      <%= render "devise/shared/error_messages", resource: resource %>
 
-  <div class="field">
-    <p><%= f.label :email %></p>
-    <p><%= f.email_field :email, autofocus: true, autocomplete: "email" %></p>
+      <!-- メールアドレス -->
+      <div style="margin-bottom: 28px;">
+        <%= f.label :email, "文通アドレス (メールアドレス)", style: "display: block; font-weight: bold; font-size: 13px; color: #d4c5b0; margin-bottom: 6px;" %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", required: true, style: "
+          width: 100%;
+          padding: 11px 12px;
+          background: #0d0808;
+          border: 1px solid #5a4a3e;
+          border-radius: 6px;
+          color: #f2e8d8;
+          font-size: 14px;
+          box-sizing: border-box;
+          outline: none;
+        " %>
+      </div>
+
+      <!-- 送信ボタン -->
+      <div>
+        <%= f.submit t('.send_me_reset_password_instructions'), style: "
+          width: 100%;
+          padding: 13px;
+          background: linear-gradient(135deg, #8c1d1d 0%, #571010 100%);
+          color: #fff;
+          font-size: 14px;
+          font-weight: bold;
+          font-family: 'Shippori Mincho', serif;
+          border: none;
+          border-radius: 25px;
+          cursor: pointer;
+          box-shadow: 0 4px 15px rgba(140, 29, 29, 0.6);
+          transition: all 0.2s ease;
+        " %>
+      </div>
+    <% end %>
+
+    <!-- フッターリンクエリア -->
+    <div class="devise-links-style" style="margin-top: 24px; text-align: center; font-size: 13px;">
+      <%= render "devise/shared/links" %>
+    </div>
   </div>
+</div>
 
-  <div class="actions">
-    <%= f.submit t('.send_me_reset_password_instructions') %>
-  </div>
-<% end %>
-
-<%= render "devise/shared/links" %>
+<style>
+  .devise-links-style a {
+    color: #a39382;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .devise-links-style a:hover {
+    color: #f2e8d8;
+    text-decoration: underline;
+  }
+</style>

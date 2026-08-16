@@ -13,7 +13,7 @@
                when "終焉" then "syuuen.png"
                when "無"   then "mu.png"
                end
-    bg_style = filename ? "url('/images/omikuji/#{filename}') center/cover no-repeat" : (@fortune[:color] || "#2b1111")
+    bg_style = filename ? "url('#{image_path("omikuji/#{filename}")}') center/cover no-repeat" : (@fortune[:color] || "#2b1111")
   end
 %>
 
@@ -81,9 +81,9 @@
         おみくじ結果をXで呟く
       <% end %>
 
-      <!-- ボタン遷移時に共通怨念ローディング起動 -->
-      <%= link_to "短歌を詠む", new_post_path, onclick: "showLoading('絶望の短歌を詠み上げております…')", style: "padding: 12px 24px; background: #8c1d1d; color: #fff; border-radius: 8px; text-decoration: none; font-weight: bold;" %>
-      <%= link_to "ギャラリーへ", posts_path, onclick: "showLoading('展覧会へご案内中…')", style: "padding: 12px 24px; background: #2a221d; border: 1px solid #5a4a3e; color: #d4c5b0; border-radius: 8px; text-decoration: none; font-weight: bold;" %>
+      <!-- 余計な onclick=showLoading を削除したクリーンなボタン -->
+      <%= link_to "短歌を詠む", new_post_path, style: "padding: 12px 24px; background: #8c1d1d; color: #fff; border-radius: 8px; text-decoration: none; font-weight: bold;" %>
+      <%= link_to "ギャラリーへ", posts_path, style: "padding: 12px 24px; background: #2a221d; border: 1px solid #5a4a3e; color: #d4c5b0; border-radius: 8px; text-decoration: none; font-weight: bold;" %>
     </div>
 
   </div>
