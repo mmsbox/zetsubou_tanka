@@ -11,7 +11,7 @@
 ">
   <div style="max-width: 800px; margin: 0 auto; position: relative; z-index: 1;">
 
-    <!-- タイトルヘッダー ＆ 設定変更ボタン -->
+    <!-- タイトルヘッダー ＆ 各種アクションボタン -->
     <div style="margin-bottom: 35px; border-bottom: 1px solid #3a2e2b; padding-bottom: 20px;">
       <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
         <div>
@@ -23,13 +23,14 @@
           </p>
         </div>
 
-        <!-- ⚙️ アカウント設定変更ボタン (edit_user_registration_path へ遷移) -->
-        <div>
+        <!-- ボタン領域（ユーザー情報編集 ＆ 短歌を詠む） -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+          <!-- ⚙️ アカウント設定変更ボタン -->
           <%= link_to edit_user_registration_path, style: "
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 8px 18px;
+            padding: 8px 16px;
             background: #2a221d;
             border: 1px solid #5a4a3e;
             border-radius: 20px;
@@ -40,6 +41,24 @@
             transition: all 0.2s;
           " do %>
             <span>⚙️ ユーザー情報を編集</span>
+          <% end %>
+
+          <!-- 🔥 短歌を詠むボタン（新規作成画面へ） -->
+          <%= link_to new_post_path, style: "
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            background: linear-gradient(135deg, #8c1d1d 0%, #571010 100%);
+            color: #fff;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(140, 29, 29, 0.5);
+            transition: all 0.2s ease;
+          " do %>
+            <span>🔥 短歌を詠む</span>
           <% end %>
         </div>
       </div>
