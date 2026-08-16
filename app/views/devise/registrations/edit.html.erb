@@ -1,18 +1,21 @@
 <div style="
   width: 100%;
   min-height: calc(100vh - 60px);
-  background: #0d0808;
-  padding: 40px 16px 80px;
+  background: radial-gradient(circle at center, #230d0d 0%, #0d0808 70%, #050303 100%);
+  padding: 60px 16px 80px;
   box-sizing: border-box;
   font-family: 'Shippori Mincho', serif;
   color: #f2e8d8;
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 ">
-  <div style="max-width: 520px; margin: 0 auto; position: relative; z-index: 1;">
+  <div style="width: 100%; max-width: 520px; position: relative; z-index: 1;">
 
     <!-- タイトル -->
-    <div style="text-align: center; margin-bottom: 30px;">
-      <h1 style="font-size: 26px; color: #f2e8d8; border-bottom: 2px solid #8c1d1d; display: inline-block; padding-bottom: 8px; font-weight: 800;">
+    <div style="text-align: center; margin-bottom: 28px;">
+      <h1 style="font-size: 24px; color: #f2e8d8; border-bottom: 2px solid #8c1d1d; display: inline-block; padding-bottom: 8px; margin: 0; font-weight: 800;">
         ⚙️ <%= t('.title', resource: devise_i18n_fix_model_name_case(resource.model_name.human, i18n_key: 'registrations.edit.title')) %>
       </h1>
     </div>
@@ -22,8 +25,9 @@
       background: #1a1512;
       border: 1px solid #3a2e2b;
       border-radius: 12px;
-      padding: 32px 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      padding: 36px 28px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(140, 29, 29, 0.3);
+      box-sizing: border-box;
     ">
 
       <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
@@ -32,15 +36,15 @@
         <!-- 名前（Userモデルに name がある場合） -->
         <% if resource.respond_to?(:name) %>
           <div style="margin-bottom: 20px;">
-            <%= f.label :name, "詠み手名 (お名前)", style: "display: block; font-size: 14px; margin-bottom: 6px; color: #d4c5b0; font-weight: bold;" %>
-            <%= f.text_field :name, placeholder: "名無し法師", style: "width: 100%; padding: 10px 12px; background: #0d0808; border: 1px solid #5a4a3e; border-radius: 6px; color: #f2e8d8; font-size: 15px; box-sizing: border-box; font-family: 'Shippori Mincho', serif;" %>
+            <%= f.label :name, "詠み手名 (お名前・雅号)", style: "display: block; font-size: 13px; margin-bottom: 6px; color: #d4c5b0; font-weight: bold;" %>
+            <%= f.text_field :name, placeholder: "名無し法師", style: "width: 100%; padding: 11px 12px; background: #0d0808; border: 1px solid #5a4a3e; border-radius: 6px; color: #f2e8d8; font-size: 14px; box-sizing: border-box; font-family: 'Shippori Mincho', serif; outline: none;" %>
           </div>
         <% end %>
 
         <!-- メールアドレス -->
         <div style="margin-bottom: 20px;">
-          <%= f.label :email, style: "display: block; font-size: 14px; margin-bottom: 6px; color: #d4c5b0; font-weight: bold;" %>
-          <%= f.email_field :email, autofocus: true, autocomplete: "email", style: "width: 100%; padding: 10px 12px; background: #0d0808; border: 1px solid #5a4a3e; border-radius: 6px; color: #f2e8d8; font-size: 15px; box-sizing: border-box;" %>
+          <%= f.label :email, "文通アドレス (メールアドレス)", style: "display: block; font-size: 13px; margin-bottom: 6px; color: #d4c5b0; font-weight: bold;" %>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", style: "width: 100%; padding: 11px 12px; background: #0d0808; border: 1px solid #5a4a3e; border-radius: 6px; color: #f2e8d8; font-size: 14px; box-sizing: border-box; outline: none;" %>
         </div>
 
         <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
@@ -51,41 +55,41 @@
 
         <!-- 新しいパスワード -->
         <div style="margin-bottom: 20px;">
-          <%= f.label :password, style: "display: block; font-size: 14px; margin-bottom: 6px; color: #d4c5b0; font-weight: bold;" do %>
-            パスワード <span style="font-size: 12px; color: #887868; font-weight: normal;">(<%= t('.leave_blank_if_you_don_t_want_to_change_it') %>)</span>
+          <%= f.label :password, style: "display: block; font-size: 13px; margin-bottom: 6px; color: #d4c5b0; font-weight: bold;" do %>
+            新・暗証文 (パスワード) <span style="font-size: 11px; color: #887868; font-weight: normal;">(<%= t('.leave_blank_if_you_don_t_want_to_change_it') %>)</span>
           <% end %>
-          <%= f.password_field :password, autocomplete: "new-password", placeholder: @minimum_password_length ? t('devise.shared.minimum_password_length', count: @minimum_password_length) : "", style: "width: 100%; padding: 10px 12px; background: #0d0808; border: 1px solid #5a4a3e; border-radius: 6px; color: #f2e8d8; font-size: 15px; box-sizing: border-box;" %>
+          <%= f.password_field :password, autocomplete: "new-password", placeholder: @minimum_password_length ? t('devise.shared.minimum_password_length', count: @minimum_password_length) : "", style: "width: 100%; padding: 11px 12px; background: #0d0808; border: 1px solid #5a4a3e; border-radius: 6px; color: #f2e8d8; font-size: 14px; box-sizing: border-box; outline: none;" %>
         </div>
 
         <!-- パスワード確認 -->
         <div style="margin-bottom: 24px;">
-          <%= f.label :password_confirmation, style: "display: block; font-size: 14px; margin-bottom: 6px; color: #d4c5b0; font-weight: bold;" %>
-          <%= f.password_field :password_confirmation, autocomplete: "new-password", style: "width: 100%; padding: 10px 12px; background: #0d0808; border: 1px solid #5a4a3e; border-radius: 6px; color: #f2e8d8; font-size: 15px; box-sizing: border-box;" %>
+          <%= f.label :password_confirmation, "新・暗証文 再入力 (確認用)", style: "display: block; font-size: 13px; margin-bottom: 6px; color: #d4c5b0; font-weight: bold;" %>
+          <%= f.password_field :password_confirmation, autocomplete: "new-password", style: "width: 100%; padding: 11px 12px; background: #0d0808; border: 1px solid #5a4a3e; border-radius: 6px; color: #f2e8d8; font-size: 14px; box-sizing: border-box; outline: none;" %>
         </div>
 
         <!-- 現在のパスワード -->
         <div style="margin-bottom: 28px; border-top: 1px dashed #3a2e2b; padding-top: 20px;">
-          <%= f.label :current_password, style: "display: block; font-size: 14px; margin-bottom: 6px; color: #ff8888; font-weight: bold;" do %>
-            <%= f.label :current_password %> <span style="font-size: 12px; color: #ffaaaa; font-weight: normal;">(<%= t('.we_need_your_current_password_to_confirm_your_changes') %>)</span>
+          <%= f.label :current_password, style: "display: block; font-size: 13px; margin-bottom: 6px; color: #ff8888; font-weight: bold;" do %>
+            現・暗証文 (現在のパスワード) <span style="font-size: 11px; color: #ffaaaa; font-weight: normal;">(<%= t('.we_need_your_current_password_to_confirm_your_changes') %>)</span>
           <% end %>
-          <%= f.password_field :current_password, autocomplete: "current-password", required: true, style: "width: 100%; padding: 10px 12px; background: #0d0808; border: 1px solid #8c1d1d; border-radius: 6px; color: #f2e8d8; font-size: 15px; box-sizing: border-box;" %>
+          <%= f.password_field :current_password, autocomplete: "current-password", required: true, style: "width: 100%; padding: 11px 12px; background: #0d0808; border: 1px solid #8c1d1d; border-radius: 6px; color: #f2e8d8; font-size: 14px; box-sizing: border-box; outline: none;" %>
         </div>
 
         <!-- 更新ボタン -->
         <div style="text-align: center;">
-          <%= f.submit t('.update'), style: "width: 100%; padding: 12px; background: linear-gradient(135deg, #8c1d1d 0%, #571010 100%); color: #fff; font-size: 16px; font-weight: bold; border: none; border-radius: 25px; cursor: pointer; box-shadow: 0 4px 15px rgba(140, 29, 29, 0.5); font-family: 'Shippori Mincho', serif;" %>
+          <%= f.submit t('.update'), style: "width: 100%; padding: 13px; background: linear-gradient(135deg, #8c1d1d 0%, #571010 100%); color: #fff; font-size: 15px; font-weight: bold; border: none; border-radius: 25px; cursor: pointer; box-shadow: 0 4px 15px rgba(140, 29, 29, 0.6); font-family: 'Shippori Mincho', serif; transition: all 0.2s ease;" %>
         </div>
       <% end %>
 
       <!-- アカウント削除エリア -->
-      <div style="margin-top: 40px; border-top: 1px solid #3a2e2b; padding-top: 24px; text-align: center;">
-        <div style="font-size: 13px; color: #887868; margin-bottom: 8px;"><%= t('.unhappy') %></div>
-        <%= button_to t('.cancel_my_account'), registration_path(resource_name), data: { confirm: t('.are_you_sure'), turbo_confirm: t('.are_you_sure') }, method: :delete, style: "background: none; border: 1px solid #5a4a3e; color: #a39382; padding: 6px 16px; border-radius: 20px; font-size: 12px; cursor: pointer;" %>
+      <div style="margin-top: 36px; border-top: 1px solid #3a2e2b; padding-top: 24px; text-align: center;">
+        <div style="font-size: 12px; color: #887868; margin-bottom: 10px;"><%= t('.unhappy') %></div>
+        <%= button_to t('.cancel_my_account'), registration_path(resource_name), data: { confirm: t('.are_you_sure'), turbo_confirm: t('.are_you_sure') }, method: :delete, style: "background: none; border: 1px solid #5a4a3e; color: #a39382; padding: 6px 16px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s;" %>
       </div>
 
       <!-- 戻るリンク -->
       <div style="text-align: center; margin-top: 24px;">
-        <%= link_to t('devise.shared.links.back'), :back, style: "color: #a39382; text-decoration: none; font-size: 14px;" %>
+        <%= link_to t('devise.shared.links.back'), :back, style: "color: #a39382; text-decoration: none; font-size: 13px;" %>
       </div>
 
     </div>
