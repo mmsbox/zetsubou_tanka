@@ -78,7 +78,7 @@
 
       <nav style="display: flex; gap: 16px; align-items: center;">
         <%= link_to "🎏 展覧会", posts_path, style: "color: #d4c5b0; text-decoration: none; font-size: 14px;" %>
-        <%= link_to "⛩️ おみくじ", omikuji_path, onclick: "showLoading('本日の運勢を占っております…', ['本日の運勢を占っております…', 'バグの神々の宣託を受信中…', 'スタックオーバーフローの神託…', '凶か吉か、絶望ログを解読中…'])", style: "color: #d4c5b0; text-decoration: none; font-size: 14px;" %>
+        <%= link_to "⛩️ おみくじ", omikuji_path, style: "color: #d4c5b0; text-decoration: none; font-size: 14px;" %>
         
         <% if user_signed_in? %>
           <%= link_to "マイページ", mypage_path, style: "color: #d4c5b0; text-decoration: none; font-size: 14px; transition: color 0.2s;" %>
@@ -217,10 +217,34 @@
           if (msgInterval) clearInterval(msgInterval);
         };
 
-        // ページ遷移が完了・開始・復元されたら確実にローディングを非表示にする
+        // 1. おみくじリンククリック時の自動検知（Turbo対応）
+        document.addEventListener("turbo:click", function(e) {
+          const anchor = e.target.closest("a");
+          if (anchor && anchor.getAttribute("href") && anchor.getAttribute("href").includes("omikuji")) {
+            showLoading("本日の運勢を占っております…", [
+              "本日の運勢を占っております…",
+              "バグの神々の宣託を受信中…",
+              "スタックオーバーフローの神託…",
+              "凶か吉か、絶望ログを解読中…"
+            ]);
+          }
+        });
+
+        // 2. おみくじフォーム送信時（おみくじ作成/引き直し）
+        document.addEventListener("turbo:submit-start", function(e) {
+          const form = e.target;
+          if (form && form.action && form.action.includes("omikuji")) {
+            showLoading("本日の運勢を占っております…", [
+              "本日の運勢を占っております…",
+              "バグの神々の宣託を受信中…",
+              "スタックオーバーフローの神託…",
+              "凶か吉か、絶望ログを解読中…"
+            ]);
+          }
+        });
+
+        // 3. 次のページ描画完了時・ブラウザ戻る時にのみローディングを消す
         document.addEventListener("turbo:load", hideLoading);
-        document.addEventListener("turbo:before-render", hideLoading);
-        document.addEventListener("turbo:visit", hideLoading);
         window.addEventListener("pageshow", hideLoading);
 
         // BGM 制御機能
