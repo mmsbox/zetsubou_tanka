@@ -36,9 +36,9 @@
         <% @posts.each_with_index do |post, index| %>
           <div class="tanka-item-wrapper <%= index.odd? ? 'odd-card' : 'even-card' %>">
             
-            <!-- 和紙風短歌カード -->
+<!-- 和紙風短冊カード -->
             <div class="tanka-card-inner" style="
-              background: #faf6ed url('/images/washi-bg.png') repeat;
+              background: #faf6ed;
               border: 2px solid #c8b9a6;
               border-radius: 12px;
               padding: 24px 16px;
@@ -55,10 +55,10 @@
                 <span style="font-size: 11px; color: #a09080;"><%= post.created_at.strftime("%Y/%m/%d") %></span>
               </div>
 
-              <!-- 短歌本文（和風縦書き表示） -->
+              <!-- 短歌本文（和風縦書き表示・はみ出し対策済み） -->
               <div style="
                 width: 100%;
-                height: 220px;
+                min-height: 220px;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -70,20 +70,20 @@
                   -webkit-writing-mode: vertical-rl;
                   text-orientation: upright;
                   -webkit-text-orientation: upright;
-                  font-size: 18px;
-                  line-height: 2.0;
-                  letter-spacing: 0.2em;
+                  font-size: 16px;
+                  line-height: 1.8;
+                  letter-spacing: 0.15em;
                   color: #1a1008;
                   font-weight: 500;
-                  height: 200px;
+                  max-height: 220px;
                   max-width: 280px;
                   word-break: break-all;
                   font-family: 'Shippori Mincho', serif;
+                  overflow-y: auto;
                 ">
                   <%= sanitize post.tanka.to_s.gsub(/[  ]+/, '<br>'), tags: %w[br] %>
                 </div>
               </div>
-
               <!-- カードフッター（共感ボタン・詳細リンク） -->
               <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2d7c7; padding-top: 12px; margin-top: 10px;">
                 <button class="gallery-like-btn" data-post-id="<%= post.id %>" style="

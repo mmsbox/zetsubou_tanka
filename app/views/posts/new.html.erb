@@ -1,26 +1,21 @@
-<!-- 最外枠：禍々しいデジタルエラー＆漆黒空間（100%幅で隙間ゼロ） -->
 <div style="
   width: 100%;
   min-height: calc(100vh - 60px);
-  background: 
-    radial-gradient(circle at center, rgba(180, 20, 20, 0.25) 0%, rgba(20, 5, 5, 0.95) 60%, #050202 100%),
-    repeating-linear-gradient(90deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 1px, transparent 1px, transparent 40px),
-    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0px, rgba(0, 0, 0, 0.4) 1px, transparent 1px, transparent 3px);
+  background: radial-gradient(circle at center, #230d0d 0%, #0d0808 70%, #050303 100%);
   padding: 40px 16px 80px;
   box-sizing: border-box;
   font-family: 'Shippori Mincho', serif;
-  color: #f2e8d8;
   position: relative;
 ">
   <div style="max-width: 600px; margin: 0 auto; position: relative; z-index: 1;">
-    
+
     <!-- タイトルエリア -->
-    <div style="text-align: center; margin-bottom: 30px;">
-      <h1 style="font-size: 28px; color: #f2e8d8; border-bottom: 2px solid #8c1d1d; display: inline-block; padding-bottom: 8px; margin-bottom: 12px; font-weight: 800;">
-        ☠️ 悲痛なるエラーを詠む
+    <div style="text-align: center; margin-bottom: 32px;">
+      <h1 style="font-size: 26px; color: #f2e8d8; border-bottom: 2px solid #8c1d1d; display: inline-block; padding-bottom: 8px; margin-bottom: 12px; font-weight: 800;">
+        🔥 絶望のエラーを詠む
       </h1>
       <p style="font-size: 14px; color: #a39382; margin: 0;">
-        日常で遭遇した絶望のエラー文を打ち込み、短歌へと昇華させよ
+        吐き出したいエラーログや悲鳴を入力してくだされ
       </p>
     </div>
 
@@ -129,6 +124,8 @@
 
 <script>
   (function() {
+    let loadingInterval = null;
+
     function setupPostLoading() {
       const btn = document.getElementById("tanka-submit-btn");
       const overlay = document.getElementById("post-loading-overlay");
@@ -136,6 +133,10 @@
       const textarea = document.querySelector("textarea");
 
       if (!btn || !overlay) return;
+
+      // 二重イベントバインド防止
+      if (btn.dataset.loadingBound) return;
+      btn.dataset.loadingBound = "true";
 
       btn.addEventListener("click", function(e) {
         // エラーメッセージが空の時は発火させない
@@ -151,7 +152,10 @@
           "スタックトレースを解読中…"
         ];
         let idx = 0;
-        setInterval(() => {
+
+        if (loadingInterval) clearInterval(loadingInterval);
+
+        loadingInterval = setInterval(() => {
           idx = (idx + 1) % messages.length;
           if (textEl) textEl.textContent = messages[idx];
         }, 2000);
