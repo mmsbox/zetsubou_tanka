@@ -271,6 +271,7 @@
 
         // 3. 次のページ描画完了時・ブラウザ戻る時にのみローディングを消す
         document.addEventListener("turbo:load", hideLoading);
+        document.addEventListener("turbo:before-cache", hideLoading);
         window.addEventListener("pageshow", hideLoading);
 
         // 🎵 BGM 制御機能
