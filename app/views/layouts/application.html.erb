@@ -24,6 +24,32 @@
     <meta name="twitter:description" content="プログラミングのエラーメッセージをAIが風情溢れる和風短歌（5・7・5・7・7）へ変換。絶望を笑いに昇華させるWebサービスです。">
 
     <!-- ★ 動的OGP画像 -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>絶望えらぁ短歌</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <!-- 🌐 基本 OGP & Twitter Card 設定 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@zetsubou_tanka">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="絶望えらぁ短歌">
+    <meta property="og:url" content="<%= request.original_url %>">
+
+    <!-- タイトル -->
+    <% title_text = @post&.persisted? ? "『#{@post.tanka.truncate(20)}』| 絶望えらぁ短歌" : "絶望えらぁ短歌 - エラーの絶望を笑いと芸術へ" %>
+    <% final_title = content_for?(:ogp_title) ? yield(:ogp_title) : title_text %>
+    <meta property="og:title" content="<%= final_title %>">
+    <meta name="twitter:title" content="<%= final_title %>">
+
+    <!-- 説明文 -->
+    <meta property="og:description" content="プログラミングのエラーメッセージをAIが風情溢れる和風短歌（5・7・5・7・7）へ変換。絶望を笑いに昇華させるWebサービスです。">
+    <meta name="twitter:description" content="プログラミングのエラーメッセージをAIが風情溢れる和風短歌（5・7・5・7・7）へ変換。絶望を笑いに昇華させるWebサービスです。">
+
+    <!-- ★ 動的OGP画像 -->
     <% 
       default_img = image_url('default_ogp.jpg')
       post_ogp_img = @post&.persisted? ? ogp_post_url(@post, format: :png) : nil
@@ -102,7 +128,7 @@
       </div>
     <% end %>
 
-    <!-- メインコンテンツ領域 -->
+    <!-- メインコンテンツ領域（ここへ各画面の中身が入ります） -->
     <main style="width: 100%; box-sizing: border-box;">
       <%= yield %>
     </main>
@@ -182,7 +208,7 @@
 
     <audio id="bgm-player" src="/audio/bgm.mp3" loop preload="auto" data-turbo-permanent></audio>
 
-    <!-- 📜 修正版ローディング ＆ BGM制御 JS -->
+    <!-- 📜 堅牢版ローディング ＆ BGM制御 JS -->
     <script>
       (function() {
         let msgInterval = null;
@@ -247,9 +273,7 @@
         document.addEventListener("turbo:load", hideLoading);
         window.addEventListener("pageshow", hideLoading);
 
-        // BGM 制御機能
-        function getAudio() { return document.getElementById("bgm-player"); }
-
+        // 🎵 BGM 制御機能
         function updateBtnState(playing) {
           const icon = document.getElementById("bgm-icon");
           const text = document.getElementById("bgm-text");
@@ -264,23 +288,25 @@
         }
 
         function setupBgmController() {
-          const audio = getAudio();
+          const audio = document.getElementById("bgm-player");
           const btn = document.getElementById("bgm-toggle-btn");
           if (!audio || !btn) return;
 
           audio.volume = 0.2;
-          audio.removeEventListener("timeupdate", saveBgmTime);
-          audio.addEventListener("timeupdate", saveBgmTime);
 
-          function saveBgmTime() {
+          // 再生時間の保存
+          audio.ontimeupdate = function() {
             if (!audio.paused) sessionStorage.setItem("bgm_time", audio.currentTime);
-          }
+          };
 
+          // 状態の復元
           const isPlaying = sessionStorage.getItem("bgm_playing") === "true";
           const savedTime = parseFloat(sessionStorage.getItem("bgm_time") || "0");
 
           if (isPlaying) {
-            if (savedTime > 0 && Math.abs(audio.currentTime - savedTime) > 2) audio.currentTime = savedTime;
+            if (savedTime > 0 && Math.abs(audio.currentTime - savedTime) > 2) {
+              audio.currentTime = savedTime;
+            }
             if (audio.paused) {
               audio.play().then(() => updateBtnState(true)).catch(() => updateBtnState(false));
             } else {
@@ -290,25 +316,24 @@
             updateBtnState(false);
           }
 
-          if (!btn.dataset.initialized) {
-            btn.dataset.initialized = "true";
-            btn.addEventListener("click", () => {
-              if (audio.paused) {
-                audio.play().then(() => {
-                  sessionStorage.setItem("bgm_playing", "true");
-                  updateBtnState(true);
-                });
-              } else {
-                audio.pause();
-                sessionStorage.setItem("bgm_playing", "false");
-                updateBtnState(false);
-              }
-            });
-          }
+          // onclick 直接指定で確実に単一処理に更新する
+          btn.onclick = function() {
+            if (audio.paused) {
+              audio.play().then(() => {
+                sessionStorage.setItem("bgm_playing", "true");
+                updateBtnState(true);
+              }).catch(() => updateBtnState(false));
+            } else {
+              audio.pause();
+              sessionStorage.setItem("bgm_playing", "false");
+              updateBtnState(false);
+            }
+          };
         }
 
         document.addEventListener("turbo:load", setupBgmController);
         document.addEventListener("DOMContentLoaded", setupBgmController);
+        window.addEventListener("pageshow", setupBgmController);
       })();
     </script>
   </body>
