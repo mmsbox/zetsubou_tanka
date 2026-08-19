@@ -7,8 +7,9 @@ class PostsController < ApplicationController
   # 小さな「つ・ゃ・ゅ・ょ」などを除外して音数を数える用の定数
   SMALL_KANA = %w[ぁ ぃ ぅ ぇ ぉ ゃ ゅ ょ ゎ ァ ィ ゥ ェ ォ ャ ュ ョ ヮ ッ ｯ].freeze
 
-  def index
-    @posts = Post.order(created_at: :desc)
+def index
+    # likes_count が nil のものは 0 とみなして降順（多い順）に並べ替える
+    @posts = Post.order(Arel.sql("COALESCE(likes_count, 0) DESC"), created_at: :desc)
   end
 
   def show
@@ -31,6 +32,10 @@ class PostsController < ApplicationController
     else
       render :new, status: :unprocessable_entity
     end
+  end
+
+  def index
+    @posts = Post.order(likes_count: :desc, created_at: :desc)
   end
 
 def ogp
@@ -72,17 +77,20 @@ def ogp
     end
   end
 
-  def like
+def like
     @post = Post.find(params[:id])
 
     session[:liked_post_ids] ||= []
 
     if session[:liked_post_ids].include?(@post.id)
-      render json: { error: "すでに「わかる」を押しています", likes_count: @post.likes_count }, status: :unprocessable_entity
+      render json: { error: "すでに「わかる」を押しています", likes_count: (@post.likes_count || 0) }, status: :unprocessable_entity
       return
     end
 
-    @post.increment!(:likes_count)
+
+current_likes = @post.likes_count || 0
+    @post.update_column(:likes_count, current_likes + 1)
+
     session[:liked_post_ids] << @post.id
 
     render json: { likes_count: @post.likes_count }
