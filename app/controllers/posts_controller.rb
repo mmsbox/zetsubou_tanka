@@ -8,9 +8,14 @@ class PostsController < ApplicationController
   SMALL_KANA = %w[ぁ ぃ ぅ ぇ ぉ ゃ ゅ ょ ゎ ァ ィ ゥ ェ ォ ャ ュ ョ ヮ ッ ｯ].freeze
 
 def index
-    # likes_count が nil のものは 0 とみなして降順（多い順）に並べ替える
+  if params[:sort] == "likes"
+    # ★ 共感順（likes_count が nil の場合は 0 扱い）
     @posts = Post.order(Arel.sql("COALESCE(likes_count, 0) DESC"), created_at: :desc)
+  else
+    # ★ 新着順（デフォルト）
+    @posts = Post.order(created_at: :desc)
   end
+end
 
   def show
     @post = Post.find(params[:id])
@@ -34,11 +39,7 @@ def index
     end
   end
 
-  def index
-    @posts = Post.order(likes_count: :desc, created_at: :desc)
-  end
-
-def ogp
+  def ogp
     post = Post.find(params[:id])
 
     tanka_text  = (post.tanka.presence || "エラー吐き 詠めぬ短歌の 虚しさよ").tr("\n", " ")
@@ -55,7 +56,6 @@ def ogp
 
     # テキストの描画
     image.combine_options do |c|
-      # もし日本語フォントを指定している場合はここに c.font "..." を追加
       c.fill OGP_TEXT_COLOR
       c.pointsize "38"
       c.gravity "center"
@@ -80,20 +80,20 @@ def ogp
 def like
     @post = Post.find(params[:id])
 
+    # 1. セッションチェック（連打防止）
     session[:liked_post_ids] ||= []
-
     if session[:liked_post_ids].include?(@post.id)
       render json: { error: "すでに「わかる」を押しています", likes_count: (@post.likes_count || 0) }, status: :unprocessable_entity
       return
     end
 
-
-current_likes = @post.likes_count || 0
-    @post.update_column(:likes_count, current_likes + 1)
-
+    # 2. 確実にDBの likes_count を +1 カウントアップする
+    Post.increment_counter(:likes_count, @post.id)
     session[:liked_post_ids] << @post.id
 
-    render json: { likes_count: @post.likes_count }
+    # 3. 最新のカウント数を取得して返却
+    @post.reload
+    render json: { likes_count: (@post.likes_count || 0) }
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Post not found" }, status: :not_found
   end
