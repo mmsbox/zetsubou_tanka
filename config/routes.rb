@@ -9,7 +9,8 @@ Rails.application.routes.draw do
 
   root "home#index"
 
-  resources :posts, only: [ :index, :show, :new, :create ] do
+  # :edit, :update, :destroy を追加
+  resources :posts, only: [ :index, :show, :new, :create, :edit, :update, :destroy ] do
     member do
       get :ogp, defaults: { format: :png }
       post :like

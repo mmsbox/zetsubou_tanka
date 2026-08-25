@@ -1,0 +1,52 @@
+<div style="
+  width: 100%;
+  min-height: calc(100vh - 60px);
+  background: #0d0808;
+  padding: 40px 16px 80px;
+  box-sizing: border-box;
+  font-family: 'Shippori Mincho', serif;
+  color: #f2e8d8;
+">
+  <div style="max-width: 600px; margin: 0 auto;">
+    
+    <div style="margin-bottom: 24px;">
+      <%= link_to "← マイページへ戻る", mypage_path, style: "color: #a39382; font-size: 13px; text-decoration: none;" %>
+    </div>
+
+    <div style="
+      background: #140808;
+      border: 2px solid #5a4a3e;
+      border-radius: 16px;
+      padding: 32px 24px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+    ">
+      <h1 style="font-size: 22px; color: #e5c158; margin: 0 0 8px 0; text-align: center;">
+        ✏️ 短歌の推敲（編集）
+      </h1>
+      <p style="font-size: 13px; color: #a39382; margin: 0 0 24px 0; text-align: center;">
+        詠み上げた短歌や絶望の記録を整えます
+      </p>
+
+      <%= form_with(model: @post, local: true) do |f| %>
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 14px;">
+            短歌本文
+          </label>
+          <%= f.text_area :tanka, rows: 3, style: "width: 100%; padding: 12px; border: 1px solid #5a4a3e; border-radius: 8px; background: #080303; color: #e5c158; font-size: 16px; font-weight: bold; font-family: 'Shippori Mincho', serif; box-sizing: border-box; line-height: 1.8;" %>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 14px;">
+            元となった絶望 / エラーログ
+          </label>
+          <%= f.text_area :error_message, rows: 4, style: "width: 100%; padding: 12px; border: 1px solid #5a4a3e; border-radius: 8px; background: #080303; color: #ff79c6; font-size: 13px; font-family: monospace; box-sizing: border-box;" %>
+        </div>
+
+        <div style="text-align: center; margin-top: 28px;">
+          <%= f.submit "推敲を完了する ", style: "width: 100%; padding: 14px; background: linear-gradient(135deg, #8c1d1d, #571010); color: #ffffff; font-size: 16px; font-weight: bold; font-family: 'Shippori Mincho', serif; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 15px rgba(140, 29, 29, 0.4);" %>
+        </div>
+      <% end %>
+    </div>
+
+  </div>
+</div>
