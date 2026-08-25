@@ -9,6 +9,9 @@ Rails.application.routes.draw do
 
   root "home#index"
 
+  # ⏳ 絶望年表（タイムライン）
+  get "timeline", to: "posts#timeline"
+
   # :edit, :update, :destroy を追加
   resources :posts, only: [ :index, :show, :new, :create, :edit, :update, :destroy ] do
     member do

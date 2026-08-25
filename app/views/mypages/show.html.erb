@@ -114,7 +114,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       ">
-        📜 詠んだ短歌
+        📜 我が絶望の年表（短歌）
       </button>
 
       <button class="carte-tab" onclick="switchCarteTab('replies')" style="
@@ -149,73 +149,75 @@
     </div>
 
     <!-- ---------------------------------------------------- -->
-    <!-- タブ 1: 詠んだ短歌 -->
+    <!-- タブ 1: 我が絶望の年表（縦型タイムライン） -->
     <!-- ---------------------------------------------------- -->
     <div id="tab-content-my-posts" class="carte-content">
-      <div style="display: flex; flex-direction: column; gap: 20px;">
-        <% if @posts.present? && @posts.any? %>
-          <% @posts.each do |post| %>
-            <div style="
-              background: #1a1512;
-              border: 1px solid #3a2e2b;
-              border-radius: 12px;
-              padding: 24px;
-              color: #f2e8d8;
-              box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-            ">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <div style="font-size: 12px; color: #887868;">
-                  <%= post.created_at.strftime("%Y/%m/%d %H:%M") %>
-                </div>
-                <% if post.respond_to?(:error_category) && post.error_category.present? %>
-                  <span style="display: inline-block; padding: 2px 8px; background: rgba(229, 193, 88, 0.15); border: 1px solid #e5c158; color: #e5c158; border-radius: 12px; font-size: 11px;">
-                    🏷️ <%= post.error_category %>
+      <% if @posts.present? && @posts.any? %>
+        <div class="user-timeline-container">
+          <div class="user-timeline-line"></div>
+
+          <% @posts.each_with_index do |post, index| %>
+            <div class="user-timeline-item <%= index.even? ? 'left-item' : 'right-item' %>">
+              <!-- 中央の刻印ノード -->
+              <div class="user-timeline-node">
+                <div class="node-inner"></div>
+              </div>
+
+              <!-- カード本文 -->
+              <div class="user-timeline-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #3a2e2b; padding-bottom: 8px; margin-bottom: 12px; font-size: 12px;">
+                  <span style="color: #e5c158; font-weight: bold;">
+                    📅 <%= post.created_at.strftime("%Y/%m/%d %H:%M") %>
                   </span>
-                <% end %>
-              </div>
-
-              <div style="
-                font-size: 19px;
-                color: #e5c158;
-                font-weight: bold;
-                line-height: 1.8;
-                margin-bottom: 16px;
-                letter-spacing: 1.5px;
-              ">
-                <%= sanitize post.tanka.to_s.gsub(/[  ]+/, ' '), tags: %w[] %>
-              </div>
-
-              <div style="font-size: 13px; color: #a39382; margin-bottom: 18px; font-family: monospace; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px;">
-                元のエラー・絶望：<%= truncate(post.error_message.presence || "指定なし", length: 60) %>
-              </div>
-
-              <!-- アクションボタン群（鑑賞・編集・削除） -->
-              <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #2a221d; padding-top: 14px; flex-wrap: wrap; gap: 10px;">
-                <div style="display: flex; gap: 12px; align-items: center;">
-                  <!-- ✏️ 編集ボタン -->
-                  <%= link_to edit_post_path(post), style: "color: #a39382; font-size: 13px; text-decoration: none; transition: color 0.2s;" do %>
-                    ✏️ 推敲（編集）
-                  <% end %>
-
-                  <!-- 🗑️ 削除ボタン（Turbo対応） -->
-                  <%= link_to post_path(post),
-                      data: { turbo_method: :delete, turbo_confirm: "本当にこの短歌を取り下げて供養しますか？" },
-                      style: "color: #8c1d1d; font-size: 13px; text-decoration: none; transition: color 0.2s;" do %>
-                    🗑️ 削除
+                  <% if post.respond_to?(:error_category) && post.error_category.present? %>
+                    <span style="display: inline-block; padding: 2px 8px; background: rgba(229, 193, 88, 0.15); border: 1px solid #e5c158; color: #e5c158; border-radius: 12px; font-size: 11px;">
+                      🏷️ <%= post.error_category %>
+                    </span>
                   <% end %>
                 </div>
 
-                <!-- 👁️ 詳細リンク -->
-                <%= link_to "鑑賞・詳細を見る →", post_path(post), style: "color: #ff6b6b; font-size: 13px; font-weight: bold; text-decoration: none;" %>
+                <div style="
+                  font-size: 17px;
+                  color: #f2e8d8;
+                  font-weight: bold;
+                  line-height: 1.8;
+                  margin-bottom: 14px;
+                  letter-spacing: 0.05em;
+                ">
+                  <%= sanitize post.tanka.to_s.gsub(/[  ]+/, ' '), tags: %w[] %>
+                </div>
+
+                <% if post.error_message.present? %>
+                  <div style="font-size: 11px; color: #a39382; font-family: monospace; background: rgba(0,0,0,0.4); padding: 6px 10px; border-radius: 6px; margin-bottom: 14px; border-left: 2px solid #8c1d1d; word-break: break-all;">
+                    $ <%= truncate(post.error_message, length: 60) %>
+                  </div>
+                <% end %>
+
+                <!-- アクションボタン群（編集・削除・詳細） -->
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #2a221d; padding-top: 10px; flex-wrap: wrap; gap: 8px; font-size: 12px;">
+                  <div style="display: flex; gap: 10px; align-items: center;">
+                    <%= link_to edit_post_path(post), style: "color: #a39382; text-decoration: none;" do %>
+                      ✏️ 推敲
+                    <% end %>
+
+                    <%= link_to post_path(post),
+                        data: { turbo_method: :delete, turbo_confirm: "本当にこの短歌を取り下げて供養しますか？" },
+                        style: "color: #8c1d1d; text-decoration: none;" do %>
+                      🗑️ 供養
+                    <% end %>
+                  </div>
+
+                  <%= link_to "鑑賞 →", post_path(post), style: "color: #ff6b6b; font-weight: bold; text-decoration: none;" %>
+                </div>
               </div>
             </div>
           <% end %>
-        <% else %>
-          <div style="text-align: center; padding: 60px 0; color: #887868; background: #1a1512; border: 1px dashed #3a2e2b; border-radius: 12px;">
-            まだ絶望ログがありません。まずは一首、詠んでみませんか？
-          </div>
-        <% end %>
-      </div>
+        </div>
+      <% else %>
+        <div style="text-align: center; padding: 60px 0; color: #887868; background: #1a1512; border: 1px dashed #3a2e2b; border-radius: 12px;">
+          まだ絶望ログがありません。まずは一首、詠んでみませんか？
+        </div>
+      <% end %>
     </div>
 
     <!-- ---------------------------------------------------- -->
@@ -313,6 +315,37 @@
 
   </div>
 </div>
+
+<!-- ⏳ タイムラインスタイル -->
+<style>
+  .user-timeline-container { position: relative; padding: 20px 0; width: 100%; box-sizing: border-box; }
+  .user-timeline-line {
+    position: absolute; top: 0; bottom: 0; left: 50%; width: 2px;
+    background: linear-gradient(180deg, rgba(140, 29, 29, 0.1) 0%, #8c1d1d 15%, #ff4d4d 50%, #8c1d1d 85%, rgba(140, 29, 29, 0.1) 100%);
+    transform: translateX(-50%); z-index: 1;
+  }
+  .user-timeline-item { position: relative; width: 50%; margin-bottom: 35px; box-sizing: border-box; z-index: 2; }
+  .left-item { left: 0; padding-right: 25px; }
+  .right-item { left: 50%; padding-left: 25px; }
+  .user-timeline-node {
+    position: absolute; top: 18px; width: 16px; height: 16px; border-radius: 50%;
+    background: #0d0808; border: 2px solid #ff4d4d; box-shadow: 0 0 10px rgba(255, 77, 77, 0.8);
+    display: flex; align-items: center; justify-content: center; z-index: 3;
+  }
+  .node-inner { width: 6px; height: 6px; border-radius: 50%; background: #ff6b6b; }
+  .left-item .user-timeline-node { right: -8px; }
+  .right-item .user-timeline-node { left: -8px; }
+  .user-timeline-card {
+    background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; padding: 18px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6); transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .user-timeline-card:hover { transform: translateY(-3px); border-color: #8c1d1d; }
+  @media (max-width: 768px) {
+    .user-timeline-line { left: 18px; }
+    .user-timeline-item { width: 100%; left: 0 !important; padding-left: 40px !important; padding-right: 0 !important; }
+    .user-timeline-node { left: 10px !important; right: auto !important; }
+  }
+</style>
 
 <script>
   function switchCarteTab(tabName) {
