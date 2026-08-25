@@ -10,13 +10,14 @@ class PostsController < ApplicationController
 
   def index
     @selected_category = params[:category]
+    @sort_mode = params[:sort]
 
     # 1. カテゴリ指定があれば絞り込み（なければ全件）
     posts = Post.by_category(@selected_category)
 
-    # 2. ソート順（共感順 / 新着順）の適用
-    if params[:sort] == "likes"
-      @posts = posts.most_liked
+    # 2. ソート順の適用（共感順は過去1週間の週間ランキング）
+    if @sort_mode == "likes"
+      @posts = posts.where("created_at >= ?", 1.week.ago).most_liked
     else
       @posts = posts.latest
     end
@@ -124,7 +125,6 @@ class PostsController < ApplicationController
   end
 
   def post_params
-    # :error_category をストロングパラメーターに追加
     params.require(:post).permit(:author_name, :error_message, :tanka, :likes_count, :parent_id, :error_category)
   end
 
