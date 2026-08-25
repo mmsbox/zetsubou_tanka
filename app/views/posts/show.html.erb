@@ -2,7 +2,6 @@
 <% content_for :ogp_title, "『#{@post.tanka.truncate(20)}』| 絶望えらぁ短歌" %>
 
 <% 
-  # スペース（全角・半角）を改行コード \n に変換してXで57577の改行表示にする
   formatted_tanka = @post.tanka.to_s.gsub(/[  ]+/, "\n")
   author_name = @post.author_name.presence || '名無し法師'
 
@@ -12,7 +11,6 @@
   twitter_share_url = "https://twitter.com/intent/tweet?text=#{CGI.escape(share_text)}&url=#{CGI.escape(share_url)}&hashtags=#{CGI.escape(hashtags)}"
 %>
 
-<!-- 最外枠：禍々しいデジタルエラー＆漆黒空間（100%幅で隙間ゼロ） -->
 <div style="
   width: 100%;
   min-height: calc(100vh - 60px);
@@ -28,7 +26,34 @@
 ">
   <div style="max-width: 900px; margin: 0 auto; position: relative; z-index: 1;">
 
-    <!-- メインレイアウト（レスポンシブ対応） -->
+    <!-- 返歌の場合：親短歌へのリンクバナー -->
+    <% if @post.parent.present? %>
+      <div style="
+        background: #150f14;
+        border: 1px solid #8c1d72;
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin-bottom: 30px;
+        color: #f2e8d8;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+      ">
+        <div>
+          <div style="font-size: 12px; color: #ff79c6; font-weight: bold; margin-bottom: 4px;">
+            ✉️ この短歌は以下の絶望への返歌（アンサー短歌）です
+          </div>
+          <div style="font-size: 14px; font-weight: 600; color: #f0e6d2;">
+            『<%= @post.parent.tanka.truncate(30) %>』
+          </div>
+        </div>
+        <%= link_to "親短歌を見に行く →", post_path(@post.parent), style: "padding: 8px 16px; background: #8c1d72; color: #fff; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: bold;" %>
+      </div>
+    <% end %>
+
+    <!-- ★ メインエリア（左：ボタン群 / 右：短冊カード） -->
     <div style="display: flex; gap: 30px; align-items: flex-start; justify-content: center; flex-wrap: wrap;">
       
       <!-- 左側：アクションボタン群 ＆ 絶望度メーター -->
@@ -62,14 +87,11 @@
             X でシェア
           <% end %>
 
-          <!-- 画像保存ボタン -->
           <button id="download-card-btn" style="padding: 12px 20px; background: linear-gradient(135deg, #8c1d1d, #571010); color: #fff; border: none; border-radius: 8px; font-weight: bold; font-family: 'Shippori Mincho', serif; cursor: pointer; box-shadow: 0 4px 12px rgba(140, 29, 29, 0.4);">
             📸 短冊を画像保存
           </button>
 
-          <!-- ★ 返歌を贈るボタン -->
           <%= link_to "✉️ この絶望に返歌を贈る", new_post_path(parent_id: @post.id), style: "padding: 12px 20px; background: linear-gradient(135deg, #2b1d38, #57104d); color: #f2e8d8; border: 1px solid #8c1d72; border-radius: 8px; text-decoration: none; text-align: center; font-weight: bold; box-shadow: 0 4px 12px rgba(87, 16, 77, 0.4);" %>
-
           <%= link_to "ギャラリーへ", posts_path, onclick: "showLoading('展覧会へご案内中…')", style: "padding: 12px 20px; background: #2a221d; border: 1px solid #5a4a3e; border-radius: 8px; text-decoration: none; color: #d4c5b0; text-align: center; font-weight: bold;" %>
           <%= link_to "もう一度詠む", new_post_path, style: "padding: 12px 20px; background: #8c1d1d; color: #fff; border-radius: 8px; text-decoration: none; text-align: center; font-weight: bold;" %>
         </div>
@@ -79,7 +101,6 @@
       <!-- 右側：和紙・短冊風結果表示エリア -->
       <div style="display: flex; flex-direction: column; align-items: center;">
         
-        <!-- html2canvas 対象となるカード要素（id="tanka-card"） -->
         <div id="tanka-card" style="
           background: #faf6ed url('/images/washi-bg.png') repeat;
           border: 2px solid #c8b9a6;
@@ -124,7 +145,7 @@
             ></div>
           </div>
 
-          <!-- ★ 打ち込まれた絶望のエラー文（ターミナル風表示） -->
+          <!-- エラー文表示 -->
           <% if @post.respond_to?(:error_message) && @post.error_message.present? %>
             <div style="
               width: 100%;
@@ -167,45 +188,49 @@
 
     </div>
 
-    <!-- ★ 返歌（アンサー短歌）セクション -->
-    <% if @replies.present? %>
-      <div style="margin-top: 60px; border-top: 1px dashed #5a4a3e; padding-top: 30px;">
-        <h3 style="text-align: center; color: #f2e8d8; font-size: 20px; margin-bottom: 24px; font-family: 'Shippori Mincho', serif;">
-          ✉️ 寄せられた返歌（<%= @replies.count %>首）
-        </h3>
-        
-        <div style="display: flex; flex-direction: column; gap: 16px; align-items: center;">
+    <!-- ★ 完全独立：下部に配置した返歌（アンサー短歌）一覧セクション -->
+    <div style="width: 100%; margin-top: 60px; border-top: 1px dashed #5a4a3e; padding-top: 40px; box-sizing: border-box;">
+      <h3 style="text-align: center; color: #f2e8d8; font-size: 22px; margin-bottom: 24px; font-family: 'Shippori Mincho', serif;">
+        ✉️ 寄せられた返歌（<%= @replies.count %>首）
+      </h3>
+      
+      <% if @replies.present? %>
+        <div style="display: flex; flex-direction: column; gap: 16px; align-items: center; width: 100%;">
           <% @replies.each do |reply| %>
             <div style="
               background: #1a1512;
               border: 1px solid #3a2e2b;
-              border-left: 4px solid #8c1d72;
+              border-left: 5px solid #8c1d72;
               border-radius: 8px;
-              padding: 16px;
+              padding: 20px;
               width: 100%;
-              max-width: 660px;
+              max-width: 680px;
               box-sizing: border-box;
+              box-shadow: 0 4px 15px rgba(0,0,0,0.4);
             ">
-              <div style="font-size: 16px; line-height: 1.8; color: #f2e8d8; font-weight: 600; margin-bottom: 8px;">
+              <div style="font-size: 17px; line-height: 1.8; color: #f2e8d8; font-weight: 600; margin-bottom: 12px; font-family: 'Shippori Mincho', serif;">
                 <%= reply.tanka %>
               </div>
-              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #a39585;">
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #a39585;">
                 <span>詠み手：<%= reply.author_name.presence || '名無し法師' %></span>
-                <%= link_to "詳細を見る →", post_path(reply), style: "color: #ff79c6; text-decoration: none;" %>
+                <%= link_to "この返歌の詳細を見る →", post_path(reply), style: "color: #ff79c6; text-decoration: none; font-weight: bold;" %>
               </div>
             </div>
           <% end %>
         </div>
-      </div>
-    <% end %>
+      <% else %>
+        <div style="text-align: center; color: #8c7b6c; padding: 20px 0;">
+          <p style="font-size: 15px; margin-bottom: 8px;">まだこの絶望への返歌はありません…</p>
+          <p style="font-size: 13px; color: #a39585;">一番乗りで寄り添う歌や、共鳴の短歌を贈ってみませんか？</p>
+        </div>
+      <% end %>
+    </div>
 
   </div>
 </div>
 
-<!-- 📜 html2canvas の読み込み -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<!-- 📜 JS演出（重複防止・安全動作用スクリプト） -->
 <script>
   (function() {
     let activeTimer = null;
@@ -214,7 +239,6 @@
       const tankaElement = document.getElementById("typewriter-tanka");
       if (!tankaElement) return;
 
-      // 既存のタイマーを破棄＆初期化
       if (activeTimer) clearInterval(activeTimer);
       tankaElement.textContent = "";
 
