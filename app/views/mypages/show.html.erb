@@ -15,12 +15,45 @@
     <div style="margin-bottom: 24px; border-bottom: 1px solid #3a2e2b; padding-bottom: 20px;">
       <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
         <div>
-          <div style="font-size: 12px; color: #ff6b6b; font-weight: bold; letter-spacing: 0.15em; margin-bottom: 4px;">
-            ⛩️ 絶望カルテ
+          <!-- ⛩️ 絶望カルテ ＆ 🏅 称号バッジ -->
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
+            <span style="font-size: 12px; color: #ff6b6b; font-weight: bold; letter-spacing: 0.15em;">
+              ⛩️ 絶望カルテ
+            </span>
+
+            <!-- 🏅 絶望度バッジ / 称号表示 -->
+            <% if current_user.respond_to?(:despair_rank) %>
+              <% rank = current_user.despair_rank %>
+              <span style="
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                padding: 3px 12px;
+                background: <%= rank[:bg_rgba] %>;
+                border: 1px solid <%= rank[:border] %>;
+                color: <%= rank[:color] %>;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: bold;
+                box-shadow: 0 0 10px <%= rank[:bg_rgba] %>;
+              ">
+                <span><%= rank[:icon] %></span>
+                <span><%= rank[:title] %></span>
+              </span>
+            <% end %>
           </div>
+
+          <!-- 詠み人名前 -->
           <h1 style="font-size: 26px; font-weight: bold; color: #f2e8d8; margin: 0 0 8px 0;">
             詠み人：<%= current_user.respond_to?(:name) && current_user.name.present? ? current_user.name : current_user.email %>
           </h1>
+          
+          <!-- 獲得共感総数のカウンター表示 -->
+          <% if current_user.respond_to?(:total_likes_count) %>
+            <div style="font-size: 13px; color: #a39382;">
+              総獲得共感：<span style="color: #e5c158; font-weight: bold;"><%= current_user.total_likes_count %></span> 心
+            </div>
+          <% end %>
         </div>
 
         <!-- ボタン領域 -->
@@ -184,7 +217,7 @@
                   margin-bottom: 14px;
                   letter-spacing: 0.05em;
                 ">
-                  <%= sanitize post.tanka.to_s.gsub(/[  ]+/, ' '), tags: %w[] %>
+                  <%= sanitize post.tanka.to_s.tr(' ', ' ').squish, tags: %w[] %>
                 </div>
 
                 <% if post.error_message.present? %>
