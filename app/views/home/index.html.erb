@@ -1,150 +1,336 @@
 <style>
-  /* 縦書き共通スタイル */
-  .btn-omikuji, .btn-tanka, .btn-gallery {
-    writing-mode: vertical-rl;
-    text-orientation: upright;
-    text-decoration: none;
-    border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    transition: all 0.3s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-sizing: border-box;
+  /* 縦書き共通スタイル（グローバルCSSの上書き対策で !important を付与） */
+  a.btn-omikuji, a.btn-tanka, a.btn-gallery,
+  .btn-omikuji, .btn-tanka, .btn-gallery, .btn-otakiage {
+    writing-mode: vertical-rl !important;
+    -webkit-writing-mode: vertical-rl !important;
+    text-orientation: upright !important;
+    -webkit-text-orientation: upright !important;
+    text-decoration: none !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    font-size: 16px !important;
+    font-weight: bold !important;
+    letter-spacing: 0.15em !important;
+    padding: 24px 10px !important;
+    text-indent: 0 !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: initial !important;
+    background-clip: initial !important;
+    -webkit-background-clip: initial !important;
+  }
+
+  /* 🔥 クソコードお焚き上げボタン */
+  .btn-otakiage {
+    background: linear-gradient(180deg, #8c1d1d 0%, #3a0000 100%);
+    color: #ffcc00 !important;
+    box-shadow: 0 0 15px rgba(255, 77, 77, 0.4);
+    border: 2px solid #ff4d4d;
+  }
+  .btn-otakiage:hover {
+    transform: translateY(-6px);
+    background: linear-gradient(180deg, #b32424 0%, #570000 100%);
+    box-shadow: 0 0 25px rgba(255, 77, 77, 0.8);
+    color: #ffffff !important;
   }
 
   /* ⛩️ おみくじボタン */
-  .btn-omikuji {
+  a.btn-omikuji, .btn-omikuji {
     background: rgba(140, 29, 29, 0.95);
-    color: #ffffff;
-    font-size: 19px;
-    font-weight: bold;
-    letter-spacing: 0.2em;
-    padding: 32px 16px;
+    color: #ffffff !important;
     border: 2px solid #ff4d4d;
   }
   .btn-omikuji:hover {
     transform: translateY(-6px);
     background: #b32424;
     box-shadow: 0 15px 30px rgba(140, 29, 29, 0.8);
+    color: #ffffff !important;
   }
 
   /* ✍️ 短歌を詠むボタン */
-  .btn-tanka {
+  a.btn-tanka, .btn-tanka {
     background: rgba(30, 30, 30, 0.92);
-    color: #ffffff;
-    font-size: 19px;
-    font-weight: bold;
-    letter-spacing: 0.2em;
-    padding: 32px 16px;
+    color: #ffffff !important;
     border: 2px solid #d4c5b0;
   }
   .btn-tanka:hover {
     transform: translateY(-6px);
     background: #333333;
     border-color: #ffffff;
+    color: #ffffff !important;
   }
 
   /* 🖼️ ギャラリーボタン */
-  .btn-gallery {
+  a.btn-gallery, .btn-gallery {
     background: rgba(15, 15, 15, 0.88);
-    color: #d4c5b0;
-    font-size: 18px;
-    font-weight: bold;
-    letter-spacing: 0.2em;
-    padding: 32px 16px;
+    color: #d4c5b0 !important;
+    font-size: 15px !important;
     border: 2px solid #555;
   }
   .btn-gallery:hover {
     transform: translateY(-6px);
     border-color: #d4c5b0;
-    color: #ffffff;
+    color: #ffffff !important;
   }
 
   /* 📱 スマホ用スタイル調整 */
   @media (max-width: 768px) {
     .hero-layout {
       flex-direction: column-reverse !important;
-      gap: 24px !important;
+      gap: 20px !important;
       height: auto !important;
-      padding: 40px 16px !important;
+      padding: 30px 16px !important;
     }
 
     .hero-logo-img {
-      max-height: 220px !important;
+      max-height: 200px !important;
       width: auto !important;
     }
 
     .btn-container {
-      gap: 10px !important;
+      gap: 8px !important;
+      flex-wrap: wrap !important;
+      justify-content: center !important;
     }
 
-    .btn-tanka, .btn-gallery, .btn-omikuji {
-      font-size: 15px !important;
-      padding: 20px 10px !important;
+    .btn-tanka, .btn-gallery, .btn-omikuji, .btn-otakiage {
+      font-size: 13px !important;
+      padding: 16px 8px !important;
     }
+  }
+
+  /* 🔥 全画面大炎上アニメーション */
+  @keyframes infernoEffect {
+    0% {
+      background: rgba(5, 2, 2, 0.95);
+      box-shadow: inset 0 0 0px rgba(255, 50, 0, 0);
+    }
+    30% {
+      background: radial-gradient(circle, #8c1d1d 0%, #3a0000 60%, #000000 100%);
+      box-shadow: inset 0 0 100px rgba(255, 100, 0, 0.9);
+    }
+    60% {
+      background: radial-gradient(circle, #ff4d4d 0%, #8c1d1d 50%, #050202 100%);
+      box-shadow: inset 0 0 200px rgba(255, 255, 0, 1);
+    }
+    100% {
+      background: rgba(5, 2, 2, 0.98);
+      box-shadow: inset 0 0 50px rgba(140, 29, 29, 0.5);
+    }
+  }
+
+  .inferno-active {
+    animation: infernoEffect 2.2s ease-in-out forwards;
   }
 </style>
 
 <!-- TOPヒーローエリア（上下の隙間ゼロ・完全全画面表示） -->
-<div style="
-  width: 100%;
-  height: calc(100vh - 60px);
-  margin: 0;
-  padding: 0;
-  background: #1a1a1a url('/bg.jpg') center/cover no-repeat;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
-  overflow: hidden;
-  position: relative;
-">
+<div
+  style="width: 100%; height: calc(100vh - 60px); margin: 0; padding: 0; background: #1a1a1a url('/bg.jpg') center/cover no-repeat; display: flex; justify-content: center; align-items: center; box-sizing: border-box; overflow: hidden; position: relative;"
+>
   <!-- 黒グラデーションオーバーレイ（薄膜加工） -->
-  <div style="
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%);
-    pointer-events: none;
-  "></div>
-
+  <div
+    style="position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%); pointer-events: none;"
+  ></div>
   <!-- メインレイアウト -->
-  <div class="hero-layout" style="
-    position: relative;
-    z-index: 2;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 40px;
-    height: 100%;
-    width: 100%;
-    max-width: 1200px;
-    padding: 0 20px;
-    box-sizing: border-box;
-  ">
+  <div
+    class="hero-layout"
+    style="position: relative; z-index: 2; display: flex; justify-content: center; align-items: center; gap: 30px; height: 100%; width: 100%; max-width: 1200px; padding: 0 20px; box-sizing: border-box;"
+  >
+    <!-- 左側：縦書きボタン4つ -->
+    <div
+      class="btn-container"
+      style="display: flex; gap: 12px; align-items: center; flex-shrink: 0;"
+    >
+      <!-- 🔥 クソコードお焚き上げボタン -->
+      <div id="open-otakiage-btn" class="btn-otakiage">
+        クソコードお焚き上げ
+      </div>
 
-    <!-- 左側：縦書きボタン3つ -->
-    <div class="btn-container" style="display: flex; gap: 16px; align-items: center;">
+      <!-- ⛩️ おみくじボタン -->
       <%= link_to omikuji_path, class: "btn-omikuji" do %>
         本日の絶望おみくじ
       <% end %>
 
+      <!-- ✍️ 短歌を詠むボタン -->
       <%= link_to new_post_path, class: "btn-tanka" do %>
         短歌を詠む
       <% end %>
 
+      <!-- 🖼️ ギャラリーボタン -->
       <%= link_to posts_path, class: "btn-gallery" do %>
-        みんなのギャラリー
+        ギャラリー
       <% end %>
     </div>
 
     <!-- 右側：ロゴ画像 -->
-    <div style="display: flex; align-items: center; justify-content: center;">
-      <img src="/logo.png" alt="絶望えらぁ短歌" class="hero-logo-img" style="
-        max-height: 480px;
-        width: auto;
-        filter: drop-shadow(0 10px 25px rgba(0,0,0,0.8));
-      ">
+    <div
+      style="display: flex; align-items: center; justify-content: center; flex-shrink: 1;"
+    >
+      <img
+        src="/logo.png"
+        alt="絶望えらぁ短歌"
+        class="hero-logo-img"
+        style="max-height: 460px; width: auto; filter: drop-shadow(0 10px 25px rgba(0,0,0,0.8));"
+      >
     </div>
   </div>
 </div>
+
+<!-- 🔥 クソコードお焚き上げモーダル -->
+<div
+  id="otakiage-modal"
+  style="display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; background: rgba(5, 2, 2, 0.94); backdrop-filter: blur(8px); z-index: 99999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Shippori Mincho', serif; transition: all 0.5s ease;"
+>
+  <!-- 入力エリア -->
+  <div
+    id="otakiage-input-card"
+    style="background: #140808; border: 2px solid #8c1d1d; border-radius: 16px; width: 100%; max-width: 600px; padding: 32px 24px; box-shadow: 0 0 40px rgba(255, 77, 77, 0.3), inset 0 0 20px rgba(0,0,0,0.9); position: relative; box-sizing: border-box; color: #f2e8d8;"
+  >
+    <!-- 閉じるボタン -->
+    <button
+      id="close-otakiage-modal"
+      style="position: absolute; top: 16px; right: 20px; background: none; border: none; color: #a39382; font-size: 24px; cursor: pointer;"
+    >✕</button>
+
+    <div style="text-align: center; margin-bottom: 20px;">
+      <h2
+        style="font-size: 24px; color: #ff4d4d; margin: 0 0 8px 0; text-shadow: 0 0 10px rgba(255,77,77,0.5);"
+      >
+        🔥 怨念のクソコードお焚き上げ神社
+      </h2>
+      <p style="font-size: 13px; color: #a39382; margin: 0;">
+        世に解き放てぬクソコードを炎にくべ、魂を浄化させよ
+      </p>
+    </div>
+
+    <div style="margin-bottom: 24px;">
+      <label
+        style="display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 14px;"
+      >
+        供養するクソコード / 怨念のスニペット
+      </label>
+      <textarea
+        id="otakiage-textarea"
+        rows="6"
+        placeholder="例: if (isTrue == true) { return true; } else { // なぜかここを通ると動く sleep(1); }"
+        style="width: 100%; padding: 12px; border: 1px solid #5a4a3e; border-radius: 8px; background: #080303; color: #ff79c6; font-size: 13px; font-family: monospace; box-sizing: border-box; resize: vertical; line-height: 1.5;"
+      ></textarea>
+    </div>
+
+    <div style="text-align: center;">
+      <button
+        type="button"
+        id="start-burn-btn"
+        style="width: 100%; padding: 14px; background: linear-gradient(135deg, #ff4d4d, #8c1d1d); color: #ffffff; font-size: 17px; font-weight: bold; font-family: 'Shippori Mincho', serif; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 20px rgba(255, 77, 77, 0.5); transition: all 0.2s ease;"
+      >
+        業火にくべて燃やし尽くす 🔥
+      </button>
+    </div>
+  </div>
+  <!-- 🌟 お焚き上げ完了後の「ありがたいお言葉」表示領域 -->
+  <div
+    id="otakiage-result-card"
+    style="display: none; background: #faf6ed url('/images/washi-bg.png') repeat; border: 3px solid #8c1d1d; border-radius: 16px; width: 100%; max-width: 520px; padding: 36px 28px; box-shadow: 0 0 50px rgba(255, 77, 77, 0.6); position: relative; box-sizing: border-box; color: #2c221e; text-align: center;"
+  >
+    <div
+      style="font-size: 14px; color: #8c1d1d; font-weight: bold; letter-spacing: 0.2em; margin-bottom: 16px;"
+    >
+      ⛩️ お焚き上げ完了 ・ 浄化の託宣 ⛩️
+    </div>
+
+    <div style="font-size: 40px; margin-bottom: 20px;">
+      🔥 ➔ 🪷
+    </div>
+
+    <div
+      id="blessing-text"
+      style="font-size: 20px; font-weight: bold; line-height: 1.8; color: #1a1008; margin-bottom: 24px; min-height: 80px; display: flex; align-items: center; justify-content: center;"
+    >
+    </div>
+
+    <p style="font-size: 12px; color: #7a6b5d; margin-bottom: 28px;">
+      怨念は炎となりて消え去りぬ。心清やかに次なるコードへ進むべし。
+    </p>
+
+    <button
+      id="finish-otakiage-btn"
+      style="padding: 12px 28px; background: #8c1d1d; color: #fff; border: none; border-radius: 24px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(140, 29, 29, 0.4);"
+    >
+      心清らかに立ち去る ✨
+    </button>
+  </div>
+</div>
+<script>
+  (function() {
+    const BLESSINGS = [
+      "そのバグもまた、宇宙の調和の一部なり。責めるなかれ。",
+      "動くコードを疑うことなかれ。たとえ理由が分からずとも。",
+      "昨日のクソコードは、今日の貴殿の成長の証なり。",
+      "バグを憎んで人を憎まず。ただしテストコードは書くべし。",
+      "LGTM。ただし、その意味は心の中にのみ留めよ。",
+      "消えたコードを惜しむなかれ。さらなる美しきコードが芽吹かん。",
+      "強制終了もまた、ひとつの解決策なり。休めよエンジニア。",
+      "仕様書のせいにせよ。汝の魂は守られたり。",
+      "インデントの乱れは心の乱れ。リフォーマットして整えよ。",
+      "明日には忘れん。今日の絶望も、ただのスタックトレースなり。"
+    ];
+
+    function setupOtakiage() {
+      const openBtn = document.getElementById("open-otakiage-btn");
+      const closeBtn = document.getElementById("close-otakiage-modal");
+      const finishBtn = document.getElementById("finish-otakiage-btn");
+      const modal = document.getElementById("otakiage-modal");
+      const startBurnBtn = document.getElementById("start-burn-btn");
+      const inputCard = document.getElementById("otakiage-input-card");
+      const resultCard = document.getElementById("otakiage-result-card");
+      const blessingText = document.getElementById("blessing-text");
+      const textarea = document.getElementById("otakiage-textarea");
+
+      if (!openBtn || !modal) return;
+
+      openBtn.onclick = function() {
+        modal.style.display = "flex";
+        inputCard.style.display = "block";
+        resultCard.style.display = "none";
+        modal.classList.remove("inferno-active");
+      };
+
+      const closeModal = function() {
+        modal.style.display = "none";
+        textarea.value = "";
+      };
+
+      closeBtn.onclick = closeModal;
+      finishBtn.onclick = closeModal;
+
+      startBurnBtn.onclick = function() {
+        if (!textarea || !textarea.value.trim()) {
+          alert("供養するクソコードを入力してください！");
+          return;
+        }
+
+        inputCard.style.display = "none";
+        modal.classList.add("inferno-active");
+
+        setTimeout(() => {
+          modal.classList.remove("inferno-active");
+          const randomBlessing = BLESSINGS[Math.floor(Math.random() * BLESSINGS.length)];
+          blessingText.textContent = randomBlessing;
+          resultCard.style.display = "block";
+        }, 2200);
+      };
+    }
+
+    document.addEventListener("DOMContentLoaded", setupOtakiage);
+    document.addEventListener("turbo:load", setupOtakiage);
+  })();
+</script>
