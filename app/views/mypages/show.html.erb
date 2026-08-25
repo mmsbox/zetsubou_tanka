@@ -163,8 +163,15 @@
               color: #f2e8d8;
               box-shadow: 0 4px 16px rgba(0,0,0,0.4);
             ">
-              <div style="font-size: 12px; color: #887868; margin-bottom: 12px;">
-                <%= post.created_at.strftime("%Y/%m/%d %H:%M") %>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="font-size: 12px; color: #887868;">
+                  <%= post.created_at.strftime("%Y/%m/%d %H:%M") %>
+                </div>
+                <% if post.respond_to?(:error_category) && post.error_category.present? %>
+                  <span style="display: inline-block; padding: 2px 8px; background: rgba(229, 193, 88, 0.15); border: 1px solid #e5c158; color: #e5c158; border-radius: 12px; font-size: 11px;">
+                    🏷️ <%= post.error_category %>
+                  </span>
+                <% end %>
               </div>
 
               <div style="
@@ -270,8 +277,15 @@
               padding: 24px;
               color: #f2e8d8;
             ">
-              <div style="font-size: 12px; color: #887868; margin-bottom: 12px;">
-                <%= post.created_at.strftime("%Y/%m/%d %H:%M") %>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="font-size: 12px; color: #887868;">
+                  <%= post.created_at.strftime("%Y/%m/%d %H:%M") %>
+                </div>
+                <% if post.respond_to?(:error_category) && post.error_category.present? %>
+                  <span style="display: inline-block; padding: 2px 8px; background: rgba(255, 159, 67, 0.15); border: 1px solid #ff9f43; color: #ff9f43; border-radius: 12px; font-size: 11px;">
+                    🏷️ <%= post.error_category %>
+                  </span>
+                <% end %>
               </div>
 
               <div style="
