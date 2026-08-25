@@ -1,4 +1,3 @@
-
 <% content_for :ogp_image, ogp_post_url(@post, format: :png) %>
 <% content_for :ogp_title, "『#{@post.tanka.truncate(20)}』| 絶望えらぁ短歌" %>
 
@@ -67,6 +66,9 @@
           <button id="download-card-btn" style="padding: 12px 20px; background: linear-gradient(135deg, #8c1d1d, #571010); color: #fff; border: none; border-radius: 8px; font-weight: bold; font-family: 'Shippori Mincho', serif; cursor: pointer; box-shadow: 0 4px 12px rgba(140, 29, 29, 0.4);">
             📸 短冊を画像保存
           </button>
+
+          <!-- ★ 返歌を贈るボタン -->
+          <%= link_to "✉️ この絶望に返歌を贈る", new_post_path(parent_id: @post.id), style: "padding: 12px 20px; background: linear-gradient(135deg, #2b1d38, #57104d); color: #f2e8d8; border: 1px solid #8c1d72; border-radius: 8px; text-decoration: none; text-align: center; font-weight: bold; box-shadow: 0 4px 12px rgba(87, 16, 77, 0.4);" %>
 
           <%= link_to "ギャラリーへ", posts_path, onclick: "showLoading('展覧会へご案内中…')", style: "padding: 12px 20px; background: #2a221d; border: 1px solid #5a4a3e; border-radius: 8px; text-decoration: none; color: #d4c5b0; text-align: center; font-weight: bold;" %>
           <%= link_to "もう一度詠む", new_post_path, style: "padding: 12px 20px; background: #8c1d1d; color: #fff; border-radius: 8px; text-decoration: none; text-align: center; font-weight: bold;" %>
@@ -164,6 +166,38 @@
       </div>
 
     </div>
+
+    <!-- ★ 返歌（アンサー短歌）セクション -->
+    <% if @replies.present? %>
+      <div style="margin-top: 60px; border-top: 1px dashed #5a4a3e; padding-top: 30px;">
+        <h3 style="text-align: center; color: #f2e8d8; font-size: 20px; margin-bottom: 24px; font-family: 'Shippori Mincho', serif;">
+          ✉️ 寄せられた返歌（<%= @replies.count %>首）
+        </h3>
+        
+        <div style="display: flex; flex-direction: column; gap: 16px; align-items: center;">
+          <% @replies.each do |reply| %>
+            <div style="
+              background: #1a1512;
+              border: 1px solid #3a2e2b;
+              border-left: 4px solid #8c1d72;
+              border-radius: 8px;
+              padding: 16px;
+              width: 100%;
+              max-width: 660px;
+              box-sizing: border-box;
+            ">
+              <div style="font-size: 16px; line-height: 1.8; color: #f2e8d8; font-weight: 600; margin-bottom: 8px;">
+                <%= reply.tanka %>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #a39585;">
+                <span>詠み手：<%= reply.author_name.presence || '名無し法師' %></span>
+                <%= link_to "詳細を見る →", post_path(reply), style: "color: #ff79c6; text-decoration: none;" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
 
   </div>
 </div>
