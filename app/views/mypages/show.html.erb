@@ -12,20 +12,19 @@
   <div style="max-width: 800px; margin: 0 auto; position: relative; z-index: 1;">
 
     <!-- タイトルヘッダー ＆ 各種アクションボタン -->
-    <div style="margin-bottom: 35px; border-bottom: 1px solid #3a2e2b; padding-bottom: 20px;">
+    <div style="margin-bottom: 24px; border-bottom: 1px solid #3a2e2b; padding-bottom: 20px;">
       <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
         <div>
+          <div style="font-size: 12px; color: #ff6b6b; font-weight: bold; letter-spacing: 0.15em; margin-bottom: 4px;">
+            ⛩️ 絶望カルテ
+          </div>
           <h1 style="font-size: 26px; font-weight: bold; color: #f2e8d8; margin: 0 0 8px 0;">
-            詠み人：<%= current_user.respond_to?(:name) && current_user.name.present? ? current_user.name : current_user.email %> の絶望ログ
+            詠み人：<%= current_user.respond_to?(:name) && current_user.name.present? ? current_user.name : current_user.email %>
           </h1>
-          <p style="font-size: 14px; color: #a39382; margin: 0;">
-            これまでに蓄積された絶望：<strong style="font-size: 18px; color: #e5c158;"><%= @posts.count %> 詠</strong>
-          </p>
         </div>
 
-        <!-- ボタン領域（ユーザー情報編集 ＆ 短歌を詠む） -->
+        <!-- ボタン領域 -->
         <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-          <!-- ⚙️ アカウント設定変更ボタン -->
           <%= link_to edit_user_registration_path, style: "
             display: inline-flex;
             align-items: center;
@@ -43,7 +42,6 @@
             <span>⚙️ ユーザー情報を編集</span>
           <% end %>
 
-          <!-- 🔥 短歌を詠むボタン（新規作成画面へ） -->
           <%= link_to new_post_path, style: "
             display: inline-flex;
             align-items: center;
@@ -64,53 +62,261 @@
       </div>
     </div>
 
-    <!-- 絶望ログ一覧 -->
-    <div style="display: flex; flex-direction: column; gap: 20px;">
-      <% if @posts.any? %>
-        <% @posts.each do |post| %>
-          <div style="
-            background: #1a1512;
-            border: 1px solid #3a2e2b;
-            border-radius: 12px;
-            padding: 24px;
-            color: #f2e8d8;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-            transition: transform 0.2s ease;
-          ">
-            <!-- 投稿日時 -->
-            <div style="font-size: 12px; color: #887868; margin-bottom: 12px;">
-              <%= post.created_at.strftime("%Y/%m/%d %H:%M") %>
-            </div>
+    <!-- 📊 絶望の軌跡・サマリーカード（視覚化エリア） -->
+    <div style="
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 35px;
+    ">
+      <!-- 詠んだ短歌 -->
+      <div style="background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; padding: 18px; text-align: center;">
+        <div style="font-size: 12px; color: #a39382; margin-bottom: 6px;">📜 蓄積された絶望</div>
+        <div style="font-size: 24px; font-weight: bold; color: #e5c158;">
+          <%= @posts&.count || 0 %> <span style="font-size: 14px; color: #f2e8d8;">詠</span>
+        </div>
+      </div>
 
-            <!-- 短歌本文（金・和風フォント） -->
+      <!-- 届いた返歌 -->
+      <div style="background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; padding: 18px; text-align: center;">
+        <div style="font-size: 12px; color: #a39382; margin-bottom: 6px;">✉️ 届いた返歌</div>
+        <div style="font-size: 24px; font-weight: bold; color: #ff6b6b;">
+          <%= defined?(@replies) && @replies.present? ? @replies.count : (defined?(@my_replies) && @my_replies.present? ? @my_replies.count : 0) %> <span style="font-size: 14px; color: #f2e8d8;">首</span>
+        </div>
+      </div>
+
+      <!-- 共感した短歌 -->
+      <div style="background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; padding: 18px; text-align: center;">
+        <div style="font-size: 12px; color: #a39382; margin-bottom: 6px;">🌸 共鳴した絶望</div>
+        <div style="font-size: 24px; font-weight: bold; color: #ff9f43;">
+          <%= defined?(@liked_posts) && @liked_posts.present? ? @liked_posts.count : 0 %> <span style="font-size: 14px; color: #f2e8d8;">心</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🗂️ タブ切替ヘッダー -->
+    <div style="
+      display: flex;
+      gap: 8px;
+      border-bottom: 2px solid #3a2e2b;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    ">
+      <button class="carte-tab active" onclick="switchCarteTab('my-posts')" style="
+        padding: 10px 20px;
+        background: none;
+        border: none;
+        border-bottom: 3px solid #ff4d4d;
+        color: #ff4d4d;
+        font-size: 15px;
+        font-weight: bold;
+        font-family: 'Shippori Mincho', serif;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      ">
+        📜 詠んだ短歌
+      </button>
+
+      <button class="carte-tab" onclick="switchCarteTab('replies')" style="
+        padding: 10px 20px;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: #a39382;
+        font-size: 15px;
+        font-weight: bold;
+        font-family: 'Shippori Mincho', serif;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      ">
+        ✉️ 届いた返歌
+      </button>
+
+      <button class="carte-tab" onclick="switchCarteTab('likes')" style="
+        padding: 10px 20px;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: #a39382;
+        font-size: 15px;
+        font-weight: bold;
+        font-family: 'Shippori Mincho', serif;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      ">
+        🌸 共感した短歌
+      </button>
+    </div>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- タブ 1: 詠んだ短歌 -->
+    <!-- ---------------------------------------------------- -->
+    <div id="tab-content-my-posts" class="carte-content">
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        <% if @posts.present? && @posts.any? %>
+          <% @posts.each do |post| %>
             <div style="
-              font-size: 19px;
-              color: #e5c158;
-              font-weight: bold;
-              line-height: 1.8;
-              margin-bottom: 16px;
-              letter-spacing: 1.5px;
+              background: #1a1512;
+              border: 1px solid #3a2e2b;
+              border-radius: 12px;
+              padding: 24px;
+              color: #f2e8d8;
+              box-shadow: 0 4px 16px rgba(0,0,0,0.4);
             ">
-              <%= sanitize post.tanka.to_s.gsub(/[  ]+/, ' '), tags: %w[] %>
-            </div>
+              <div style="font-size: 12px; color: #887868; margin-bottom: 12px;">
+                <%= post.created_at.strftime("%Y/%m/%d %H:%M") %>
+              </div>
 
-            <!-- 元のエラー文 -->
-            <div style="font-size: 13px; color: #a39382; margin-bottom: 18px; font-family: monospace; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px;">
-              元のエラー・絶望：<%= truncate(post.error_message.presence || "指定なし", length: 60) %>
-            </div>
+              <div style="
+                font-size: 19px;
+                color: #e5c158;
+                font-weight: bold;
+                line-height: 1.8;
+                margin-bottom: 16px;
+                letter-spacing: 1.5px;
+              ">
+                <%= sanitize post.tanka.to_s.gsub(/[  ]+/, ' '), tags: %w[] %>
+              </div>
 
-            <!-- 詳細を見るリンク -->
-            <div style="text-align: right;">
-              <%= link_to "鑑賞・詳細を見る →", post_path(post), onclick: "showLoading('作品を鑑賞中…')", style: "color: #ff6b6b; font-size: 13px; font-weight: bold; text-decoration: none;" %>
+              <div style="font-size: 13px; color: #a39382; margin-bottom: 18px; font-family: monospace; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px;">
+                元のエラー・絶望：<%= truncate(post.error_message.presence || "指定なし", length: 60) %>
+              </div>
+
+              <!-- アクションボタン群（鑑賞・編集・削除） -->
+              <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #2a221d; padding-top: 14px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; gap: 12px; align-items: center;">
+                  <!-- ✏️ 編集ボタン -->
+                  <%= link_to edit_post_path(post), style: "color: #a39382; font-size: 13px; text-decoration: none; transition: color 0.2s;" do %>
+                    ✏️ 推敲（編集）
+                  <% end %>
+
+                  <!-- 🗑️ 削除ボタン（Turbo対応） -->
+                  <%= link_to post_path(post),
+                      data: { turbo_method: :delete, turbo_confirm: "本当にこの短歌を取り下げて供養しますか？" },
+                      style: "color: #8c1d1d; font-size: 13px; text-decoration: none; transition: color 0.2s;" do %>
+                    🗑️ 削除
+                  <% end %>
+                </div>
+
+                <!-- 👁️ 詳細リンク -->
+                <%= link_to "鑑賞・詳細を見る →", post_path(post), style: "color: #ff6b6b; font-size: 13px; font-weight: bold; text-decoration: none;" %>
+              </div>
             </div>
+          <% end %>
+        <% else %>
+          <div style="text-align: center; padding: 60px 0; color: #887868; background: #1a1512; border: 1px dashed #3a2e2b; border-radius: 12px;">
+            まだ絶望ログがありません。まずは一首、詠んでみませんか？
           </div>
         <% end %>
-      <% else %>
-        <div style="text-align: center; padding: 60px 0; color: #887868; background: #1a1512; border: 1px dashed #3a2e2b; border-radius: 12px;">
-          まだ絶望ログがありません。まずは一首、詠んでみませんか？
-        </div>
-      <% end %>
+      </div>
+    </div>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- タブ 2: 届いた返歌 -->
+    <!-- ---------------------------------------------------- -->
+    <div id="tab-content-replies" class="carte-content" style="display: none;">
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        <% replies_data = defined?(@replies) && @replies.present? ? @replies : (defined?(@my_replies) ? @my_replies : nil) %>
+        <% if replies_data.present? && replies_data.any? %>
+          <% replies_data.each do |reply| %>
+            <div style="
+              background: #1a1512;
+              border: 1px solid #3a2e2b;
+              border-radius: 12px;
+              padding: 24px;
+              color: #f2e8d8;
+            ">
+              <div style="font-size: 12px; color: #887868; margin-bottom: 12px;">
+                <%= reply.created_at.strftime("%Y/%m/%d %H:%M") %> ・ <%= reply.try(:author_name).presence || "名無し法師" %> より
+              </div>
+
+              <div style="
+                font-size: 18px;
+                color: #ff6b6b;
+                font-weight: bold;
+                line-height: 1.8;
+                margin-bottom: 16px;
+              ">
+                <%= sanitize reply.try(:content).to_s || reply.try(:tanka).to_s, tags: %w[] %>
+              </div>
+
+              <% if reply.respond_to?(:post) && reply.post.present? %>
+                <div style="text-align: right;">
+                  <%= link_to "対象の短歌を見る →", post_path(reply.post), style: "color: #e5c158; font-size: 13px; font-weight: bold; text-decoration: none;" %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        <% else %>
+          <div style="text-align: center; padding: 60px 0; color: #887868; background: #1a1512; border: 1px dashed #3a2e2b; border-radius: 12px;">
+            まだ届いた返歌はありません。誰かの短歌に返歌を贈ると、交流が広がるかもしれません。
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- タブ 3: 共感した短歌 -->
+    <!-- ---------------------------------------------------- -->
+    <div id="tab-content-likes" class="carte-content" style="display: none;">
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        <% liked_data = defined?(@liked_posts) && @liked_posts.present? ? @liked_posts : nil %>
+        <% if liked_data.present? && liked_data.any? %>
+          <% liked_data.each do |post| %>
+            <div style="
+              background: #1a1512;
+              border: 1px solid #3a2e2b;
+              border-radius: 12px;
+              padding: 24px;
+              color: #f2e8d8;
+            ">
+              <div style="font-size: 12px; color: #887868; margin-bottom: 12px;">
+                <%= post.created_at.strftime("%Y/%m/%d %H:%M") %>
+              </div>
+
+              <div style="
+                font-size: 19px;
+                color: #ff9f43;
+                font-weight: bold;
+                line-height: 1.8;
+                margin-bottom: 16px;
+              ">
+                <%= sanitize post.tanka.to_s, tags: %w[] %>
+              </div>
+
+              <div style="text-align: right;">
+                <%= link_to "鑑賞・詳細を見る →", post_path(post), style: "color: #ff6b6b; font-size: 13px; font-weight: bold; text-decoration: none;" %>
+              </div>
+            </div>
+          <% end %>
+        <% else %>
+          <div style="text-align: center; padding: 60px 0; color: #887868; background: #1a1512; border: 1px dashed #3a2e2b; border-radius: 12px;">
+            まだ共感（いいね）した短歌はありません。ギャラリーで心に響く短歌を探してみましょう！
+          </div>
+        <% end %>
+      </div>
     </div>
 
   </div>
 </div>
+
+<script>
+  function switchCarteTab(tabName) {
+    const contents = document.querySelectorAll('.carte-content');
+    contents.forEach(content => content.style.display = 'none');
+
+    const targetContent = document.getElementById('tab-content-' + tabName);
+    if (targetContent) {
+      targetContent.style.display = 'block';
+    }
+
+    const tabs = document.querySelectorAll('.carte-tab');
+    tabs.forEach(tab => {
+      tab.style.borderColor = 'transparent';
+      tab.style.color = '#a39382';
+    });
+
+    event.currentTarget.style.borderColor = '#ff4d4d';
+    event.currentTarget.style.color = '#ff4d4d';
+  }
+</script>

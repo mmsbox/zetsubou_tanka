@@ -1,48 +1,54 @@
 class PostsController < ApplicationController
-  # OGP画像用カラー定数
-  OGP_BG_COLOR     = "#050202".freeze
-  OGP_TEXT_COLOR   = "#f2e8d8".freeze
-  OGP_AUTHOR_COLOR = "#8c1d1d".freeze
+  before_action :authenticate_user!, only: [ :new, :create, :edit, :update, :destroy ]
+  before_action :set_post, only: [ :show, :edit, :update, :destroy, :like ]
+  before_action :authorize_user!, only: [ :edit, :update, :destroy ]
 
-  # 小さな「つ・ゃ・ゅ・ょ」などを除外して音数を数える用の定数
-  SMALL_KANA = %w[ぁ ぃ ぅ ぇ ぉ ゃ ゅ ょ ゎ ァ ィ ゥ ェ ォ ャ ュ ョ ヮ ッ ｯ].freeze
+  OGP_BG_COLOR = "#0d0808".freeze
+  OGP_TEXT_COLOR = "#e5c158".freeze
+  OGP_AUTHOR_COLOR = "#a39382".freeze
+  SMALL_KANA = %w[っ ゃ ゅ ょ ぁ ぃ ぅ ぇ ぉ ヮ ヵ ヶ].freeze
 
   def index
-    if params[:sort] == "likes"
-      # ★ 共感順（likes_count が nil の場合は 0 扱い）
-      @posts = Post.order(Arel.sql("COALESCE(likes_count, 0) DESC"), created_at: :desc)
-    else
-      # ★ 新着順（デフォルト）
-      @posts = Post.order(created_at: :desc)
-    end
+    @posts = Post.order(created_at: :desc)
   end
 
   def show
-    @post = Post.find(params[:id])
-    @replies = @post.replies.order(created_at: :asc)
-    @reply = Post.new(parent_id: @post.id)
   end
 
   def new
-    @post = Post.new(parent_id: params[:parent_id])
-    @parent_post = Post.find_by(id: params[:parent_id]) if params[:parent_id].present?
+    @post = Post.new
   end
 
-def create
+  def create
     @post = Post.new(post_params)
+    @post.user = current_user if respond_to?(:current_user) && current_user.present?
 
-    # 短歌が未入力で、エラーメッセージが存在する場合のみ AI で短歌を生成する
     if @post.tanka.blank? && @post.error_message.present?
       @post.tanka = generate_tanka_from_error(@post.error_message)
     end
 
     if @post.save
-      # 返歌（parent が存在）の場合は親短歌の詳細へ、通常投稿の場合は自身の詳細へリダイレクト
       redirect_target = @post.parent.present? ? @post.parent : @post
       redirect_to redirect_target, notice: "短歌が詠まれました。"
     else
       render :new, status: :unprocessable_entity
     end
+  end
+
+  def edit
+  end
+
+  def update
+    if @post.update(post_params)
+      redirect_to mypage_path, notice: "短歌を推敲（更新）しました。"
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    @post.destroy
+    redirect_to mypage_path, notice: "短歌を取り下げ、供養しました。"
   end
 
   def ogp
@@ -51,16 +57,14 @@ def create
     tanka_text  = (post.tanka.presence || "エラー吐き 詠めぬ短歌の 虚しさよ").tr("\n", " ")
     author_text = "詠み手：#{post.author_name.presence || '名無し法師'}"
 
-    # キャンバス画像を生成 (xc: を使用し、フォーマットを png: で明示)
     image = MiniMagick::Image.create do |f|
       MiniMagick::Tool::Convert.new do |config|
         config.size "1200x630"
         config << "xc:#{OGP_BG_COLOR}"
-        config << "png:#{f.path}" # png形式で書き出し指定
+        config << "png:#{f.path}"
       end
     end
 
-    # テキストの描画
     image.combine_options do |c|
       c.fill OGP_TEXT_COLOR
       c.pointsize "38"
@@ -84,20 +88,15 @@ def create
   end
 
   def like
-    @post = Post.find(params[:id])
-
-    # 1. セッションチェック（連打防止）
     session[:liked_post_ids] ||= []
     if session[:liked_post_ids].include?(@post.id)
       render json: { error: "すでに「わかる」を押しています", likes_count: (@post.likes_count || 0) }, status: :unprocessable_entity
       return
     end
 
-    # 2. 確実にDBの likes_count を +1 カウントアップする
     Post.increment_counter(:likes_count, @post.id)
     session[:liked_post_ids] << @post.id
 
-    # 3. 最新のカウント数を取得して返却
     @post.reload
     render json: { likes_count: (@post.likes_count || 0) }
   rescue ActiveRecord::RecordNotFound
@@ -105,6 +104,14 @@ def create
   end
 
   private
+
+  def set_post
+    @post = Post.find(params[:id])
+  end
+
+  def authorize_user!
+    redirect_to mypage_path, alert: "権限がありません。" unless @post.respond_to?(:user) && @post.user == current_user
+  end
 
   def post_params
     params.require(:post).permit(:author_name, :error_message, :tanka, :likes_count, :parent_id)
