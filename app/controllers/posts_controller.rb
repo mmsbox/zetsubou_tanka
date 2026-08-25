@@ -28,15 +28,18 @@ class PostsController < ApplicationController
     @parent_post = Post.find_by(id: params[:parent_id]) if params[:parent_id].present?
   end
 
-  def create
+def create
     @post = Post.new(post_params)
 
-    if @post.error_message.present? && @post.tanka.blank?
+    # 短歌が未入力で、エラーメッセージが存在する場合のみ AI で短歌を生成する
+    if @post.tanka.blank? && @post.error_message.present?
       @post.tanka = generate_tanka_from_error(@post.error_message)
     end
 
     if @post.save
-      redirect_to @post, notice: "短歌が詠まれました。"
+      # 返歌（parent が存在）の場合は親短歌の詳細へ、通常投稿の場合は自身の詳細へリダイレクト
+      redirect_target = @post.parent.present? ? @post.parent : @post
+      redirect_to redirect_target, notice: "短歌が詠まれました。"
     else
       render :new, status: :unprocessable_entity
     end
