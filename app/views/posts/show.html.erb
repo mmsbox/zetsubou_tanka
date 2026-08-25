@@ -171,8 +171,25 @@
             </div>
           <% end %>
 
-          <div style="font-size: 13px; color: #7a6b5d; text-align: right; width: 100%; font-family: 'Shippori Mincho', serif; font-weight: bold;">
-            詠み手：<%= @post.author_name.presence || "名無し法師" %>
+          <!-- 詠み手 ＆ 🏅 称号バッジ表示 -->
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; font-family: 'Shippori Mincho', serif; font-weight: bold; font-size: 13px; color: #7a6b5d;">
+            <span>詠み手：<%= @post.author_name.presence || "名無し法師" %></span>
+            <% if @post.user.present? %>
+              <% rank = @post.user.despair_rank %>
+              <span style="
+                display: inline-flex;
+                align-items: center;
+                gap: 2px;
+                padding: 1px 8px;
+                background: <%= rank[:bg_rgba] %>;
+                border: 1px solid <%= rank[:border] %>;
+                color: <%= rank[:color] %>;
+                border-radius: 12px;
+                font-size: 10px;
+              ">
+                <%= rank[:icon] %> <%= rank[:title] %>
+              </span>
+            <% end %>
           </div>
         </div>
 
@@ -217,7 +234,25 @@
                 <%= reply.tanka %>
               </div>
               <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #a39585;">
-                <span>詠み手：<%= reply.author_name.presence || '名無し法師' %></span>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span>詠み手：<%= reply.author_name.presence || '名無し法師' %></span>
+                  <% if reply.user.present? %>
+                    <% r_rank = reply.user.despair_rank %>
+                    <span style="
+                      display: inline-flex;
+                      align-items: center;
+                      gap: 2px;
+                      padding: 1px 6px;
+                      background: <%= r_rank[:bg_rgba] %>;
+                      border: 1px solid <%= r_rank[:border] %>;
+                      color: <%= r_rank[:color] %>;
+                      border-radius: 10px;
+                      font-size: 10px;
+                    ">
+                      <%= r_rank[:icon] %> <%= r_rank[:title] %>
+                    </span>
+                  <% end %>
+                </div>
                 <%= link_to "この返歌の詳細を見る →", post_path(reply), style: "color: #ff79c6; text-decoration: none; font-weight: bold;" %>
               </div>
             </div>
@@ -325,46 +360,50 @@
     function initImageDownload() {
       const downloadBtn = document.getElementById("download-card-btn");
       const cardElement = document.getElementById("tanka-card");
-      const tankaElement = document.getElementById("typewriter-tanka");
 
       if (!downloadBtn || !cardElement) return;
 
-      downloadBtn.onclick = function() {
-        if (tankaElement && tankaElement.dataset.tanka) {
-          tankaElement.textContent = tankaElement.dataset.tanka;
+      if (downloadBtn.dataset.downloadBound) return;
+      downloadBtn.dataset.downloadBound = "true";
+
+      downloadBtn.addEventListener("click", function() {
+        if (typeof html2canvas === "undefined") {
+          alert("画像生成ライブラリの読み込み中です。少々お待ちください。");
+          return;
         }
 
-        downloadBtn.innerText = "生成中...";
+        downloadBtn.textContent = "⏳ 画像作成中…";
         downloadBtn.disabled = true;
 
         html2canvas(cardElement, {
           scale: 2,
-          backgroundColor: "#faf6ed"
+          useCORS: true,
+          backgroundColor: null
         }).then(canvas => {
           const link = document.createElement("a");
-          link.download = "zetsubou_tanka.png";
+          link.download = `zetsubou_tanka_${Date.now()}.png`;
           link.href = canvas.toDataURL("image/png");
           link.click();
 
-          downloadBtn.innerText = "📸 短冊を画像保存";
+          downloadBtn.textContent = "📸 短冊を画像保存";
           downloadBtn.disabled = false;
         }).catch(err => {
-          console.error(err);
-          alert("画像の生成に失敗しました。");
-          downloadBtn.innerText = "📸 短冊を画像保存";
+          console.error("Canvas error:", err);
+          alert("画像の作成に失敗しました。");
+          downloadBtn.textContent = "📸 短冊を画像保存";
           downloadBtn.disabled = false;
         });
-      };
+      });
     }
 
-    function setupAll() {
+    function initAll() {
       startTypewriter();
       animateScore();
       initEmpathyButtons();
       initImageDownload();
     }
 
-    document.addEventListener("turbo:load", setupAll);
-    document.addEventListener("DOMContentLoaded", setupAll);
+    document.addEventListener("DOMContentLoaded", initAll);
+    document.addEventListener("turbo:load", initAll);
   })();
 </script>

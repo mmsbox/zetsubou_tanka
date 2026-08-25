@@ -116,11 +116,30 @@
                 </div>
               <% end %>
 
-              <!-- 詠み手（名前） ＆ エラー種別タグ -->
+              <!-- 詠み手（名前・称号バッジ） ＆ 日付 -->
               <div
                 style="font-size: 13px; color: #7a6b5d; font-weight: bold; border-bottom: 1px dashed #d4c5b0; padding-bottom: 8px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;"
               >
-                <span>詠み手：<%= post.author_name.presence || "名無し法師" %></span>
+                <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                  <span>詠み手：<%= post.author_name.presence || "名無し法師" %></span>
+                  <% if post.user.present? && post.user.respond_to?(:despair_rank) %>
+                    <% rank = post.user.despair_rank %>
+                    <span style="
+                      display: inline-flex;
+                      align-items: center;
+                      gap: 2px;
+                      padding: 1px 6px;
+                      background: <%= rank[:bg_rgba] %>;
+                      border: 1px solid <%= rank[:border] %>;
+                      color: <%= rank[:color] %>;
+                      border-radius: 10px;
+                      font-size: 10px;
+                      font-weight: bold;
+                    ">
+                      <%= rank[:icon] %> <%= rank[:title] %>
+                    </span>
+                  <% end %>
+                </div>
                 <span style="font-size: 11px; color: #a09080;"><%= post.created_at.strftime("%Y/%m/%d") %></span>
               </div>
 
@@ -133,14 +152,14 @@
                 </div>
               <% end %>
 
-              <!-- 短歌本文（和風縦書き表示・はみ出し対策済み） -->
+              <!-- 短歌本文（和風縦書き表示・はみ出し＆文字化け対策済み） -->
               <div
                 style="width: 100%; min-height: 220px; display: flex; justify-content: center; align-items: center; margin-bottom: 18px; overflow: hidden;"
               >
                 <div
                   style="writing-mode: vertical-rl; -webkit-writing-mode: vertical-rl; text-orientation: upright; -webkit-text-orientation: upright; font-size: 16px; line-height: 1.8; letter-spacing: 0.15em; color: #1a1008; font-weight: 500; max-height: 220px; max-width: 280px; word-break: break-all; font-family: 'Shippori Mincho', serif; overflow-y: auto;"
                 >
-                  <%= sanitize post.tanka.to_s.gsub(/[  ]+/, "<br>"), tags: %w[br] %>
+                  <%= sanitize post.tanka.to_s.tr(' ', ' ').squish.gsub(' ', '<br>'), tags: %w[br] %>
                 </div>
               </div>
 
