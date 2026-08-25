@@ -28,22 +28,32 @@
       </p>
 
       <%= form_with(model: @post, local: true) do |f| %>
+        <!-- ① 短歌本文 -->
         <div style="margin-bottom: 20px;">
-          <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 14px;">
-            短歌本文
-          </label>
+          <%= f.label :tanka, "短歌本文", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 14px;" %>
           <%= f.text_area :tanka, rows: 3, style: "width: 100%; padding: 12px; border: 1px solid #5a4a3e; border-radius: 8px; background: #080303; color: #e5c158; font-size: 16px; font-weight: bold; font-family: 'Shippori Mincho', serif; box-sizing: border-box; line-height: 1.8;" %>
         </div>
 
+        <!-- ② 🏷️ エラー種別・タグ（選択または自由入力） -->
         <div style="margin-bottom: 20px;">
-          <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 14px;">
-            元となった絶望 / エラーログ
-          </label>
+          <%= f.label :error_category, "🏷️ エラー種別・タグ（選択または自由入力）", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 14px;" %>
+          <%= f.text_field :error_category, list: "category-list", placeholder: "例: SyntaxError, 本番DB事故, 環境構築 など", style: "width: 100%; padding: 12px; border: 1px solid #5a4a3e; border-radius: 8px; background: #080303; color: #f2e8d8; font-size: 14px; box-sizing: border-box;" %>
+          <datalist id="category-list">
+            <% Post::CATEGORIES.each do |cat| %>
+              <option value="<%= cat %>"></option>
+            <% end %>
+          </datalist>
+        </div>
+
+        <!-- ③ 元となった絶望 / エラーログ -->
+        <div style="margin-bottom: 20px;">
+          <%= f.label :error_message, "元となった絶望 / エラーログ", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 14px;" %>
           <%= f.text_area :error_message, rows: 4, style: "width: 100%; padding: 12px; border: 1px solid #5a4a3e; border-radius: 8px; background: #080303; color: #ff79c6; font-size: 13px; font-family: monospace; box-sizing: border-box;" %>
         </div>
 
+        <!-- ④ 送信ボタン -->
         <div style="text-align: center; margin-top: 28px;">
-          <%= f.submit "推敲を完了する ", style: "width: 100%; padding: 14px; background: linear-gradient(135deg, #8c1d1d, #571010); color: #ffffff; font-size: 16px; font-weight: bold; font-family: 'Shippori Mincho', serif; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 15px rgba(140, 29, 29, 0.4);" %>
+          <%= f.submit "推敲を完了する ✨", style: "width: 100%; padding: 14px; background: linear-gradient(135deg, #8c1d1d, #571010); color: #ffffff; font-size: 16px; font-weight: bold; font-family: 'Shippori Mincho', serif; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 15px rgba(140, 29, 29, 0.4);" %>
         </div>
       <% end %>
     </div>

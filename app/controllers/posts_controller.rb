@@ -9,7 +9,17 @@ class PostsController < ApplicationController
   SMALL_KANA = %w[っ ゃ ゅ ょ ぁ ぃ ぅ ぇ ぉ ヮ ヵ ヶ].freeze
 
   def index
-    @posts = Post.order(created_at: :desc)
+    @selected_category = params[:category]
+
+    # 1. カテゴリ指定があれば絞り込み（なければ全件）
+    posts = Post.by_category(@selected_category)
+
+    # 2. ソート順（共感順 / 新着順）の適用
+    if params[:sort] == "likes"
+      @posts = posts.most_liked
+    else
+      @posts = posts.latest
+    end
   end
 
   def show
@@ -114,7 +124,8 @@ class PostsController < ApplicationController
   end
 
   def post_params
-    params.require(:post).permit(:author_name, :error_message, :tanka, :likes_count, :parent_id)
+    # :error_category をストロングパラメーターに追加
+    params.require(:post).permit(:author_name, :error_message, :tanka, :likes_count, :parent_id, :error_category)
   end
 
   def count_mora(kana)
@@ -201,30 +212,5 @@ class PostsController < ApplicationController
   rescue StandardError => e
     Rails.logger.error("OpenAI API Error: #{e.message}")
     "エラー吐き 詠めぬ短歌の 虚しさよ 接続切れの 深き絶望"
-  end
-
-  def validate_tanka_mora(data)
-    expected = [ 5, 7, 5, 7, 7 ]
-    keys = [ "ku1", "ku2", "ku3", "ku4", "ku5" ]
-    errors = []
-
-    keys.each_with_index do |key, idx|
-      phrase_data = data[key]
-      return [ false, "#{key} のデータが存在しません。" ] unless phrase_data && phrase_data["kana"]
-
-      kana = phrase_data["kana"].to_s.gsub(/[[:space:]]/, "")
-      actual_count = count_mora(kana)
-      target_count = expected[idx]
-
-      if (actual_count - target_count).abs > 1
-        errors << "#{key}の読み「#{kana}」は#{actual_count}音です（目標: #{target_count}音）。"
-      end
-    end
-
-    if errors.empty?
-      [ true, nil ]
-    else
-      [ false, errors.join("\n") ]
-    end
   end
 end

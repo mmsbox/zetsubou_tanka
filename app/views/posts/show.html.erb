@@ -118,8 +118,13 @@
           color: #2c221e;
         ">
           
-          <div style="font-size: 13px; color: #7a6b5d; border-bottom: 1px dashed #d4c5b0; padding-bottom: 8px; width: 100%; text-align: center; font-family: 'Shippori Mincho', serif; font-weight: bold;">
-            絶望えらぁ短歌
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #d4c5b0; padding-bottom: 8px; width: 100%; font-family: 'Shippori Mincho', serif; font-weight: bold;">
+            <span style="font-size: 13px; color: #7a6b5d;">絶望えらぁ短歌</span>
+            <% if @post.respond_to?(:error_category) && @post.error_category.present? %>
+              <span style="font-size: 11px; color: #8c1d1d; background: rgba(140, 29, 29, 0.1); border: 1px solid #8c1d1d; padding: 1px 6px; border-radius: 10px;">
+                🏷️ <%= @post.error_category %>
+              </span>
+            <% end %>
           </div>
 
           <!-- 縦書き短歌表示 -->
@@ -191,7 +196,7 @@
     <!-- ★ 完全独立：下部に配置した返歌（アンサー短歌）一覧セクション -->
     <div style="width: 100%; margin-top: 60px; border-top: 1px dashed #5a4a3e; padding-top: 40px; box-sizing: border-box;">
       <h3 style="text-align: center; color: #f2e8d8; font-size: 22px; margin-bottom: 24px; font-family: 'Shippori Mincho', serif;">
-        ✉️ 寄せられた返歌（<%= @replies.count %>首）
+        ✉️ 寄せられた返歌（<%= @replies&.count || 0 %>首）
       </h3>
       
       <% if @replies.present? %>

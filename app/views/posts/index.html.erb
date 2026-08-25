@@ -4,7 +4,7 @@
 >
   <div style="max-width: 900px; margin: 0 auto; position: relative; z-index: 1;">
     <!-- 展覧会タイトル ＆ 説明 -->
-    <div style="text-align: center; margin-bottom: 40px;">
+    <div style="text-align: center; margin-bottom: 30px;">
       <h1
         style="font-size: 28px; color: #f2e8d8; border-bottom: 2px solid #8c1d1d; display: inline-block; padding-bottom: 8px; margin-bottom: 12px; font-weight: 800;"
       >
@@ -14,15 +14,65 @@
         世のエンジニアたちが詠みし 悲痛なる短歌の数々
       </p>
     </div>
+
+    <!-- 🏷️ エラー種別フィルター（タグ絞り込み） -->
+    <div style="
+      margin-bottom: 24px;
+      padding: 16px 20px;
+      background: #1a1512;
+      border: 1px solid #3a2e2b;
+      border-radius: 12px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+    ">
+      <span style="font-size: 13px; color: #a39382; font-weight: bold;">
+        🏷️ 絶望の種類：
+      </span>
+
+      <!-- 「すべて」ボタン -->
+      <%= link_to posts_path(sort: params[:sort]), style: "
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: all 0.2s;
+        #{@selected_category.blank? ? 'background: #ff4d4d; color: #fff; box-shadow: 0 2px 8px rgba(255, 77, 77, 0.4);' : 'background: #2a221d; border: 1px solid #5a4a3e; color: #a39382;'}
+      " do %>
+        すべて
+      <% end %>
+
+      <!-- 各カテゴリボタン -->
+      <% Post::CATEGORIES.each do |cat| %>
+        <%= link_to posts_path(category: cat, sort: params[:sort]), style: "
+          padding: 6px 14px;
+          border-radius: 20px;
+          font-size: 13px;
+          font-weight: bold;
+          text-decoration: none;
+          transition: all 0.2s;
+          #{@selected_category == cat ? 'background: #ff4d4d; color: #fff; box-shadow: 0 2px 8px rgba(255, 77, 77, 0.4);' : 'background: #2a221d; border: 1px solid #5a4a3e; color: #a39382;'}
+        " do %>
+          <%= cat %>
+        <% end %>
+      <% end %>
+    </div>
+
     <!-- ソートタブ（新着順・人気順） -->
     <div
       style="display: flex; justify-content: center; gap: 12px; margin-bottom: 40px;"
     >
-      <%= link_to posts_path(sort: "latest"), style: "padding: 8px 20px; border-radius: 20px; text-decoration: none; font-size: 14px; font-weight: bold; #{params[:sort] != 'likes' ? 'background: #8c1d1d; color: #fff;' : 'background: #2a221d; color: #a39382; border: 1px solid #4a3d35;'}" do %>
+      <%= link_to posts_path(sort: "latest", category: @selected_category), style: "padding: 8px 20px; border-radius: 20px; text-decoration: none; font-size: 14px; font-weight: bold; #{params[:sort] != 'likes' ? 'background: #8c1d1d; color: #fff;' : 'background: #2a221d; color: #a39382; border: 1px solid #4a3d35;'}" do %>
         🌸 新着順
-      <% end %><%= link_to posts_path(sort: "likes"), style: "padding: 8px 20px; border-radius: 20px; text-decoration: none; font-size: 14px; font-weight: bold; #{params[:sort] == 'likes' ? 'background: #8c1d1d; color: #fff;' : 'background: #2a221d; color: #a39382; border: 1px solid #4a3d35;'}" do %>🔥 共感順
+      <% end %>
+      <%= link_to posts_path(sort: "likes", category: @selected_category), style: "padding: 8px 20px; border-radius: 20px; text-decoration: none; font-size: 14px; font-weight: bold; #{params[:sort] == 'likes' ? 'background: #8c1d1d; color: #fff;' : 'background: #2a221d; color: #a39382; border: 1px solid #4a3d35;'}" do %>
+        🔥 共感順
       <% end %>
     </div>
+
     <!-- 短歌ギャラリー領域 -->
     <div class="tanka-gallery-vertical">
       <% if @posts.present? %>
@@ -33,13 +83,23 @@
               class="tanka-card-inner"
               style="background: #faf6ed; border: 2px solid #c8b9a6; border-radius: 12px; padding: 24px 16px; width: 100%; max-width: 300px; box-sizing: border-box; position: relative; color: #2c221e;"
             >
-              <!-- 詠み手（名前） -->
+              <!-- 詠み手（名前） ＆ エラー種別タグ -->
               <div
                 style="font-size: 13px; color: #7a6b5d; font-weight: bold; border-bottom: 1px dashed #d4c5b0; padding-bottom: 8px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;"
               >
                 <span>詠み手：<%= post.author_name.presence || "名無し法師" %></span>
                 <span style="font-size: 11px; color: #a09080;"><%= post.created_at.strftime("%Y/%m/%d") %></span>
               </div>
+
+              <!-- エラータグバッジ（設定されていれば表示） -->
+              <% if post.respond_to?(:error_category) && post.error_category.present? %>
+                <div style="text-align: center; margin-bottom: 12px;">
+                  <span style="display: inline-block; padding: 2px 10px; background: rgba(140, 29, 29, 0.1); border: 1px solid #8c1d1d; color: #8c1d1d; border-radius: 12px; font-size: 11px; font-weight: bold;">
+                    🏷️ <%= post.error_category %>
+                  </span>
+                </div>
+              <% end %>
+
               <!-- 短歌本文（和風縦書き表示・はみ出し対策済み） -->
               <div
                 style="width: 100%; min-height: 220px; display: flex; justify-content: center; align-items: center; margin-bottom: 18px; overflow: hidden;"
@@ -50,6 +110,7 @@
                   <%= sanitize post.tanka.to_s.gsub(/[  ]+/, "<br>"), tags: %w[br] %>
                 </div>
               </div>
+
               <!-- カードフッター（共感ボタン・詳細リンク） -->
               <div
                 style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2d7c7; padding-top: 12px; margin-top: 10px;"
@@ -75,10 +136,11 @@
         <% end %>
       <% else %>
         <div style="text-align: center; padding: 60px 0; color: #a39382;">
-          まだ短歌が詠まれておりません。第一号を詠んでみませんか？
+          該当するカテゴリの絶望短歌はまだ詠まれておりません。
         </div>
       <% end %>
     </div>
+
     <!-- 投稿ボタン -->
     <div style="text-align: center; margin-top: 60px;">
       <%= link_to "自分も短歌を詠む 🔥",
@@ -86,21 +148,22 @@
       onclick: "showLoading('案内中…')",
       style:
         "
-                          display: inline-block;
-                          padding: 14px 36px;
-                          background: linear-gradient(135deg, #8c1d1d 0%, #571010 100%);
-                          color: #fff;
-                          font-size: 16px;
-                          font-weight: bold;
-                          border-radius: 30px;
-                          text-decoration: none;
-                          box-shadow: 0 6px 20px rgba(140, 29, 29, 0.6);
-                          transition: transform 0.2s ease;
-                        " %>
+          display: inline-block;
+          padding: 14px 36px;
+          background: linear-gradient(135deg, #8c1d1d 0%, #571010 100%);
+          color: #fff;
+          font-size: 16px;
+          font-weight: bold;
+          border-radius: 30px;
+          text-decoration: none;
+          box-shadow: 0 6px 20px rgba(140, 29, 29, 0.6);
+          transition: transform 0.2s ease;
+        " %>
     </div>
 
   </div>
 </div>
+
 <!-- CSSスタイル（はみ出しズレを防止した安全設計） -->
 <style>
   .tanka-gallery-vertical {
@@ -154,16 +217,15 @@
     }
   }
 </style>
+
 <!-- JavaScript (共感ボタン) -->
 <script>
   (function() {
     function initGalleryEmpathyButtons() {
-      // HTML側の class="gallery-like-btn" を全て取得
       const empathyBtns = document.querySelectorAll(".gallery-like-btn");
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
       empathyBtns.forEach(btn => {
-        // 重複登録防止
         if (btn.dataset.galleryInitialized) return;
         btn.dataset.galleryInitialized = "true";
 
@@ -171,19 +233,16 @@
           e.preventDefault();
 
           const postId = this.dataset.postId;
-          // class="like-count-ID" の要素を取得
           const countSpan = this.querySelector(`.like-count-${postId}`);
 
           if (!postId || !countSpan) return;
 
-          // アニメーション演出
           this.style.transform = "scale(1.1)";
           this.style.borderColor = "#8c1d1d";
           setTimeout(() => {
             this.style.transform = "scale(1)";
           }, 120);
 
-          // POST リクエスト送信
           fetch(`/posts/${postId}/like`, {
             method: 'POST',
             headers: {
@@ -198,7 +257,6 @@
             return response.json();
           })
           .then(data => {
-            // カウント数を更新
             countSpan.textContent = data.likes_count;
           })
           .catch(err => {
