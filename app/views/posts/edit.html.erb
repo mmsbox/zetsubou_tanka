@@ -36,11 +36,20 @@
 
         <!-- ② 🏷️ エラー種別・タグ（選択または自由入力） -->
         <div style="margin-bottom: 20px;">
-          <%= f.label :error_category, "🏷️ エラー種別・タグ（選択または自由入力）", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 14px;" %>
-          <%= f.text_field :error_category, list: "category-list", placeholder: "例: SyntaxError, 本番DB事故, 環境構築 など", style: "width: 100%; padding: 12px; border: 1px solid #5a4a3e; border-radius: 8px; background: #080303; color: #f2e8d8; font-size: 14px; box-sizing: border-box;" %>
+          <%= f.label :error_category, "🏷️ エラー種別・タグ（RUNTEQ生活・エラー種別・自由入力）", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 14px;" %>
+          <%= f.text_field :error_category, list: "category-list", placeholder: "例: カリキュラム詰まり, Docker環境構築, SyntaxError など", style: "width: 100%; padding: 12px; border: 1px solid #5a4a3e; border-radius: 8px; background: #080303; color: #f2e8d8; font-size: 14px; box-sizing: border-box;" %>
+          
           <datalist id="category-list">
-            <% Post::CATEGORIES.each do |cat| %>
-              <option value="<%= cat %>"></option>
+            <% if defined?(Post::CATEGORY_GROUPS) %>
+              <% Post::CATEGORY_GROUPS.each do |group_name, tags| %>
+                <% tags.each do |cat| %>
+                  <option value="<%= cat %>"><%= group_name %></option>
+                <% end %>
+              <% end %>
+            <% elsif defined?(Post::ALL_CATEGORIES) %>
+              <% Post::ALL_CATEGORIES.each do |cat| %>
+                <option value="<%= cat %>"></option>
+              <% end %>
             <% end %>
           </datalist>
         </div>
