@@ -61,15 +61,20 @@
       <% end %>
     </div>
 
-    <!-- ソートタブ（新着順・人気順） -->
-    <div
-      style="display: flex; justify-content: center; gap: 12px; margin-bottom: 40px;"
-    >
-      <%= link_to posts_path(sort: "latest", category: @selected_category), style: "padding: 8px 20px; border-radius: 20px; text-decoration: none; font-size: 14px; font-weight: bold; #{params[:sort] != 'likes' ? 'background: #8c1d1d; color: #fff;' : 'background: #2a221d; color: #a39382; border: 1px solid #4a3d35;'}" do %>
-        🌸 新着順
-      <% end %>
-      <%= link_to posts_path(sort: "likes", category: @selected_category), style: "padding: 8px 20px; border-radius: 20px; text-decoration: none; font-size: 14px; font-weight: bold; #{params[:sort] == 'likes' ? 'background: #8c1d1d; color: #fff;' : 'background: #2a221d; color: #a39382; border: 1px solid #4a3d35;'}" do %>
-        🔥 共感順
+    <!-- ソートタブ（新着順・今週の共感順） -->
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 40px;">
+      <div style="display: flex; justify-content: center; gap: 12px;">
+        <%= link_to posts_path(sort: "latest", category: @selected_category), style: "padding: 8px 20px; border-radius: 20px; text-decoration: none; font-size: 14px; font-weight: bold; #{params[:sort] != 'likes' ? 'background: #8c1d1d; color: #fff;' : 'background: #2a221d; color: #a39382; border: 1px solid #4a3d35;'}" do %>
+          🌸 新着順
+        <% end %>
+        <%= link_to posts_path(sort: "likes", category: @selected_category), style: "padding: 8px 20px; border-radius: 20px; text-decoration: none; font-size: 14px; font-weight: bold; #{params[:sort] == 'likes' ? 'background: linear-gradient(135deg, #e5c158, #8c1d1d); color: #fff; box-shadow: 0 0 12px rgba(229,193,88,0.5);' : 'background: #2a221d; color: #a39382; border: 1px solid #4a3d35;'}" do %>
+          🏆 今週の共感順（殿堂入り）
+        <% end %>
+      </div>
+      <% if params[:sort] == 'likes' %>
+        <span style="font-size: 12px; color: #e5c158; letter-spacing: 0.05em;">
+          ※ 過去7日間に詠まれた短歌の共感ランキングです（毎週更新）
+        </span>
       <% end %>
     </div>
 
@@ -77,12 +82,33 @@
     <div class="tanka-gallery-vertical">
       <% if @posts.present? %>
         <% @posts.each_with_index do |post, index| %>
+          <% 
+            # 共感順かつTOP3判定
+            is_top_ranking = (params[:sort] == "likes" && index < 3)
+            frame_class = if is_top_ranking
+                            case index
+                            when 0 then "gold-frame"
+                            when 1 then "silver-frame"
+                            when 2 then "bronze-frame"
+                            else ""
+                            end
+                          else
+                            ""
+                          end
+          %>
           <div class="tanka-item-wrapper <%= index.odd? ? 'odd-card' : 'even-card' %>">
             <!-- 和紙風短冊カード -->
             <div
-              class="tanka-card-inner"
+              class="tanka-card-inner <%= frame_class %>"
               style="background: #faf6ed; border: 2px solid #c8b9a6; border-radius: 12px; padding: 24px 16px; width: 100%; max-width: 300px; box-sizing: border-box; position: relative; color: #2c221e;"
             >
+              <!-- 🥇 殿堂入りクラウンバッジ（TOP3のみ表示） -->
+              <% if is_top_ranking %>
+                <div style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: #110e0c; border: 1px solid <%= index == 0 ? '#ffd700' : (index == 1 ? '#c0c0c0' : '#cd7f32') %>; border-radius: 20px; padding: 2px 14px; font-size: 11px; font-weight: bold; color: <%= index == 0 ? '#ffd700' : (index == 1 ? '#e0e0e0' : '#e59866') %>; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.8); z-index: 5;">
+                  <%= index == 0 ? '👑 今週の絶望王（第1位）' : (index == 1 ? '🥈 殿堂入り（第2位）' : '🥉 殿堂入り（第3位）') %>
+                </div>
+              <% end %>
+
               <!-- 詠み手（名前） ＆ エラー種別タグ -->
               <div
                 style="font-size: 13px; color: #7a6b5d; font-weight: bold; border-bottom: 1px dashed #d4c5b0; padding-bottom: 8px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;"
@@ -136,7 +162,11 @@
         <% end %>
       <% else %>
         <div style="text-align: center; padding: 60px 0; color: #a39382;">
-          該当するカテゴリの絶望短歌はまだ詠まれておりません。
+          <% if params[:sort] == 'likes' %>
+            直近1週間に詠まれた絶望短歌はまだありません。第一号を詠んでみませんか？
+          <% else %>
+            該当するカテゴリの絶望短歌はまだ詠まれておりません。
+          <% end %>
         </div>
       <% end %>
     </div>
@@ -164,7 +194,7 @@
   </div>
 </div>
 
-<!-- CSSスタイル（はみ出しズレを防止した安全設計） -->
+<!-- CSSスタイル（はみ出しズレを防止した安全設計 ＆ 殿堂入りフレーム演出） -->
 <style>
   .tanka-gallery-vertical {
     display: flex;
@@ -198,7 +228,7 @@
   }
 
   .tanka-card-inner {
-    transition: transform 0.3s ease, filter 0.3s ease;
+    transition: transform 0.3s ease, filter 0.3s ease, box-shadow 0.3s ease;
     filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8));
   }
 
@@ -206,6 +236,31 @@
     transform: rotate(0deg) scale(1.03) !important;
     filter: drop-shadow(0 0 20px rgba(140, 29, 29, 0.8)) !important;
     z-index: 10;
+  }
+
+  /* 🥇 1位（金）フレーム ＆ 黄金オーラ */
+  .gold-frame {
+    border: 3px solid #ffd700 !important;
+    box-shadow: 0 0 35px rgba(255, 215, 0, 0.8), inset 0 0 15px rgba(255, 215, 0, 0.3) !important;
+    background: radial-gradient(circle at center, #fffdf0 0%, #faf6ed 100%) !important;
+    animation: goldPulse 2.5s ease-in-out infinite alternate;
+  }
+
+  @keyframes goldPulse {
+    0% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+    100% { box-shadow: 0 0 45px rgba(255, 215, 0, 0.95); }
+  }
+
+  /* 🥈 2位（銀）フレーム */
+  .silver-frame {
+    border: 3px solid #c0c0c0 !important;
+    box-shadow: 0 0 25px rgba(192, 192, 192, 0.6) !important;
+  }
+
+  /* 🥉 3位（銅）フレーム */
+  .bronze-frame {
+    border: 3px solid #cd7f32 !important;
+    box-shadow: 0 0 20px rgba(205, 127, 50, 0.5) !important;
   }
 
   @media (max-width: 600px) {
