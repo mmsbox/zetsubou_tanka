@@ -1,6 +1,10 @@
 class Post < ApplicationRecord
   belongs_to :user, optional: true
 
+  # 返歌用の自己参照リレーション
+  belongs_to :parent, class_name: "Post", optional: true
+  has_many :replies, class_name: "Post", foreign_key: "parent_id", dependent: :destroy
+
   validates :error_message, presence: true
 
   # ソート用スコープ

@@ -7,22 +7,25 @@ class PostsController < ApplicationController
   # 小さな「つ・ゃ・ゅ・ょ」などを除外して音数を数える用の定数
   SMALL_KANA = %w[ぁ ぃ ぅ ぇ ぉ ゃ ゅ ょ ゎ ァ ィ ゥ ェ ォ ャ ュ ョ ヮ ッ ｯ].freeze
 
-def index
-  if params[:sort] == "likes"
-    # ★ 共感順（likes_count が nil の場合は 0 扱い）
-    @posts = Post.order(Arel.sql("COALESCE(likes_count, 0) DESC"), created_at: :desc)
-  else
-    # ★ 新着順（デフォルト）
-    @posts = Post.order(created_at: :desc)
+  def index
+    if params[:sort] == "likes"
+      # ★ 共感順（likes_count が nil の場合は 0 扱い）
+      @posts = Post.order(Arel.sql("COALESCE(likes_count, 0) DESC"), created_at: :desc)
+    else
+      # ★ 新着順（デフォルト）
+      @posts = Post.order(created_at: :desc)
+    end
   end
-end
 
   def show
     @post = Post.find(params[:id])
+    @replies = @post.replies.order(created_at: :asc)
+    @reply = Post.new(parent_id: @post.id)
   end
 
   def new
-    @post = Post.new
+    @post = Post.new(parent_id: params[:parent_id])
+    @parent_post = Post.find_by(id: params[:parent_id]) if params[:parent_id].present?
   end
 
   def create
@@ -77,7 +80,7 @@ end
     end
   end
 
-def like
+  def like
     @post = Post.find(params[:id])
 
     # 1. セッションチェック（連打防止）
@@ -101,7 +104,7 @@ def like
   private
 
   def post_params
-    params.require(:post).permit(:author_name, :error_message, :tanka, :likes_count)
+    params.require(:post).permit(:author_name, :error_message, :tanka, :likes_count, :parent_id)
   end
 
   def count_mora(kana)
