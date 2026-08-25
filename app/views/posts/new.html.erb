@@ -1,210 +1,193 @@
-        >
+<!-- 画面全体の最外枠（100%幅でズレない安全設計 ＆ 修正版ダーク背景） -->
+<div
+  style="width: 100%; min-height: calc(100vh - 60px); background: radial-gradient(circle at center, #230d0d 0%, #0d0808 70%, #050303 100%); padding: 40px 16px 80px; box-sizing: border-box; font-family: 'Shippori Mincho', serif; position: relative;"
+>
+  <div style="max-width: 600px; margin: 0 auto; position: relative; z-index: 1;">
+    <!-- タイトルエリア -->
+    <div style="text-align: center; margin-bottom: 24px;">
+      <h1
+        style="font-size: 26px; color: #f2e8d8; border-bottom: 2px solid #8c1d1d; display: inline-block; padding-bottom: 8px; margin-bottom: 12px; font-weight: 800;"
+      >
+        <% if @parent_post.present? %>
+          ✉️ 返歌（アンサー短歌）を詠む
+        <% else %>
+          🔥 絶望の短歌を詠む
+        <% end %>
+      </h1>
+      <p style="font-size: 14px; color: #a39382; margin: 0;">
+        <% if @parent_post.present? %>
+          寄り添う歌や、さらなる絶望の共鳴を言葉に乗せてくだされ
+        <% else %>
+          エラーの悲痛なる叫びを五・七・五・七・七の響きに変換いたします
+        <% end %>
+      </p>
+    </div>
+
+    <!-- 返歌対象の親短歌プレビュー表示 -->
+    <% if @parent_post.present? %>
+      <div
+        style="background: #150f14; border: 1px solid #8c1d72; border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; color: #f2e8d8;"
+      >
+        <div style="font-size: 12px; color: #ff79c6; font-weight: bold; margin-bottom: 6px;">
           【返歌先の短歌】
         </div>
-        <div
-          style="font-size: 15px; font-weight: 600; line-height: 1.6; color: #f0e6d2;"
-        >
+        <div style="font-size: 15px; font-weight: 600; line-height: 1.6; color: #f0e6d2;">
           <%= @parent_post.tanka %>
         </div>
-        <div
-          style="font-size: 12px; color: #a39585; text-align: right; margin-top: 6px;"
-        >
+        <div style="font-size: 12px; color: #a39585; text-align: right; margin-top: 6px;">
           詠み手：<%= @parent_post.author_name.presence || "名無し法師" %>
         </div>
       </div>
     <% end %>
-    <!-- 入力フォームエリア（ダーク和風カード） --> <div
+
+    <!-- 入力フォームエリア（ダーク和風カード） -->
     <div
-      style="width: 100%; min-height: calc(100vh - 60px); background: radial-gradient(circle at center, #230d0d 0%, #0d0808 70%, #050303 100%); padding: 40px 16px 80px; box-sizing: border-box; font-family: 'Shippori Mincho', serif; position: relative;"
+      style="background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; padding: 30px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.7), 0 0 20px rgba(140, 29, 29, 0.3); box-sizing: border-box;"
     >
-      <div style="max-width: 600px; margin: 0 auto; position: relative; z-index: 1;">
-        <!-- タイトルエリア -->
-        <div style="text-align: center; margin-bottom: 24px;">
-          <h1
-            style="font-size: 26px; color: #f2e8d8; border-bottom: 2px solid #8c1d1d; display: inline-block; padding-bottom: 8px; margin-bottom: 12px; font-weight: 800;"
-          >
-            <% if @parent_post.present? %>
-              ✉️ 返歌（アンサー短歌）を詠む
-            <% else %>
-            <% end %>
-          </h1>
-          <p style="font-size: 14px; color: #a39382; margin: 0;">
-            <% if @parent_post.present? %>
-              寄り添う歌や、さらなる絶望の共鳴を言葉に乗せてくだされ
-            <% else %><% end %>
-          </p>
-        </div>
-        <!-- 返歌対象の親短歌プレビュー表示 -->
-        <% if @parent_post.present? %>
-          <div
-            style="background: #150f14; border: 1px solid #8c1d72; border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; color: #f2e8d8;"
-          >
-            <div
-              style="font-size: 12px; color: #ff79c6; font-weight: bold; margin-bottom: 6px;"
-            >
-              【返歌先の短歌】
-            </div>
-            <div
-              style="font-size: 15px; font-weight: 600; line-height: 1.6; color: #f0e6d2;"
-            >
-              <%= @parent_post.tanka %>
-            </div>
-            <div
-              style="font-size: 12px; color: #a39585; text-align: right; margin-top: 6px;"
-            >
-              詠み手：<%= @parent_post.author_name.presence || "名無し法師" %>
-            </div>
-          </div>
-        <% end %>
-        <!-- 入力フォームエリア（ダーク和風カード） -->
+      <%= form_with(model: @post, local: true) do |f| %>
+        <!-- parent_id を送信するための隠しフィールド -->
+        <%= f.hidden_field :parent_id %>
+
+        <!-- 🔮 モード選択（ラジオボタンタブ） -->
         <div
-          style="background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; padding: 30px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.7), 0 0 20px rgba(140, 29, 29, 0.3); box-sizing: border-box;"
+          style="margin-bottom: 24px; display: flex; gap: 12px; background: #0d0808; padding: 6px; border-radius: 30px; border: 1px solid #3a2e2b;"
         >
-          <%= form_with(model: @post, local: true) do |f| %>
-            <!-- parent_id を送信するための隠しフィールド -->
-            <%= f.hidden_field :parent_id %>
-            <!-- 🔮 モード選択（ラジオボタンタブ） -->
-            <div
-              style="margin-bottom: 24px; display: flex; gap: 12px; background: #0d0808; padding: 6px; border-radius: 30px; border: 1px solid #3a2e2b;"
+          <label style="flex: 1; text-align: center; cursor: pointer; margin: 0;">
+            <input
+              type="radio"
+              name="mode"
+              value="ai"
+              id="mode-ai"
+              checked
+              style="display: none;"
             >
-              <label style="flex: 1; text-align: center; cursor: pointer; margin: 0;">
-                <input
-                  type="radio"
-                  name="mode"
-                  value="ai"
-                  id="mode-ai"
-                  checked
-                  style="display: none;"
-                >
-                <div
-                  class="mode-tab-btn active"
-                  id="tab-ai"
-                  style="padding: 10px 14px; border-radius: 20px; font-size: 14px; font-weight: bold; transition: all 0.2s ease;"
-                >
-                  🤖 AIに短歌を詠ませる
-                </div>
-              </label>
-              <label style="flex: 1; text-align: center; cursor: pointer; margin: 0;">
-                <input
-                  type="radio"
-                  name="mode"
-                  value="manual"
-                  id="mode-manual"
-                  style="display: none;"
-                >
-                <div
-                  class="mode-tab-btn"
-                  id="tab-manual"
-                  style="padding: 10px 14px; border-radius: 20px; font-size: 14px; font-weight: bold; transition: all 0.2s ease;"
-                >
-                  ✍️ 自分で自作短歌を詠む
-                </div>
-              </label>
+            <div
+              class="mode-tab-btn active"
+              id="tab-ai"
+              style="padding: 10px 14px; border-radius: 20px; font-size: 14px; font-weight: bold; transition: all 0.2s ease;"
+            >
+              🤖 AIに短歌を詠ませる
             </div>
-            <!-- ① AIモード用：エラーメッセージ（入力必須） -->
-            <div id="ai-input-group" style="margin-bottom: 24px;">
-              <%= f.label :error_message,
+          </label>
+          <label style="flex: 1; text-align: center; cursor: pointer; margin: 0;">
+            <input
+              type="radio"
+              name="mode"
+              value="manual"
+              id="mode-manual"
+              style="display: none;"
+            >
+            <div
+              class="mode-tab-btn"
+              id="tab-manual"
+              style="padding: 10px 14px; border-radius: 20px; font-size: 14px; font-weight: bold; transition: all 0.2s ease;"
+            >
+              ✍️ 自分で自作短歌を詠む
+            </div>
+          </label>
+        </div>
+
+        <!-- ① AIモード用：エラーメッセージ（入力必須） -->
+        <div id="ai-input-group" style="margin-bottom: 24px;">
+          <%= f.label :error_message,
                       (@parent_post.present? ? "返歌に込める絶望 / メッセージ" : "絶望のエラーメッセージ / 悲鳴"),
-                      style:
-                        "display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 15px;" %>
-              <%= f.text_area :error_message,
+                      style: "display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 15px;" %>
+          <%= f.text_area :error_message,
                           id: "ai-error-textarea",
                           rows: 5,
                           required: true,
-                          placeholder:
-                            (
-                              if @parent_post.present?
-                                "例: その気持ち、痛いほどわかる...（共感や返歌の想いを入力）"
-                              else
-                                "例: NoMethodError: undefined method 'user=' for nil:NilClass\n（怒りや悲しみの叫びでも可）"
-                              end
-                            ),
-                          style:
-                            "width: 100%; padding: 12px; border: 1px solid #5a4a3e; border-radius: 8px; background: #0d0808; color: #f2e8d8; font-size: 14px; box-sizing: border-box; font-family: monospace; resize: vertical; line-height: 1.5;" %>
-            </div>
-            <!-- ② 自分で詠むモード用：短歌直接入力 ＋ 任意のエラーログ -->
-            <div id="manual-input-group" style="display: none; margin-bottom: 24px;">
-              <div style="margin-bottom: 20px;">
-                <%= f.label :tanka,
+                          placeholder: (@parent_post.present? ? "例: その気持ち、痛いほどわかる...（共感や返歌の想いを入力）" : "例: NoMethodError: undefined method 'user=' for nil:NilClass\n（怒りや悲しみの叫びでも可）"),
+                          style: "width: 100%; padding: 12px; border: 1px solid #5a4a3e; border-radius: 8px; background: #0d0808; color: #f2e8d8; font-size: 14px; box-sizing: border-box; font-family: monospace; resize: vertical; line-height: 1.5;" %>
+        </div>
+
+        <!-- ② 自分で詠むモード用：短歌直接入力 ＋ 任意のエラーログ -->
+        <div id="manual-input-group" style="display: none; margin-bottom: 24px;">
+          <div style="margin-bottom: 20px;">
+            <%= f.label :tanka,
                         "短歌本文（五・七・五・七・七）",
-                        style:
-                          "display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 15px;" %>
-                <%= f.text_field :tanka,
+                        style: "display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 15px;" %>
+            <%= f.text_field :tanka,
                              id: "manual-tanka-input",
                              placeholder: "例: 立ち上がれ ぬるの呪いよ 永久に消えよ",
-                             style:
-                               "width: 100%; padding: 12px; border: 1px solid #5a4a3e; border-radius: 8px; background: #0d0808; color: #f2e8d8; font-size: 15px; box-sizing: border-box;" %>
-                <span style="font-size: 12px; color: #a39382; margin-top: 4px; display: block;">※スペースで区切ると読みやすくなります</span>
-              </div>
+                             style: "width: 100%; padding: 12px; border: 1px solid #5a4a3e; border-radius: 8px; background: #0d0808; color: #f2e8d8; font-size: 15px; box-sizing: border-box;" %>
+            <span style="font-size: 12px; color: #a39382; margin-top: 4px; display: block;">※スペースで区切ると読みやすくなります</span>
+          </div>
 
-              <div>
-                <%= f.label :error_message_manual,
+          <div>
+            <%= f.label :error_message_manual,
                         "添えるエラーメッセージ / ログ（任意）",
-                        style:
-                          "display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 14px;" %>
-                <textarea
-                  id="manual-error-textarea"
-                  rows="3"
-                  placeholder="カード下部に表示するエラーコード（空欄可）"
-                  style="width: 100%; padding: 10px; border: 1px solid #5a4a3e; border-radius: 8px; background: #0d0808; color: #f2e8d8; font-size: 13px; box-sizing: border-box; font-family: monospace; resize: vertical;"
-                ></textarea>
-              </div>
-            </div>
-            <!-- 詠み手（名前・任意） -->
-            <div style="margin-bottom: 30px;">
-              <%= f.label :author_name,
+                        style: "display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 14px;" %>
+            <textarea
+              id="manual-error-textarea"
+              rows="3"
+              placeholder="カード下部に表示するエラーコード（空欄可）"
+              style="width: 100%; padding: 10px; border: 1px solid #5a4a3e; border-radius: 8px; background: #0d0808; color: #f2e8d8; font-size: 13px; box-sizing: border-box; font-family: monospace; resize: vertical;"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- 🏷️ エラー種別・タグ（選択または自由入力） -->
+        <div style="margin-bottom: 24px;">
+          <%= f.label :error_category, "🏷️ エラー種別・タグ（選択または自由入力）", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 15px;" %>
+          <%= f.text_field :error_category, list: "category-list", placeholder: "例: SyntaxError, 本番DB事故, Docker環境構築 など",
+                           style: "width: 100%; padding: 12px; border: 1px solid #5a4a3e; border-radius: 8px; background: #0d0808; color: #f2e8d8; font-size: 14px; box-sizing: border-box;" %>
+          <datalist id="category-list">
+            <% Post::CATEGORIES.each do |cat| %>
+              <option value="<%= cat %>"></option>
+            <% end %>
+          </datalist>
+        </div>
+
+        <!-- 詠み手（名前・任意） -->
+        <div style="margin-bottom: 30px;">
+          <%= f.label :author_name,
                       "詠み手（お名前 / 雅号）",
-                      style:
-                        "display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 15px;" %>
-              <%= f.text_field :author_name,
+                      style: "display: block; font-weight: bold; margin-bottom: 8px; color: #d4c5b0; font-size: 15px;" %>
+          <%= f.text_field :author_name,
                            placeholder: "例: 迷えるエンジニア（空欄の場合は「名無し法師」）",
-                           style:
-                             "width: 100%; padding: 12px; border: 1px solid #5a4a3e; border-radius: 8px; background: #0d0808; color: #f2e8d8; font-size: 14px; box-sizing: border-box;" %>
-            </div>
-            <!-- 送信ボタン -->
-            <div style="text-align: center;">
-              <%= f.submit (@parent_post.present? ? "返歌を詠む ✉️" : "短歌を詠む 🔥"),
+                           style: "width: 100%; padding: 12px; border: 1px solid #5a4a3e; border-radius: 8px; background: #0d0808; color: #f2e8d8; font-size: 14px; box-sizing: border-box;" %>
+        </div>
+
+        <!-- 送信ボタン -->
+        <div style="text-align: center;">
+          <%= f.submit (@parent_post.present? ? "返歌を詠む ✉️" : "短歌を詠む 🔥"),
                        id: "tanka-submit-btn",
-                       style:
-                         "width: 100%; padding: 14px; background: linear-gradient(135deg, #8c1d1d, #571010); color: #fff; font-size: 16px; font-weight: bold; font-family: 'Shippori Mincho', serif; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 15px rgba(140, 29, 29, 0.6); transition: all 0.2s ease;" %>
-            </div>
-
-          <% end %>
+                       style: "width: 100%; padding: 14px; background: linear-gradient(135deg, #8c1d1d, #571010); color: #fff; font-size: 16px; font-weight: bold; font-family: 'Shippori Mincho', serif; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 15px rgba(140, 29, 29, 0.6); transition: all 0.2s ease;" %>
         </div>
-        <!-- 戻るリンク -->
-        <div style="text-align: center; margin-top: 24px;">
-          <%= link_to "← TOPへもどる",
-          root_path,
-          style:
-            "color: #a39382; text-decoration: none; font-size: 14px; font-weight: bold;" %>
-        </div>
-
-      </div>
+      <% end %>
     </div>
-    <!-- 🎃 短歌生成専用・全画面怨念ローディング画面（画面内に直接配置） -->
-    <div
-      id="post-loading-overlay"
-      style="display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at center, #1a0808 0%, #080303 80%, #000000 100%); z-index: 999999; flex-direction: column; justify-content: center; align-items: center; font-family: 'Shippori Mincho', serif; color: #f0e6d2;"
+
+    <!-- 戻るリンク -->
+    <div style="text-align: center; margin-top: 24px;">
+      <%= link_to "← TOPへもどる",
+                  root_path,
+                  style: "color: #a39382; text-decoration: none; font-size: 14px; font-weight: bold;" %>
+    </div>
+  </div>
+</div>
+
+<!-- 🎃 短歌生成専用・全画面怨念ローディング画面（画面内に直接配置） -->
+<div
+  id="post-loading-overlay"
+  style="display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at center, #1a0808 0%, #080303 80%, #000000 100%); z-index: 999999; flex-direction: column; justify-content: center; align-items: center; font-family: 'Shippori Mincho', serif; color: #f0e6d2;"
+>
+  <!-- 妖しく回転する呪印 -->
+  <div class="post-loading-circle"></div>
+  <!-- 中央のテキストエリア -->
+  <div style="position: relative; z-index: 2; text-align: center; padding: 0 20px;">
+    <p
+      id="post-loading-text"
+      style="font-size: 22px; letter-spacing: 0.2em; color: #f5e6c8; text-shadow: 0 0 12px rgba(140, 29, 29, 0.9), 0 0 20px #8c1d1d; margin-bottom: 16px; min-height: 32px;"
     >
-      <!-- 妖しく回転する呪印 -->
-      <div class="post-loading-circle"></div>
-      <!-- 中央のテキストエリア -->
-      <div
-        style="position: relative; z-index: 2; text-align: center; padding: 0 20px;"
-      >
-        <p
-          id="post-loading-text"
-          style="font-size: 22px; letter-spacing: 0.2em; color: #f5e6c8; text-shadow: 0 0 12px rgba(140, 29, 29, 0.9), 0 0 20px #8c1d1d; margin-bottom: 16px; min-height: 32px;"
-        >
-          絶望の短歌を詠み上げております…
-        </p>
-        <p style="font-size: 13px; color: #887868; letter-spacing: 0.1em;">
-          しばしお待ちくだされ
-        </p>
-      </div>
-    </div>
+      絶望の短歌を詠み上げております…
+    </p>
+    <p style="font-size: 13px; color: #887868; letter-spacing: 0.1em;">
+      しばしお待ちくだされ
+    </p>
+  </div>
+</div>
 
-    <style>
+<style>
   .mode-tab-btn {
     color: #a39382;
     background: transparent;
@@ -231,9 +214,9 @@
     50% { transform: rotate(180deg) scale(1.08); box-shadow: 0 0 35px rgba(179, 36, 36, 0.9); }
     100% { transform: rotate(360deg) scale(1); }
   }
-    </style>
+</style>
 
-    <script>
+<script>
   (function() {
     let loadingInterval = null;
 
@@ -256,11 +239,10 @@
           tabManual.classList.remove("active");
           aiGroup.style.display = "block";
           manualGroup.style.display = "none";
-          
+
           aiTextarea.required = true;
           manualTankaInput.required = false;
 
-          // 手入力用テキストエリアから name 属性を取り除く
           manualErrorTextarea.removeAttribute("name");
           aiTextarea.setAttribute("name", "post[error_message]");
         }
@@ -276,7 +258,6 @@
           aiTextarea.required = false;
           manualTankaInput.required = true;
 
-          // 手入力モード時はエラーログ欄を error_message として送信できるように調整
           aiTextarea.removeAttribute("name");
           manualErrorTextarea.setAttribute("name", "post[error_message]");
         }
@@ -295,7 +276,6 @@
       btn.dataset.loadingBound = "true";
 
       btn.addEventListener("click", function(e) {
-        // 自作短歌モードの時は重いAI生成がないのでローディングは一瞬表示（またはスキップ）
         if (modeAi && !modeAi.checked) {
           overlay.style.display = "flex";
           if (textEl) textEl.textContent = "短歌を記録しております…";
@@ -333,4 +313,4 @@
     document.addEventListener("DOMContentLoaded", initAll);
     document.addEventListener("turbo:load", initAll);
   })();
-    </script>
+</script>

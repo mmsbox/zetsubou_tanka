@@ -15,50 +15,57 @@
       </p>
     </div>
 
-    <!-- 🏷️ エラー種別フィルター（タグ絞り込み） -->
+    <!-- 🏷️ グループ別エラー・タグフィルター -->
     <div style="
-      margin-bottom: 24px;
-      padding: 16px 20px;
+      margin-bottom: 28px;
+      padding: 20px;
       background: #1a1512;
       border: 1px solid #3a2e2b;
       border-radius: 12px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
     ">
-      <span style="font-size: 13px; color: #a39382; font-weight: bold;">
-        🏷️ 絶望の種類：
-      </span>
-
-      <!-- 「すべて」ボタン -->
-      <%= link_to posts_path(sort: params[:sort]), style: "
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: bold;
-        text-decoration: none;
-        transition: all 0.2s;
-        #{@selected_category.blank? ? 'background: #ff4d4d; color: #fff; box-shadow: 0 2px 8px rgba(255, 77, 77, 0.4);' : 'background: #2a221d; border: 1px solid #5a4a3e; color: #a39382;'}
-      " do %>
-        すべて
-      <% end %>
-
-      <!-- 各カテゴリボタン -->
-      <% Post::CATEGORIES.each do |cat| %>
-        <%= link_to posts_path(category: cat, sort: params[:sort]), style: "
-          padding: 6px 14px;
+      <!-- すべてボタン -->
+      <div style="margin-bottom: 16px; text-align: center;">
+        <%= link_to posts_path(sort: params[:sort]), style: "
+          display: inline-block;
+          padding: 6px 18px;
           border-radius: 20px;
           font-size: 13px;
           font-weight: bold;
           text-decoration: none;
           transition: all 0.2s;
-          #{@selected_category == cat ? 'background: #ff4d4d; color: #fff; box-shadow: 0 2px 8px rgba(255, 77, 77, 0.4);' : 'background: #2a221d; border: 1px solid #5a4a3e; color: #a39382;'}
+          #{@selected_category.blank? ? 'background: #ff4d4d; color: #fff; box-shadow: 0 2px 8px rgba(255, 77, 77, 0.4);' : 'background: #2a221d; border: 1px solid #5a4a3e; color: #a39382;'}
         " do %>
-          <%= cat %>
+          ✨ すべての絶望を表示
         <% end %>
-      <% end %>
+      </div>
+
+      <!-- グループごとのタグボタン（RUNTEQ生活・エラー種別等） -->
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <% if defined?(Post::CATEGORY_GROUPS) %>
+          <% Post::CATEGORY_GROUPS.each do |group_name, tags| %>
+            <div>
+              <div style="font-size: 12px; color: #e5c158; font-weight: bold; margin-bottom: 8px;">
+                <%= group_name %>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <% tags.each do |cat| %>
+                  <%= link_to posts_path(category: cat, sort: params[:sort]), style: "
+                    padding: 4px 12px;
+                    border-radius: 16px;
+                    font-size: 12px;
+                    font-weight: bold;
+                    text-decoration: none;
+                    transition: all 0.2s;
+                    #{@selected_category == cat ? 'background: #ff4d4d; color: #fff; box-shadow: 0 2px 6px rgba(255, 77, 77, 0.4);' : 'background: #2a221d; border: 1px solid #4a3d35; color: #d4c5b0;'}
+                  " do %>
+                    <%= cat %>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
     </div>
 
     <!-- ソートタブ（新着順・今週の共感順） -->
@@ -194,7 +201,7 @@
   </div>
 </div>
 
-<!-- CSSスタイル（はみ出しズレを防止した安全設計 ＆ 殿堂入りフレーム演出） -->
+<!-- CSSスタイル -->
 <style>
   .tanka-gallery-vertical {
     display: flex;
