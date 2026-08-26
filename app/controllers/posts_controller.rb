@@ -30,22 +30,26 @@ class PostsController < ApplicationController
     @post = Post.new
   end
 
-  def create
+def create
     @post = Post.new(post_params)
     @post.user = current_user if respond_to?(:current_user) && current_user.present?
 
+    # 🤖 AIモード（短歌が空でエラーメッセージがある場合）
     if @post.tanka.blank? && @post.error_message.present?
       @post.tanka = generate_tanka_from_error(@post.error_message)
+    # ✍️ 自作短歌モード（短歌が入力されていて、エラーメッセージが空の場合の補填）
+    elsif @post.tanka.present? && @post.error_message.blank?
+      @post.error_message = "自作短歌"
     end
 
     if @post.save
       redirect_target = @post.parent.present? ? @post.parent : @post
       redirect_to redirect_target, notice: "短歌が詠まれました。"
     else
+      Rails.logger.error("Post Save Failed: #{@post.errors.full_messages.join(', ')}")
       render :new, status: :unprocessable_entity
     end
   end
-
   def edit
   end
 

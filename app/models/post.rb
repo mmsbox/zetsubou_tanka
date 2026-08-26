@@ -5,7 +5,9 @@ class Post < ApplicationRecord
   belongs_to :parent, class_name: "Post", optional: true
   has_many :replies, class_name: "Post", foreign_key: "parent_id", dependent: :destroy
 
-  validates :error_message, presence: true
+  # 必達チェック：短歌本文かエラーメッセージのどちらかが存在すること
+  validates :tanka, presence: true, if: -> { error_message.blank? }
+  validates :error_message, presence: true, if: -> { tanka.blank? }
 
   # 🏷️ グループ別エラー・タグ定義
   CATEGORY_GROUPS = {
