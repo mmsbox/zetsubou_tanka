@@ -8,18 +8,23 @@ class PostsController < ApplicationController
   OGP_AUTHOR_COLOR = "#a39382".freeze
   SMALL_KANA = %w[っ ゃ ゅ ょ ぁ ぃ ぅ ぇ ぉ ヮ ヵ ヶ].freeze
 
-  def index
+def index
     @selected_category = params[:category]
     @sort_mode = params[:sort]
 
     # 1. カテゴリ指定があれば絞り込み（なければ全件）
     posts = Post.by_category(@selected_category)
 
-    # 2. ソート順の適用（共感順は過去1週間の週間ランキング）
+    # 2. ソート順の適用 ＋ ページネーション（1ページ12件）
     if @sort_mode == "likes"
-      @posts = posts.where("created_at >= ?", 1.week.ago).most_liked
+      @posts = posts.where("created_at >= ?", 1.week.ago)
+                    .most_liked
+                    .page(params[:page])
+                    .per(12)
     else
       @posts = posts.latest
+                    .page(params[:page])
+                    .per(12)
     end
   end
 

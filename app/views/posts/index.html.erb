@@ -186,6 +186,12 @@
             </div>
           </div>
         <% end %>
+
+        <!-- 🌸 ページネーション表示エリア -->
+        <div style="text-align: center; margin-top: 50px; margin-bottom: 20px;">
+          <%= paginate @posts %>
+        </div>
+
       <% else %>
         <div style="text-align: center; padding: 60px 0; color: #a39382;">
           <% if params[:sort] == 'likes' %>
@@ -287,6 +293,41 @@
   .bronze-frame {
     border: 3px solid #cd7f32 !important;
     box-shadow: 0 0 20px rgba(205, 127, 50, 0.5) !important;
+  }
+
+  /* 🌸 ページネーション用デザイン */
+  .pagination {
+    display: inline-flex;
+    gap: 8px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    justify-content: center;
+  }
+
+  .pagination a, .pagination .current, .pagination .gap {
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+    text-decoration: none;
+    border: 1px solid #4a3d35;
+    background: #2a221d;
+    color: #a39382;
+    transition: all 0.2s ease;
+  }
+
+  .pagination a:hover {
+    background: #8c1d1d;
+    color: #fff;
+    border-color: #8c1d1d;
+  }
+
+  .pagination .current {
+    background: #8c1d1d;
+    color: #fff;
+    border-color: #ff4d4d;
+    box-shadow: 0 0 10px rgba(255, 77, 77, 0.4);
   }
 
   @media (max-width: 600px) {
