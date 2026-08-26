@@ -188,12 +188,15 @@
 <!-- 🔥 クソコードお焚き上げモーダル -->
 <div
   id="otakiage-modal"
-  style="display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; background: rgba(5, 2, 2, 0.94); backdrop-filter: blur(8px); z-index: 99999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Shippori Mincho', serif; transition: all 0.5s ease;"
+  style="display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; background: url('/images/otakiage-bg.png') center/cover no-repeat; backdrop-filter: blur(2px); z-index: 99999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Shippori Mincho', serif; transition: all 0.5s ease;"
 >
+  <!-- モーダルの背景を少し暗くしてUIの視認性を高めるオーバーレイ -->
+  <div style="position: absolute; inset: 0; background: rgba(5, 2, 2, 0.4); z-index: 0;"></div>
+
   <!-- 入力エリア -->
   <div
     id="otakiage-input-card"
-    style="background: #140808; border: 2px solid #8c1d1d; border-radius: 16px; width: 100%; max-width: 600px; padding: 32px 24px; box-shadow: 0 0 40px rgba(255, 77, 77, 0.3), inset 0 0 20px rgba(0,0,0,0.9); position: relative; box-sizing: border-box; color: #f2e8d8;"
+    style="background: rgba(20, 8, 8, 0.88); backdrop-filter: blur(10px); border: 2px solid #8c1d1d; border-radius: 16px; width: 100%; max-width: 600px; padding: 32px 24px; box-shadow: 0 0 50px rgba(255, 77, 77, 0.4), inset 0 0 20px rgba(0,0,0,0.9); position: relative; z-index: 1; box-sizing: border-box; color: #f2e8d8;"
   >
     <!-- 閉じるボタン -->
     <button
@@ -222,7 +225,7 @@
         id="otakiage-textarea"
         rows="6"
         placeholder="例: if (isTrue == true) { return true; } else { // なぜかここを通ると動く sleep(1); }"
-        style="width: 100%; padding: 12px; border: 1px solid #5a4a3e; border-radius: 8px; background: #080303; color: #ff79c6; font-size: 13px; font-family: monospace; box-sizing: border-box; resize: vertical; line-height: 1.5;"
+        style="width: 100%; padding: 12px; border: 1px solid #5a4a3e; border-radius: 8px; background: rgba(8, 3, 3, 0.85); color: #ff79c6; font-size: 13px; font-family: monospace; box-sizing: border-box; resize: vertical; line-height: 1.5;"
       ></textarea>
     </div>
 
@@ -236,10 +239,11 @@
       </button>
     </div>
   </div>
+
   <!-- 🌟 お焚き上げ完了後の「ありがたいお言葉」表示領域 -->
   <div
     id="otakiage-result-card"
-    style="display: none; background: #faf6ed url('/images/washi-bg.png') repeat; border: 3px solid #8c1d1d; border-radius: 16px; width: 100%; max-width: 520px; padding: 36px 28px; box-shadow: 0 0 50px rgba(255, 77, 77, 0.6); position: relative; box-sizing: border-box; color: #2c221e; text-align: center;"
+    style="display: none; background: #faf6ed url('/images/washi-bg.png') repeat; border: 3px solid #8c1d1d; border-radius: 16px; width: 100%; max-width: 520px; padding: 36px 28px; box-shadow: 0 0 50px rgba(255, 77, 77, 0.6); position: relative; z-index: 1; box-sizing: border-box; color: #2c221e; text-align: center;"
   >
     <div
       style="font-size: 14px; color: #8c1d1d; font-weight: bold; letter-spacing: 0.2em; margin-bottom: 16px;"
