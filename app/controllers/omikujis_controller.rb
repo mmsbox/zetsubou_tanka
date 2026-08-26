@@ -1,4 +1,5 @@
 class OmikujisController < ApplicationController
+  # 運勢・カラー・確率(weight)・背景スタイルの定義
   RESULTS = [
     { result: "大吉", color: "#d93838", weight: 10, bg_style: "url('/images/omikuji/daikichi.png') center/cover no-repeat" },
     { result: "中吉", color: "#e67e22", weight: 15, bg_style: "url('/images/omikuji/chukichi.png') center/cover no-repeat" },
@@ -25,7 +26,7 @@ class OmikujisController < ApplicationController
     today_key = "omikuji_#{Date.today}"
     cached_data = session[today_key]
 
-    if cached_data.is_a?(Hash)
+    if cached_data.present? && cached_data.respond_to?(:deep_symbolize_keys)
       @fortune = cached_data.deep_symbolize_keys
       @already_drawn = true
     else
@@ -46,7 +47,9 @@ class OmikujisController < ApplicationController
       @already_drawn = false
     end
   rescue StandardError => e
-    Rails.logger.error("Omikuji Show Error: #{e.class} - #{e.message}\n#{e.backtrace&.first(3)&.join("\n")}")
+    Rails.logger.error("Omikuji Show Controller Exception: #{e.class} - #{e.message}\n#{e.backtrace&.first(3)&.join("\n")}")
+
+    # 500エラーを絶対に起こさないための全自動フォールバック処理
     @fortune = {
       result: "大吉",
       color: "#d93838",
@@ -75,6 +78,7 @@ class OmikujisController < ApplicationController
     kana.to_s.chars.reject { |c| SMALL_KANA.include?(c) }.size
   end
 
+  # 音数（モーラ数）の検証メソッド
   def validate_tanka_mora(data)
     return [ false, "データが存在しません" ] unless data.is_a?(Hash)
 
@@ -96,9 +100,17 @@ class OmikujisController < ApplicationController
     end
 
     [ errors.empty?, errors.join("\n") ]
+  rescue StandardError => e
+    [ false, "モーラ数検証中の例外: #{e.message}" ]
   end
 
+  # AI短歌生成メソッド
   def generate_ai_tanka(theme)
+    # APIキーが空の場合は即座にデフォルト短歌を返却
+    if ENV["OPENAI_API_KEY"].blank?
+      return "消えたコード 二度と戻らぬ 黄昏に 静かに閉じる エディタの画面"
+    end
+
     client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
     feedback = nil
 
