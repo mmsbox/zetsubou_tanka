@@ -46,8 +46,7 @@ class OmikujisController < ApplicationController
       @already_drawn = false
     end
   rescue StandardError => e
-    Rails.logger.error("Omikuji Show Controller Error: #{e.class} - #{e.message}\n#{e.backtrace&.first(3)&.join("\n")}")
-    # 500エラー防止用の完全自動フォールバック
+    Rails.logger.error("Omikuji Show Error: #{e.class} - #{e.message}\n#{e.backtrace&.first(3)&.join("\n")}")
     @fortune = {
       result: "大吉",
       color: "#d93838",
