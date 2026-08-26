@@ -15,56 +15,80 @@
       </p>
     </div>
 
-    <!-- 🏷️ グループ別エラー・タグフィルター -->
-    <div style="
-      margin-bottom: 28px;
-      padding: 20px;
-      background: #1a1512;
-      border: 1px solid #3a2e2b;
-      border-radius: 12px;
-    ">
-      <!-- すべてボタン -->
-      <div style="margin-bottom: 16px; text-align: center;">
-        <%= link_to posts_path(sort: params[:sort]), style: "
-          display: inline-block;
-          padding: 6px 18px;
-          border-radius: 20px;
-          font-size: 13px;
+    <!-- 🏷️ グループ別エラー・タグフィルター（ニュルッとトグル開閉） -->
+    <div 
+      class="category-toggle-box <%= 'is-active' if @selected_category.present? %>"
+      style="margin-bottom: 28px; background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; overflow: hidden;"
+    >
+      <!-- トグルヘッダー（クリックで開閉） -->
+      <div 
+        class="category-toggle-header"
+        onclick="toggleCategoryFilter()"
+        style="
+          padding: 14px 20px;
+          font-size: 14px;
           font-weight: bold;
-          text-decoration: none;
-          transition: all 0.2s;
-          #{@selected_category.blank? ? 'background: #ff4d4d; color: #fff; box-shadow: 0 2px 8px rgba(255, 77, 77, 0.4);' : 'background: #2a221d; border: 1px solid #5a4a3e; color: #a39382;'}
-        " do %>
-          ✨ すべての絶望を表示
-        <% end %>
+          color: #e5c158;
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          user-select: none;
+          background: #231b17;
+          transition: background 0.2s ease;
+        "
+      >
+        <span>🏷️ 絶望カテゴリで絞り込む <%= "(選択中: #{@selected_category})" if @selected_category.present? %></span>
+        <span class="toggle-arrow" style="font-size: 12px; color: #a39382; transition: transform 0.3s ease;">🔽 絞り込みを開く</span>
       </div>
 
-      <!-- グループごとのタグボタン（RUNTEQ生活・エラー種別等） -->
-      <div style="display: flex; flex-direction: column; gap: 14px;">
-        <% if defined?(Post::CATEGORY_GROUPS) %>
-          <% Post::CATEGORY_GROUPS.each do |group_name, tags| %>
-            <div>
-              <div style="font-size: 12px; color: #e5c158; font-weight: bold; margin-bottom: 8px;">
-                <%= group_name %>
-              </div>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <% tags.each do |cat| %>
-                  <%= link_to posts_path(category: cat, sort: params[:sort]), style: "
-                    padding: 4px 12px;
-                    border-radius: 16px;
-                    font-size: 12px;
-                    font-weight: bold;
-                    text-decoration: none;
-                    transition: all 0.2s;
-                    #{@selected_category == cat ? 'background: #ff4d4d; color: #fff; box-shadow: 0 2px 6px rgba(255, 77, 77, 0.4);' : 'background: #2a221d; border: 1px solid #4a3d35; color: #d4c5b0;'}
-                  " do %>
-                    <%= cat %>
-                  <% end %>
-                <% end %>
-              </div>
-            </div>
-          <% end %>
-        <% end %>
+      <!-- トグルコンテンツ（アニメーション領域） -->
+      <div class="category-toggle-body">
+        <div style="padding: 20px; border-top: 1px solid #3a2e2b;">
+          <!-- すべてボタン -->
+          <div style="margin-bottom: 16px; text-align: center;">
+            <%= link_to posts_path(sort: params[:sort]), style: "
+              display: inline-block;
+              padding: 6px 18px;
+              border-radius: 20px;
+              font-size: 13px;
+              font-weight: bold;
+              text-decoration: none;
+              transition: all 0.2s;
+              #{@selected_category.blank? ? 'background: #ff4d4d; color: #fff; box-shadow: 0 2px 8px rgba(255, 77, 77, 0.4);' : 'background: #2a221d; border: 1px solid #5a4a3e; color: #a39382;'}
+            " do %>
+              ✨ すべての絶望を表示
+            <% end %>
+          </div>
+
+          <!-- グループごとのタグボタン（RUNTEQ生活・エラー種別等） -->
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <% if defined?(Post::CATEGORY_GROUPS) %>
+              <% Post::CATEGORY_GROUPS.each do |group_name, tags| %>
+                <div>
+                  <div style="font-size: 12px; color: #e5c158; font-weight: bold; margin-bottom: 8px;">
+                    <%= group_name %>
+                  </div>
+                  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <% tags.each do |cat| %>
+                      <%= link_to posts_path(category: cat, sort: params[:sort]), style: "
+                        padding: 4px 12px;
+                        border-radius: 16px;
+                        font-size: 12px;
+                        font-weight: bold;
+                        text-decoration: none;
+                        transition: all 0.2s;
+                        #{@selected_category == cat ? 'background: #ff4d4d; color: #fff; box-shadow: 0 2px 6px rgba(255, 77, 77, 0.4);' : 'background: #2a221d; border: 1px solid #4a3d35; color: #d4c5b0;'}
+                      " do %>
+                        <%= cat %>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -330,6 +354,23 @@
     box-shadow: 0 0 10px rgba(255, 77, 77, 0.4);
   }
 
+  /* 🏷️ ニュルッと伸び縮みするトグルCSS（height transition） */
+  .category-toggle-header:hover {
+    background: #2d231e !important;
+  }
+  .category-toggle-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  /* アクティブ（開いた状態） */
+  .category-toggle-box.is-active .category-toggle-body {
+    max-height: 800px;
+  }
+  .category-toggle-box.is-active .toggle-arrow {
+    transform: rotate(180deg);
+  }
+
   @media (max-width: 600px) {
     .odd-card, .even-card {
       justify-content: center;
@@ -340,8 +381,15 @@
   }
 </style>
 
-<!-- JavaScript (共感ボタン) -->
+<!-- JavaScript (トグル＆共感ボタン) -->
 <script>
+  function toggleCategoryFilter() {
+    const box = document.querySelector('.category-toggle-box');
+    if (box) {
+      box.classList.toggle('is-active');
+    }
+  }
+
   (function() {
     function initGalleryEmpathyButtons() {
       const empathyBtns = document.querySelectorAll(".gallery-like-btn");
