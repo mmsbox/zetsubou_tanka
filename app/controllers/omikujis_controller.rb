@@ -1,33 +1,42 @@
 class OmikujisController < ApplicationController
-  # 運勢・カラー・確率(weight)・背景スタイルの定義
   RESULTS = [
-    { result: "大吉", color: "#d93838", weight: 10, bg_style: "url('/images/omikuji/daikichi.png') center/cover no-repeat" },
-    { result: "中吉", color: "#e67e22", weight: 15, bg_style: "url('/images/omikuji/chukichi.png') center/cover no-repeat" },
-    { result: "吉",   color: "#27ae60", weight: 20, bg_style: "url('/images/omikuji/kichi.png') center/cover no-repeat" },
-    { result: "小吉", color: "#2980b9", weight: 20, bg_style: "url('/images/omikuji/shokichi.png') center/cover no-repeat" },
-    { result: "大凶", color: "#8c1d1d", weight: 15, bg_style: "url('/images/omikuji/daikyou.png') center/cover no-repeat" },
-    { result: "極凶", color: "#5b1d8c", weight: 10, bg_style: "url('/images/omikuji/gokukyou.png') center/cover no-repeat" },
-    { result: "崩壊", color: "#8c531d", weight: 5,  bg_style: "url('/images/omikuji/houkai.png') center/cover no-repeat" },
-    { result: "終焉", color: "#1d6f8c", weight: 3,  bg_style: "url('/images/omikuji/syuuen.png') center/cover no-repeat" },
-    { result: "無",   color: "#ffffff", weight: 2,  bg_style: "url('/images/omikuji/mu.png') center/cover no-repeat" }
+    { id: 0, result: "大吉", color: "#d93838", weight: 10, bg_style: "url('/images/omikuji/daikichi.png') center/cover no-repeat" },
+    { id: 1, result: "中吉", color: "#e67e22", weight: 15, bg_style: "url('/images/omikuji/chukichi.png') center/cover no-repeat" },
+    { id: 2, result: "吉",   color: "#27ae60", weight: 20, bg_style: "url('/images/omikuji/kichi.png') center/cover no-repeat" },
+    { id: 3, result: "小吉", color: "#2980b9", weight: 20, bg_style: "url('/images/omikuji/shokichi.png') center/cover no-repeat" },
+    { id: 4, result: "大凶", color: "#8c1d1d", weight: 15, bg_style: "url('/images/omikuji/daikyou.png') center/cover no-repeat" },
+    { id: 5, result: "極凶", color: "#5b1d8c", weight: 10, bg_style: "url('/images/omikuji/gokukyou.png') center/cover no-repeat" },
+    { id: 6, result: "崩壊", color: "#8c531d", weight: 5,  bg_style: "url('/images/omikuji/houkai.png') center/cover no-repeat" },
+    { id: 7, result: "終焉", color: "#1d6f8c", weight: 3,  bg_style: "url('/images/omikuji/syuuen.png') center/cover no-repeat" },
+    { id: 8, result: "無",   color: "#ffffff", weight: 2,  bg_style: "url('/images/omikuji/mu.png') center/cover no-repeat" }
   ].freeze
 
   THEMES = [
-    { theme: "git push -f を誤って叩いてリポが吹き飛んだ絶望", advice: "本日は丁寧なコミットとバックアップを心がけましょう。" },
-    { theme: "ローカルでは動いたのに本番で500エラーが出る絶望", advice: "環境変数とDockerコンテナの再起動を確認するべし。" },
-    { theme: "依存ライブラリのバージョン競合でビルドが通らない絶望", advice: "安易な bundle update は控え、ロックファイルを慈しみましょう。" },
-    { theme: "タイポ一つを探すためだけに3時間が消えた虚しさ", advice: "目を休め、エラーログをAIにそのまま投げるのが吉。" },
-    { theme: "ログに何も出ず原因不明のまま静まり返る夜の絶望", advice: "サーバーが起動しているか、ポート番号を今一度見直すべし。" }
+    { id: 0, theme: "git push -f を誤って叩いてリポが吹き飛んだ絶望", advice: "本日は丁寧なコミットとバックアップを心がけましょう。" },
+    { id: 1, theme: "ローカルでは動いたのに本番で500エラーが出る絶望", advice: "環境変数とDockerコンテナの再起動を確認するべし。" },
+    { id: 2, theme: "依存ライブラリのバージョン競合でビルドが通らない絶望", advice: "安易な bundle update は控え、ロックファイルを慈しみましょう。" },
+    { id: 3, theme: "タイポ一つを探すためだけに3時間が消えた虚しさ", advice: "目を休め、エラーログをAIにそのまま投げるのが吉。" },
+    { id: 4, theme: "ログに何も出ず原因不明のまま静まり返る夜の絶望", advice: "サーバーが起動しているか、ポート番号を今一度見直すべし。" }
   ].freeze
 
   SMALL_KANA = %w[ぁ ぃ ぅ ぇ ぉ ゃ ゅ ょ ァ ィ ゥ ェ ォ ャ ュ ョ].freeze
 
   def show
     today_key = "omikuji_#{Date.today}"
-    cached_data = session[today_key]
+    cached_session = session[today_key]
 
-    if cached_data.present? && cached_data.respond_to?(:deep_symbolize_keys)
-      @fortune = cached_data.deep_symbolize_keys
+    if cached_session.is_a?(Hash) && cached_session["result_id"].present?
+      # 既に引いている場合は保存されたIDから再構築（セッションサイズを軽量化）
+      result_id = cached_session["result_id"].to_i
+      selected_result = RESULTS.find { |r| r[:id] == result_id } || RESULTS.first
+
+      @fortune = {
+        result: selected_result[:result],
+        color: selected_result[:color],
+        bg_style: selected_result[:bg_style],
+        tanka: cached_session["tanka"] || "消えたコード 二度と戻らぬ 黄昏に 静かに閉じる エディタの画面",
+        advice: cached_session["advice"] || "本日は丁寧なコミットを心がけましょう。"
+      }
       @already_drawn = true
     else
       selected_result = draw_weighted_result(RESULTS)
@@ -43,13 +52,17 @@ class OmikujisController < ApplicationController
         advice: selected_theme[:advice]
       }
 
-      session[today_key] = @fortune
+      # 💡 セッション容量オーバー防止：必要最小限のデータのみ保存
+      session[today_key] = {
+        "result_id" => selected_result[:id],
+        "tanka" => tanka,
+        "advice" => selected_theme[:advice]
+      }
       @already_drawn = false
     end
   rescue StandardError => e
-    Rails.logger.error("Omikuji Show Controller Exception: #{e.class} - #{e.message}\n#{e.backtrace&.first(3)&.join("\n")}")
+    Rails.logger.error("Omikuji Show Exception: #{e.class} - #{e.message}\n#{e.backtrace&.first(3)&.join("\n")}")
 
-    # 500エラーを絶対に起こさないための全自動フォールバック処理
     @fortune = {
       result: "大吉",
       color: "#d93838",
@@ -78,7 +91,6 @@ class OmikujisController < ApplicationController
     kana.to_s.chars.reject { |c| SMALL_KANA.include?(c) }.size
   end
 
-  # 音数（モーラ数）の検証メソッド
   def validate_tanka_mora(data)
     return [ false, "データが存在しません" ] unless data.is_a?(Hash)
 
@@ -104,9 +116,7 @@ class OmikujisController < ApplicationController
     [ false, "モーラ数検証中の例外: #{e.message}" ]
   end
 
-  # AI短歌生成メソッド
   def generate_ai_tanka(theme)
-    # APIキーが空の場合は即座にデフォルト短歌を返却
     if ENV["OPENAI_API_KEY"].blank?
       return "消えたコード 二度と戻らぬ 黄昏に 静かに閉じる エディタの画面"
     end
