@@ -14,34 +14,24 @@
         世のエンジニアたちが詠みし 悲痛なる短歌の数々
       </p>
     </div>
-
     <!-- 🏷️ グループ別エラー・タグフィルター（ニュルッとトグル開閉） -->
-    <div 
+    <div
       class="category-toggle-box <%= 'is-active' if @selected_category.present? %>"
       style="margin-bottom: 28px; background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; overflow: hidden;"
     >
       <!-- トグルヘッダー（クリックで開閉） -->
-      <div 
+      <div
         class="category-toggle-header"
         onclick="toggleCategoryFilter()"
-        style="
-          padding: 14px 20px;
-          font-size: 14px;
-          font-weight: bold;
-          color: #e5c158;
-          cursor: pointer;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          user-select: none;
-          background: #231b17;
-          transition: background 0.2s ease;
-        "
+        style="padding: 14px 20px; font-size: 14px; font-weight: bold; color: #e5c158; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; background: #231b17; transition: background 0.2s ease;"
       >
-        <span>🏷️ 絶望カテゴリで絞り込む <%= "(選択中: #{@selected_category})" if @selected_category.present? %></span>
-        <span class="toggle-arrow" style="font-size: 12px; color: #a39382; transition: transform 0.3s ease;">🔽 絞り込みを開く</span>
+        <span>🏷️ 絶望カテゴリで絞り込む
+          <%= "(選択中: #{@selected_category})" if @selected_category.present? %></span>
+        <span
+          class="toggle-arrow"
+          style="font-size: 12px; color: #a39382; transition: transform 0.3s ease;"
+        >🔽 絞り込みを開く</span>
       </div>
-
       <!-- トグルコンテンツ（アニメーション領域） -->
       <div class="category-toggle-body">
         <div style="padding: 20px; border-top: 1px solid #3a2e2b;">
@@ -60,13 +50,14 @@
               ✨ すべての絶望を表示
             <% end %>
           </div>
-
           <!-- グループごとのタグボタン（RUNTEQ生活・エラー種別等） -->
           <div style="display: flex; flex-direction: column; gap: 14px;">
             <% if defined?(Post::CATEGORY_GROUPS) %>
               <% Post::CATEGORY_GROUPS.each do |group_name, tags| %>
                 <div>
-                  <div style="font-size: 12px; color: #e5c158; font-weight: bold; margin-bottom: 8px;">
+                  <div
+                    style="font-size: 12px; color: #e5c158; font-weight: bold; margin-bottom: 8px;"
+                  >
                     <%= group_name %>
                   </div>
                   <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -91,14 +82,14 @@
         </div>
       </div>
     </div>
-
     <!-- ソートタブ（新着順・今週の共感順） -->
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 40px;">
+    <div
+      style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 40px;"
+    >
       <div style="display: flex; justify-content: center; gap: 12px;">
         <%= link_to posts_path(sort: "latest", category: @selected_category), style: "padding: 8px 20px; border-radius: 20px; text-decoration: none; font-size: 14px; font-weight: bold; #{params[:sort] != 'likes' ? 'background: #8c1d1d; color: #fff;' : 'background: #2a221d; color: #a39382; border: 1px solid #4a3d35;'}" do %>
           🌸 新着順
-        <% end %>
-        <%= link_to posts_path(sort: "likes", category: @selected_category), style: "padding: 8px 20px; border-radius: 20px; text-decoration: none; font-size: 14px; font-weight: bold; #{params[:sort] == 'likes' ? 'background: linear-gradient(135deg, #e5c158, #8c1d1d); color: #fff; box-shadow: 0 0 12px rgba(229,193,88,0.5);' : 'background: #2a221d; color: #a39382; border: 1px solid #4a3d35;'}" do %>
+        <% end %><%= link_to posts_path(sort: "likes", category: @selected_category), style: "padding: 8px 20px; border-radius: 20px; text-decoration: none; font-size: 14px; font-weight: bold; #{params[:sort] == 'likes' ? 'background: linear-gradient(135deg, #e5c158, #8c1d1d); color: #fff; box-shadow: 0 0 12px rgba(229,193,88,0.5);' : 'background: #2a221d; color: #a39382; border: 1px solid #4a3d35;'}" do %>
           🏆 今週の共感順（殿堂入り）
         <% end %>
       </div>
@@ -108,25 +99,27 @@
         </span>
       <% end %>
     </div>
-
     <!-- 短歌ギャラリー領域 -->
     <div class="tanka-gallery-vertical">
       <% if @posts.present? %>
         <% @posts.each_with_index do |post, index| %>
-          <% 
-            # 共感順かつTOP3判定
-            is_top_ranking = (params[:sort] == "likes" && index < 3)
-            frame_class = if is_top_ranking
-                            case index
-                            when 0 then "gold-frame"
-                            when 1 then "silver-frame"
-                            when 2 then "bronze-frame"
-                            else ""
-                            end
-                          else
-                            ""
-                          end
-          %>
+          <%# 共感順かつTOP3判定
+          is_top_ranking = (params[:sort] == "likes" && index < 3)
+          frame_class =
+            if is_top_ranking
+              case index
+              when 0
+                "gold-frame"
+              when 1
+                "silver-frame"
+              when 2
+                "bronze-frame"
+              else
+                ""
+              end
+            else
+              ""
+            end %>
           <div class="tanka-item-wrapper <%= index.odd? ? 'odd-card' : 'even-card' %>">
             <!-- 和紙風短冊カード -->
             <div
@@ -135,47 +128,53 @@
             >
               <!-- 🥇 殿堂入りクラウンバッジ（TOP3のみ表示） -->
               <% if is_top_ranking %>
-                <div style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: #110e0c; border: 1px solid <%= index == 0 ? '#ffd700' : (index == 1 ? '#c0c0c0' : '#cd7f32') %>; border-radius: 20px; padding: 2px 14px; font-size: 11px; font-weight: bold; color: <%= index == 0 ? '#ffd700' : (index == 1 ? '#e0e0e0' : '#e59866') %>; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.8); z-index: 5;">
-                  <%= index == 0 ? '👑 今週の絶望王（第1位）' : (index == 1 ? '🥈 殿堂入り（第2位）' : '🥉 殿堂入り（第3位）') %>
+                <div
+                  style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: #110e0c; border: 1px solid <%= index == 0 ? '#ffd700' : (index == 1 ? '#c0c0c0' : '#cd7f32') %>; border-radius: 20px; padding: 2px 14px; font-size: 11px; font-weight: bold; color: <%= index == 0 ? '#ffd700' : (index == 1 ? '#e0e0e0' : '#e59866') %>; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.8); z-index: 5;"
+                >
+                  <%= index == 0 ? "👑 今週の絶望王（第1位）" : (index == 1 ? "🥈 殿堂入り（第2位）" : "🥉 殿堂入り（第3位）") %>
                 </div>
               <% end %>
-
               <!-- 詠み手（名前・称号バッジ） ＆ 日付 -->
               <div
-                style="font-size: 13px; color: #7a6b5d; font-weight: bold; border-bottom: 1px dashed #d4c5b0; padding-bottom: 8px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;"
+                style="font-size: 13px; color: #7a6b5d; font-weight: bold; border-bottom: 1px dashed #d4c5b0; padding-bottom: 8px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;"
               >
                 <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
                   <span>詠み手：<%= post.author_name.presence || "名無し法師" %></span>
                   <% if post.user.present? && post.user.respond_to?(:despair_rank) %>
                     <% rank = post.user.despair_rank %>
-                    <span style="
-                      display: inline-flex;
-                      align-items: center;
-                      gap: 2px;
-                      padding: 1px 6px;
-                      background: <%= rank[:bg_rgba] %>;
-                      border: 1px solid <%= rank[:border] %>;
-                      color: <%= rank[:color] %>;
-                      border-radius: 10px;
-                      font-size: 10px;
-                      font-weight: bold;
-                    ">
-                      <%= rank[:icon] %> <%= rank[:title] %>
+                    <span
+                      style="display: inline-flex; align-items: center; gap: 2px; padding: 1px 6px; background: <%= rank[:bg_rgba] %>; border: 1px solid <%= rank[:border] %>; color: <%= rank[:color] %>; border-radius: 10px; font-size: 10px; font-weight: bold;"
+                    >
+                      <%= rank[:icon] %>
+                      <%= rank[:title] %>
                     </span>
                   <% end %>
                 </div>
                 <span style="font-size: 11px; color: #a09080;"><%= post.created_at.strftime("%Y/%m/%d") %></span>
               </div>
-
-              <!-- エラータグバッジ（設定されていれば表示） -->
-              <% if post.respond_to?(:error_category) && post.error_category.present? %>
-                <div style="text-align: center; margin-bottom: 12px;">
-                  <span style="display: inline-block; padding: 2px 10px; background: rgba(140, 29, 29, 0.1); border: 1px solid #8c1d1d; color: #8c1d1d; border-radius: 12px; font-size: 11px; font-weight: bold;">
-                    🏷️ <%= post.error_category %>
+              <!-- 🏷️ エラータグ ＆ 📿 同調バッジ（設定されていれば表示） -->
+              <div
+                style="display: flex; justify-content: center; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 12px;"
+              >
+                <% if post.respond_to?(:error_category) && post.error_category.present? %>
+                  <span
+                    style="display: inline-block; padding: 2px 8px; background: rgba(140, 29, 29, 0.1); border: 1px solid #8c1d1d; color: #8c1d1d; border-radius: 12px; font-size: 11px; font-weight: bold;"
+                  >
+                    🏷️
+                    <%= post.error_category %>
                   </span>
-                </div>
-              <% end %>
+                <% end %>
 
+                <% if post.respond_to?(:same_error_count) && post.same_error_count.to_i > 1 %>
+                  <span
+                    style="display: inline-block; padding: 2px 8px; background: rgba(255, 107, 107, 0.15); border: 1px solid #ff6b6b; color: #d63031; border-radius: 12px; font-size: 11px; font-weight: bold;"
+                    title="同じエラー型を詠んだ法師の人数"
+                  >
+                    📿 同調
+                    <%= post.same_error_count %>人
+                  </span>
+                <% end %>
+              </div>
               <!-- 短歌本文（和風縦書き表示・はみ出し＆文字化け対策済み） -->
               <div
                 style="width: 100%; min-height: 220px; display: flex; justify-content: center; align-items: center; margin-bottom: 18px; overflow: hidden;"
@@ -183,10 +182,9 @@
                 <div
                   style="writing-mode: vertical-rl; -webkit-writing-mode: vertical-rl; text-orientation: upright; -webkit-text-orientation: upright; font-size: 16px; line-height: 1.8; letter-spacing: 0.15em; color: #1a1008; font-weight: 500; max-height: 220px; max-width: 280px; word-break: break-all; font-family: 'Shippori Mincho', serif; overflow-y: auto;"
                 >
-                  <%= sanitize post.tanka.to_s.tr(' ', ' ').squish.gsub(' ', '<br>'), tags: %w[br] %>
+                  <%= sanitize post.tanka.to_s.tr(" ", " ").squish.gsub(" ", "<br>"), tags: %w[br] %>
                 </div>
               </div>
-
               <!-- カードフッター（共感ボタン・詳細リンク） -->
               <div
                 style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2d7c7; padding-top: 12px; margin-top: 10px;"
@@ -210,7 +208,6 @@
             </div>
           </div>
         <% end %>
-
         <!-- 🌸 ページネーション表示エリア -->
         <div style="text-align: center; margin-top: 50px; margin-bottom: 20px;">
           <%= paginate @posts %>
@@ -220,13 +217,10 @@
         <div style="text-align: center; padding: 60px 0; color: #a39382;">
           <% if params[:sort] == 'likes' %>
             直近1週間に詠まれた絶望短歌はまだありません。第一号を詠んでみませんか？
-          <% else %>
-            該当するカテゴリの絶望短歌はまだ詠まれておりません。
-          <% end %>
+          <% else %><% end %>
         </div>
       <% end %>
     </div>
-
     <!-- 投稿ボタン -->
     <div style="text-align: center; margin-top: 60px;">
       <%= link_to "自分も短歌を詠む 🔥",
@@ -234,22 +228,21 @@
       onclick: "showLoading('案内中…')",
       style:
         "
-          display: inline-block;
-          padding: 14px 36px;
-          background: linear-gradient(135deg, #8c1d1d 0%, #571010 100%);
-          color: #fff;
-          font-size: 16px;
-          font-weight: bold;
-          border-radius: 30px;
-          text-decoration: none;
-          box-shadow: 0 6px 20px rgba(140, 29, 29, 0.6);
-          transition: transform 0.2s ease;
-        " %>
+                display: inline-block;
+                padding: 14px 36px;
+                background: linear-gradient(135deg, #8c1d1d 0%, #571010 100%);
+                color: #fff;
+                font-size: 16px;
+                font-weight: bold;
+                border-radius: 30px;
+                text-decoration: none;
+                box-shadow: 0 6px 20px rgba(140, 29, 29, 0.6);
+                transition: transform 0.2s ease;
+              " %>
     </div>
 
   </div>
 </div>
-
 <!-- CSSスタイル -->
 <style>
   .tanka-gallery-vertical {
@@ -380,7 +373,6 @@
     }
   }
 </style>
-
 <!-- JavaScript (トグル＆共感ボタン) -->
 <script>
   function toggleCategoryFilter() {
