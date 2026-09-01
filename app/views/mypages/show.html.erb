@@ -1,61 +1,53 @@
 <!-- 最外枠（100%幅＆ダーク背景で崩れ・ズレを完全防止） -->
-<div style="
-  width: 100%;
-  min-height: calc(100vh - 60px);
-  background: #0d0808;
-  padding: 40px 16px 80px;
-  box-sizing: border-box;
-  font-family: 'Shippori Mincho', serif;
-  color: #f2e8d8;
-  position: relative;
-">
+<div
+  style="width: 100%; min-height: calc(100vh - 60px); background: #0d0808; padding: 40px 16px 80px; box-sizing: border-box; font-family: 'Shippori Mincho', serif; color: #f2e8d8; position: relative;"
+>
   <div style="max-width: 800px; margin: 0 auto; position: relative; z-index: 1;">
-
     <!-- タイトルヘッダー ＆ 各種アクションボタン -->
-    <div style="margin-bottom: 24px; border-bottom: 1px solid #3a2e2b; padding-bottom: 20px;">
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+    <div
+      style="margin-bottom: 24px; border-bottom: 1px solid #3a2e2b; padding-bottom: 20px;"
+    >
+      <div
+        style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;"
+      >
         <div>
           <!-- ⛩️ 絶望カルテ ＆ 🏅 称号バッジ -->
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
-            <span style="font-size: 12px; color: #ff6b6b; font-weight: bold; letter-spacing: 0.15em;">
+          <div
+            style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;"
+          >
+            <span
+              style="font-size: 12px; color: #ff6b6b; font-weight: bold; letter-spacing: 0.15em;"
+            >
               ⛩️ 絶望カルテ
             </span>
-
             <!-- 🏅 絶望度バッジ / 称号表示 -->
-            <% if current_user.respond_to?(:despair_rank) %>
-              <% rank = current_user.despair_rank %>
-              <span style="
-                display: inline-flex;
-                align-items: center;
-                gap: 4px;
-                padding: 3px 12px;
-                background: <%= rank[:bg_rgba] %>;
-                border: 1px solid <%= rank[:border] %>;
-                color: <%= rank[:color] %>;
-                border-radius: 20px;
-                font-size: 12px;
-                font-weight: bold;
-                box-shadow: 0 0 10px <%= rank[:bg_rgba] %>;
-              ">
+            <% if current_user.respond_to?(:despair_rank) %><% rank = current_user.despair_rank %>
+              <span
+                style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 12px; background: <%= rank[:bg_rgba] %>; border: 1px solid <%= rank[:border] %>; color: <%= rank[:color] %>; border-radius: 20px; font-size: 12px; font-weight: bold; box-shadow: 0 0 10px <%= rank[:bg_rgba] %>;"
+              >
                 <span><%= rank[:icon] %></span>
                 <span><%= rank[:title] %></span>
               </span>
             <% end %>
           </div>
-
           <!-- 詠み人名前 -->
-          <h1 style="font-size: 26px; font-weight: bold; color: #f2e8d8; margin: 0 0 8px 0;">
-            詠み人：<%= current_user.respond_to?(:name) && current_user.name.present? ? current_user.name : current_user.email %>
+          <h1
+            style="font-size: 26px; font-weight: bold; color: #f2e8d8; margin: 0 0 8px 0;"
+          >
+            詠み人：<%= if current_user.respond_to?(:name) && current_user.name.present?
+              current_user.name
+            else
+              current_user.email
+            end %>
           </h1>
-          
           <!-- 獲得共感総数のカウンター表示 -->
           <% if current_user.respond_to?(:total_likes_count) %>
             <div style="font-size: 13px; color: #a39382;">
-              総獲得共感：<span style="color: #e5c158; font-weight: bold;"><%= current_user.total_likes_count %></span> 心
+              総獲得共感：<span style="color: #e5c158; font-weight: bold;"><%= current_user.total_likes_count %></span>
+              心
             </div>
           <% end %>
         </div>
-
         <!-- ボタン領域 -->
         <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
           <%= link_to edit_user_registration_path, style: "
@@ -94,96 +86,76 @@
         </div>
       </div>
     </div>
-
     <!-- 📊 絶望の軌跡・サマリーカード（視覚化エリア） -->
-    <div style="
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 35px;
-    ">
+    <div
+      style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 35px;"
+    >
       <!-- 詠んだ短歌 -->
-      <div style="background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; padding: 18px; text-align: center;">
+      <div
+        style="background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; padding: 18px; text-align: center;"
+      >
         <div style="font-size: 12px; color: #a39382; margin-bottom: 6px;">📜 蓄積された絶望</div>
         <div style="font-size: 24px; font-weight: bold; color: #e5c158;">
-          <%= @posts&.count || 0 %> <span style="font-size: 14px; color: #f2e8d8;">詠</span>
+          <%= @posts&.count || 0 %>
+          <span style="font-size: 14px; color: #f2e8d8;">詠</span>
         </div>
       </div>
-
       <!-- 届いた返歌 -->
-      <div style="background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; padding: 18px; text-align: center;">
+      <div
+        style="background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; padding: 18px; text-align: center;"
+      >
         <div style="font-size: 12px; color: #a39382; margin-bottom: 6px;">✉️ 届いた返歌</div>
         <div style="font-size: 24px; font-weight: bold; color: #ff6b6b;">
-          <%= defined?(@replies) && @replies.present? ? @replies.count : (defined?(@my_replies) && @my_replies.present? ? @my_replies.count : 0) %> <span style="font-size: 14px; color: #f2e8d8;">首</span>
+          <%= if defined?(@replies) && @replies.present?
+            @replies.count
+          else
+            (defined?(@my_replies) && @my_replies.present? ? @my_replies.count : 0)
+          end %>
+          <span style="font-size: 14px; color: #f2e8d8;">首</span>
         </div>
       </div>
-
       <!-- 共感した短歌 -->
-      <div style="background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; padding: 18px; text-align: center;">
+      <div
+        style="background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; padding: 18px; text-align: center;"
+      >
         <div style="font-size: 12px; color: #a39382; margin-bottom: 6px;">🌸 共鳴した絶望</div>
         <div style="font-size: 24px; font-weight: bold; color: #ff9f43;">
-          <%= defined?(@liked_posts) && @liked_posts.present? ? @liked_posts.count : 0 %> <span style="font-size: 14px; color: #f2e8d8;">心</span>
+          <%= defined?(@liked_posts) && @liked_posts.present? ? @liked_posts.count : 0 %>
+          <span style="font-size: 14px; color: #f2e8d8;">心</span>
         </div>
       </div>
     </div>
-
     <!-- 🗂️ タブ切替ヘッダー -->
-    <div style="
-      display: flex;
-      gap: 8px;
-      border-bottom: 2px solid #3a2e2b;
-      margin-bottom: 24px;
-      overflow-x: auto;
-    ">
-      <button class="carte-tab active" onclick="switchCarteTab('my-posts')" style="
-        padding: 10px 20px;
-        background: none;
-        border: none;
-        border-bottom: 3px solid #ff4d4d;
-        color: #ff4d4d;
-        font-size: 15px;
-        font-weight: bold;
-        font-family: 'Shippori Mincho', serif;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      ">
+    <div
+      style="display: flex; gap: 8px; border-bottom: 2px solid #3a2e2b; margin-bottom: 24px; overflow-x: auto;"
+    >
+      <button
+        class="carte-tab active"
+        onclick="switchCarteTab('my-posts')"
+        style="padding: 10px 20px; background: none; border: none; border-bottom: 3px solid #ff4d4d; color: #ff4d4d; font-size: 15px; font-weight: bold; font-family: 'Shippori Mincho', serif; cursor: pointer; transition: all 0.2s ease;"
+      >
         📜 我が絶望の年表（短歌）
       </button>
 
-      <button class="carte-tab" onclick="switchCarteTab('replies')" style="
-        padding: 10px 20px;
-        background: none;
-        border: none;
-        border-bottom: 3px solid transparent;
-        color: #a39382;
-        font-size: 15px;
-        font-weight: bold;
-        font-family: 'Shippori Mincho', serif;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      ">
+      <button
+        class="carte-tab"
+        onclick="switchCarteTab('replies')"
+        style="padding: 10px 20px; background: none; border: none; border-bottom: 3px solid transparent; color: #a39382; font-size: 15px; font-weight: bold; font-family: 'Shippori Mincho', serif; cursor: pointer; transition: all 0.2s ease;"
+      >
         ✉️ 届いた返歌
       </button>
 
-      <button class="carte-tab" onclick="switchCarteTab('likes')" style="
-        padding: 10px 20px;
-        background: none;
-        border: none;
-        border-bottom: 3px solid transparent;
-        color: #a39382;
-        font-size: 15px;
-        font-weight: bold;
-        font-family: 'Shippori Mincho', serif;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      ">
+      <button
+        class="carte-tab"
+        onclick="switchCarteTab('likes')"
+        style="padding: 10px 20px; background: none; border: none; border-bottom: 3px solid transparent; color: #a39382; font-size: 15px; font-weight: bold; font-family: 'Shippori Mincho', serif; cursor: pointer; transition: all 0.2s ease;"
+      >
         🌸 共感した短歌
       </button>
     </div>
-
-    <!-- ---------------------------------------------------- -->
-    <!-- タブ 1: 我が絶望の年表（縦型タイムライン） -->
-    <!-- ---------------------------------------------------- -->
+    <!-- ---------------------------------------------------- --> <!-- タブ 1:
+    我が絶望の年表（縦型タイムライン） --> <!--
+    ---------------------------------------------------- -->
     <div id="tab-content-my-posts" class="carte-content">
       <% if @posts.present? && @posts.any? %>
         <div class="user-timeline-container">
@@ -195,44 +167,72 @@
               <div class="user-timeline-node">
                 <div class="node-inner"></div>
               </div>
-
               <!-- カード本文 -->
               <div class="user-timeline-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #3a2e2b; padding-bottom: 8px; margin-bottom: 12px; font-size: 12px;">
+                <div
+                  style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #3a2e2b; padding-bottom: 8px; margin-bottom: 12px; font-size: 12px;"
+                >
                   <span style="color: #e5c158; font-weight: bold;">
-                    📅 <%= post.created_at.strftime("%Y/%m/%d %H:%M") %>
+                    📅
+                    <%= post.created_at.strftime("%Y/%m/%d %H:%M") %>
                   </span>
                   <% if post.respond_to?(:error_category) && post.error_category.present? %>
-                    <span style="display: inline-block; padding: 2px 8px; background: rgba(229, 193, 88, 0.15); border: 1px solid #e5c158; color: #e5c158; border-radius: 12px; font-size: 11px;">
-                      🏷️ <%= post.error_category %>
+                    <span
+                      style="display: inline-block; padding: 2px 8px; background: rgba(229, 193, 88, 0.15); border: 1px solid #e5c158; color: #e5c158; border-radius: 12px; font-size: 11px;"
+                    >
+                      🏷️
+                      <%= post.error_category %>
                     </span>
                   <% end %>
                 </div>
 
-                <div style="
-                  font-size: 17px;
-                  color: #f2e8d8;
-                  font-weight: bold;
-                  line-height: 1.8;
-                  margin-bottom: 14px;
-                  letter-spacing: 0.05em;
-                ">
-                  <%= sanitize post.tanka.to_s.tr(' ', ' ').squish, tags: %w[] %>
+                <div
+                  style="font-size: 17px; color: #f2e8d8; font-weight: bold; line-height: 1.8; margin-bottom: 14px; letter-spacing: 0.05em;"
+                >
+                  <%= sanitize post.tanka.to_s.tr(" ", " ").squish, tags: %w[] %>
                 </div>
 
                 <% if post.error_message.present? %>
-                  <div style="font-size: 11px; color: #a39382; font-family: monospace; background: rgba(0,0,0,0.4); padding: 6px 10px; border-radius: 6px; margin-bottom: 14px; border-left: 2px solid #8c1d1d; word-break: break-all;">
-                    $ <%= truncate(post.error_message, length: 60) %>
+                  <div
+                    style="font-size: 11px; color: #a39382; font-family: monospace; background: rgba(0,0,0,0.4); padding: 6px 10px; border-radius: 6px; margin-bottom: 12px; border-left: 2px solid #8c1d1d; word-break: break-all;"
+                  >
+                    $
+                    <%= truncate(post.error_message, length: 60) %>
                   </div>
                 <% end %>
+                <!-- 🤖 AI法師の解脱助言（アコーディオン表示） -->
+                <% if post.error_message.present? && post.error_message != "自作短歌" %>
+                  <div
+                    style="margin-bottom: 14px; background: #110e0c; border: 1px solid #3a2e2b; border-radius: 8px; padding: 10px 12px; font-family: 'Shippori Mincho', serif;"
+                  >
+                    <details style="cursor: pointer;">
+                      <summary
+                        style="font-size: 12px; color: #e5c158; font-weight: bold; outline: none; display: flex; align-items: center; justify-content: space-between;"
+                      >
+                        <span>🤖 AI法師の解脱助言</span>
+                        <span style="font-size: 10px; color: #a39382;">▼ タップで見る</span>
+                      </summary>
 
+                      <div
+                        style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #3a2e2b; color: #f2e8d8; font-size: 12px; line-height: 1.7; white-space: pre-wrap;"
+                      >
+                        <% if post.ai_advice.present? %>
+                          <%= post.ai_advice %>
+                        <% else %>
+                          <span style="color: #a39382;">⏳ アドバイス生成中、または取得できませんでした。</span>
+                        <% end %>
+                      </div>
+                    </details>
+                  </div>
+                <% end %>
                 <!-- アクションボタン群（編集・削除・詳細） -->
-                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #2a221d; padding-top: 10px; flex-wrap: wrap; gap: 8px; font-size: 12px;">
+                <div
+                  style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #2a221d; padding-top: 10px; flex-wrap: wrap; gap: 8px; font-size: 12px;"
+                >
                   <div style="display: flex; gap: 10px; align-items: center;">
                     <%= link_to edit_post_path(post), style: "color: #a39382; text-decoration: none;" do %>
                       ✏️ 推敲
                     <% end %>
-
                     <%= link_to post_path(post),
                         data: { turbo_method: :delete, turbo_confirm: "本当にこの短歌を取り下げて供養しますか？" },
                         style: "color: #8c1d1d; text-decoration: none;" do %>
@@ -240,106 +240,116 @@
                     <% end %>
                   </div>
 
-                  <%= link_to "鑑賞 →", post_path(post), style: "color: #ff6b6b; font-weight: bold; text-decoration: none;" %>
+                  <%= link_to "鑑賞 →",
+                  post_path(post),
+                  style: "color: #ff6b6b; font-weight: bold; text-decoration: none;" %>
                 </div>
               </div>
             </div>
           <% end %>
         </div>
       <% else %>
-        <div style="text-align: center; padding: 60px 0; color: #887868; background: #1a1512; border: 1px dashed #3a2e2b; border-radius: 12px;">
+        <div
+          style="text-align: center; padding: 60px 0; color: #887868; background: #1a1512; border: 1px dashed #3a2e2b; border-radius: 12px;"
+        >
           まだ絶望ログがありません。まずは一首、詠んでみませんか？
         </div>
       <% end %>
     </div>
-
-    <!-- ---------------------------------------------------- -->
-    <!-- タブ 2: 届いた返歌 -->
-    <!-- ---------------------------------------------------- -->
+    <!-- ---------------------------------------------------- --> <!-- タブ 2:
+    届いた返歌 --> <!-- ---------------------------------------------------- -->
     <div id="tab-content-replies" class="carte-content" style="display: none;">
       <div style="display: flex; flex-direction: column; gap: 20px;">
-        <% replies_data = defined?(@replies) && @replies.present? ? @replies : (defined?(@my_replies) ? @my_replies : nil) %>
+        <% replies_data =
+          (
+            if defined?(@replies) && @replies.present?
+              @replies
+            else
+              (defined?(@my_replies) ? @my_replies : nil)
+            end
+          ) %>
         <% if replies_data.present? && replies_data.any? %>
           <% replies_data.each do |reply| %>
-            <div style="
-              background: #1a1512;
-              border: 1px solid #3a2e2b;
-              border-radius: 12px;
-              padding: 24px;
-              color: #f2e8d8;
-            ">
+            <div
+              style="background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; padding: 24px; color: #f2e8d8;"
+            >
               <div style="font-size: 12px; color: #887868; margin-bottom: 12px;">
-                <%= reply.created_at.strftime("%Y/%m/%d %H:%M") %> ・ <%= reply.try(:author_name).presence || "名無し法師" %> より
+                <%= reply.created_at.strftime("%Y/%m/%d %H:%M") %>
+                ・
+                <%= reply.try(:author_name).presence || "名無し法師" %>
+                より
               </div>
 
-              <div style="
-                font-size: 18px;
-                color: #ff6b6b;
-                font-weight: bold;
-                line-height: 1.8;
-                margin-bottom: 16px;
-              ">
+              <div
+                style="font-size: 18px; color: #ff6b6b; font-weight: bold; line-height: 1.8; margin-bottom: 16px;"
+              >
                 <%= sanitize reply.try(:content).to_s || reply.try(:tanka).to_s, tags: %w[] %>
               </div>
 
               <% if reply.respond_to?(:post) && reply.post.present? %>
                 <div style="text-align: right;">
-                  <%= link_to "対象の短歌を見る →", post_path(reply.post), style: "color: #e5c158; font-size: 13px; font-weight: bold; text-decoration: none;" %>
+                  <%= link_to "対象の短歌を見る →",
+                  post_path(reply.post),
+                  style:
+                    "color: #e5c158; font-size: 13px; font-weight: bold; text-decoration: none;" %>
                 </div>
               <% end %>
             </div>
           <% end %>
         <% else %>
-          <div style="text-align: center; padding: 60px 0; color: #887868; background: #1a1512; border: 1px dashed #3a2e2b; border-radius: 12px;">
+          <div
+            style="text-align: center; padding: 60px 0; color: #887868; background: #1a1512; border: 1px dashed #3a2e2b; border-radius: 12px;"
+          >
             まだ届いた返歌はありません。誰かの短歌に返歌を贈ると、交流が広がるかもしれません。
           </div>
         <% end %>
       </div>
     </div>
-
-    <!-- ---------------------------------------------------- -->
-    <!-- タブ 3: 共感した短歌 -->
-    <!-- ---------------------------------------------------- -->
+    <!-- ---------------------------------------------------- --> <!-- タブ 3:
+    共感した短歌 --> <!-- ---------------------------------------------------- -->
     <div id="tab-content-likes" class="carte-content" style="display: none;">
       <div style="display: flex; flex-direction: column; gap: 20px;">
-        <% liked_data = defined?(@liked_posts) && @liked_posts.present? ? @liked_posts : nil %>
+        <% liked_data =
+          defined?(@liked_posts) && @liked_posts.present? ? @liked_posts : nil %>
         <% if liked_data.present? && liked_data.any? %>
           <% liked_data.each do |post| %>
-            <div style="
-              background: #1a1512;
-              border: 1px solid #3a2e2b;
-              border-radius: 12px;
-              padding: 24px;
-              color: #f2e8d8;
-            ">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div
+              style="background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; padding: 24px; color: #f2e8d8;"
+            >
+              <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;"
+              >
                 <div style="font-size: 12px; color: #887868;">
                   <%= post.created_at.strftime("%Y/%m/%d %H:%M") %>
                 </div>
                 <% if post.respond_to?(:error_category) && post.error_category.present? %>
-                  <span style="display: inline-block; padding: 2px 8px; background: rgba(255, 159, 67, 0.15); border: 1px solid #ff9f43; color: #ff9f43; border-radius: 12px; font-size: 11px;">
-                    🏷️ <%= post.error_category %>
+                  <span
+                    style="display: inline-block; padding: 2px 8px; background: rgba(255, 159, 67, 0.15); border: 1px solid #ff9f43; color: #ff9f43; border-radius: 12px; font-size: 11px;"
+                  >
+                    🏷️
+                    <%= post.error_category %>
                   </span>
                 <% end %>
               </div>
 
-              <div style="
-                font-size: 19px;
-                color: #ff9f43;
-                font-weight: bold;
-                line-height: 1.8;
-                margin-bottom: 16px;
-              ">
+              <div
+                style="font-size: 19px; color: #ff9f43; font-weight: bold; line-height: 1.8; margin-bottom: 16px;"
+              >
                 <%= sanitize post.tanka.to_s, tags: %w[] %>
               </div>
 
               <div style="text-align: right;">
-                <%= link_to "鑑賞・詳細を見る →", post_path(post), style: "color: #ff6b6b; font-size: 13px; font-weight: bold; text-decoration: none;" %>
+                <%= link_to "鑑賞・詳細を見る →",
+                post_path(post),
+                style:
+                  "color: #ff6b6b; font-size: 13px; font-weight: bold; text-decoration: none;" %>
               </div>
             </div>
           <% end %>
         <% else %>
-          <div style="text-align: center; padding: 60px 0; color: #887868; background: #1a1512; border: 1px dashed #3a2e2b; border-radius: 12px;">
+          <div
+            style="text-align: center; padding: 60px 0; color: #887868; background: #1a1512; border: 1px dashed #3a2e2b; border-radius: 12px;"
+          >
             まだ共感（いいね）した短歌はありません。ギャラリーで心に響く短歌を探してみましょう！
           </div>
         <% end %>
@@ -348,7 +358,6 @@
 
   </div>
 </div>
-
 <!-- ⏳ タイムラインスタイル -->
 <style>
   .user-timeline-container { position: relative; padding: 20px 0; width: 100%; box-sizing: border-box; }
