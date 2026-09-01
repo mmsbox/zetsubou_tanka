@@ -10,15 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_25_062957) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_01_061501) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "posts", force: :cascade do |t|
+    t.text "ai_advice"
     t.string "author_name"
     t.datetime "created_at", null: false
     t.string "error_category"
     t.text "error_message"
+    t.string "error_signature"
     t.integer "likes_count"
     t.integer "parent_id"
     t.text "tanka"

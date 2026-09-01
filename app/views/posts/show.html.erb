@@ -120,11 +120,18 @@
           
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #d4c5b0; padding-bottom: 8px; width: 100%; font-family: 'Shippori Mincho', serif; font-weight: bold;">
             <span style="font-size: 13px; color: #7a6b5d;">絶望えらぁ短歌</span>
-            <% if @post.respond_to?(:error_category) && @post.error_category.present? %>
-              <span style="font-size: 11px; color: #8c1d1d; background: rgba(140, 29, 29, 0.1); border: 1px solid #8c1d1d; padding: 1px 6px; border-radius: 10px;">
-                🏷️ <%= @post.error_category %>
-              </span>
-            <% end %>
+            <div style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
+              <% if @post.respond_to?(:error_category) && @post.error_category.present? %>
+                <span style="font-size: 11px; color: #8c1d1d; background: rgba(140, 29, 29, 0.1); border: 1px solid #8c1d1d; padding: 1px 6px; border-radius: 10px;">
+                  🏷️ <%= @post.error_category %>
+                </span>
+              <% end %>
+              <% if @post.respond_to?(:same_error_count) && @post.same_error_count > 1 %>
+                <span style="font-size: 11px; color: #ff6b6b; background: rgba(255, 107, 107, 0.12); border: 1px solid #ff6b6b; padding: 1px 6px; border-radius: 10px;" title="同じエラー型を詠んだ法師の人数">
+                  📿 同調 <%= @post.same_error_count %>人
+                </span>
+              <% end %>
+            </div>
           </div>
 
           <!-- 縦書き短歌表示 -->
@@ -150,7 +157,7 @@
             ></div>
           </div>
 
-          <!-- エラー文表示 -->
+          <!-- エラー文表示 ＆ 同調バナー -->
           <% if @post.respond_to?(:error_message) && @post.error_message.present? %>
             <div style="
               width: 100%;
@@ -163,12 +170,18 @@
               line-height: 1.4;
               box-sizing: border-box;
               word-break: break-all;
-              margin-bottom: 12px;
+              margin-bottom: 8px;
               border-left: 3px solid #8c1d1d;
               text-align: left;
             ">
               <span style="color: #6272a4; font-weight: bold;">$ error:</span> <%= truncate(@post.error_message, length: 80) %>
             </div>
+
+            <% if @post.respond_to?(:same_error_count) && @post.same_error_count > 1 %>
+              <div style="width: 100%; background: rgba(255, 107, 107, 0.1); border: 1px dashed #ff6b6b; border-radius: 6px; padding: 6px 10px; margin-bottom: 12px; font-size: 11px; color: #ff6b6b; text-align: center; box-sizing: border-box;">
+                📿 この絶望型、これまでに <b><%= @post.same_error_count %>人</b> の法師が詠んでいます
+              </div>
+            <% end %>
           <% end %>
 
           <!-- 詠み手 ＆ 🏅 称号バッジ表示 -->
@@ -208,6 +221,48 @@
 
       </div>
 
+    </div>
+
+    <!-- 🤖 会員限定：AI法師の解脱助言（エラー解決ヒント）セクション -->
+    <div style="width: 100%; max-width: 680px; margin: 40px auto 0; box-sizing: border-box;">
+      <div style="
+        background: #1a1512; 
+        border: 1px solid #3a2e2b; 
+        border-radius: 12px; 
+        padding: 24px; 
+        box-shadow: 0 4px 20px rgba(0,0,0,0.6); 
+        font-family: 'Shippori Mincho', serif;
+      ">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px dashed #3a2e2b; padding-bottom: 12px; margin-bottom: 18px;">
+          <h3 style="font-size: 16px; color: #e5c158; margin: 0; display: flex; align-items: center; gap: 8px; font-weight: bold;">
+            <span>🤖</span> AI法師の解脱助言（エラー解決ヒント）
+          </h3>
+          <span style="font-size: 11px; background: rgba(229,193,88,0.1); border: 1px solid #e5c158; color: #e5c158; padding: 2px 10px; border-radius: 12px; font-weight: bold;">
+            会員限定
+          </span>
+        </div>
+
+        <% if respond_to?(:user_signed_in?) ? user_signed_in? : current_user.present? %>
+          <% if @post.ai_advice.present? %>
+            <div style="color: #f2e8d8; font-size: 14px; line-height: 1.8; white-space: pre-wrap; background: #0d0808; padding: 18px; border-radius: 8px; border-left: 4px solid #e5c158; font-family: 'Shippori Mincho', serif;">
+              <%= @post.ai_advice %>
+            </div>
+          <% else %>
+            <div style="color: #a39382; font-size: 13px; text-align: center; padding: 16px 0;">
+              ⏳ AI法師がただいま解決策を解読中…（エラー本文がない自作短歌の場合は表示されません）
+            </div>
+          <% end %>
+        <% else %>
+          <!-- 未ログイン時の訴求（CTA） -->
+          <div style="text-align: center; padding: 20px 12px; background: rgba(140, 29, 29, 0.15); border: 1px dashed #8c1d1d; border-radius: 8px;">
+            <p style="color: #d4c5b0; font-size: 13px; margin: 0 0 14px 0; line-height: 1.6;">
+              🔒 <b>会員限定機能</b><br>
+              会員登録（ログイン）すると、この絶望エラーに対するAI法師からの個別解決アドバイスが閲覧できます！
+            </p>
+            <%= link_to "会員登録してアドバイスを見る ✨", new_user_registration_path, style: "display: inline-block; padding: 10px 24px; background: linear-gradient(135deg, #8c1d1d, #571010); color: #fff; border-radius: 20px; font-size: 13px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 12px rgba(140,29,29,0.5);" %>
+          </div>
+        <% end %>
+      </div>
     </div>
 
     <!-- ★ 完全独立：下部に配置した返歌（アンサー短歌）一覧セクション -->
