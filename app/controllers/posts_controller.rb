@@ -8,7 +8,7 @@ class PostsController < ApplicationController
   OGP_AUTHOR_COLOR = "#a39382".freeze
   SMALL_KANA = %w[っ ゃ ゅ ょ ぁ ぃ ぅ ぇ ぉ ヮ ヵ ヶ].freeze
 
-def index
+  def index
     @selected_category = params[:category]
     @sort_mode = params[:sort]
 
@@ -29,13 +29,15 @@ def index
   end
 
   def show
+    @replies = @post.replies.includes(:user).order(created_at: :desc)
   end
 
   def new
     @post = Post.new
+    @post.parent_id = params[:parent_id] if params[:parent_id].present?
   end
 
-def create
+  def create
     @post = Post.new(post_params)
     @post.user = current_user if respond_to?(:current_user) && current_user.present?
 
@@ -48,6 +50,11 @@ def create
     end
 
     if @post.save
+      # 🤖 会員ユーザーの投稿であれば、AI解決アドバイスを自動生成
+      if logged_in?
+        @post.generate_ai_advice!
+      end
+
       redirect_target = @post.parent.present? ? @post.parent : @post
       redirect_to redirect_target, notice: "短歌が詠まれました。"
     else
@@ -55,6 +62,7 @@ def create
       render :new, status: :unprocessable_entity
     end
   end
+
   def edit
   end
 
@@ -141,6 +149,22 @@ def create
     kana.to_s.chars.reject { |c| SMALL_KANA.include?(c) }.size
   end
 
+  def validate_tanka_mora(data)
+    expected_moras = [ 5, 7, 5, 7, 7 ]
+    ku_keys = [ "ku1", "ku2", "ku3", "ku4", "ku5" ]
+
+    ku_keys.each_with_index do |key, idx|
+      kana = data.dig(key, "kana")
+      return [ false, "JSON構造不正" ] if kana.nil?
+
+      actual = count_mora(kana)
+      expected = expected_moras[idx]
+      return [ false, "#{key}のモーラ数が不正です (予想:#{expected}, 実際:#{actual})" ] if actual != expected
+    end
+
+    [ true, nil ]
+  end
+
   def build_tanka_prompt(error_message, feedback)
     <<~PROMPT
       あなたはプログラミングのエラーに苦しむエンジニアの悲惨さを詠む「短歌名人」です。
@@ -148,7 +172,7 @@ def create
 
       #{feedback ? "【前回の音数ミスの修正指示】\n#{feedback}\nこれを踏まえて必ず正しい音数で作り直してください。\n" : ''}
       【最重要ルール：音数（モーラ数）】
-      各句の「kana」（全ひらがな）の音数を厳格に守ってください。
+      各句の「kana」（全ひらなが）の音数を厳格に守ってください。
       - ku1 (初句): 5音
       - ku2 (二句): 7音
       - ku3 (三句): 5音
