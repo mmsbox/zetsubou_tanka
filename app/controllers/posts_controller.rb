@@ -8,7 +8,7 @@ class PostsController < ApplicationController
   OGP_AUTHOR_COLOR = "#a39382".freeze
   SMALL_KANA = %w[っ ゃ ゅ ょ ぁ ぃ ぅ ぇ ぉ ヮ ヵ ヶ].freeze
 
-def index
+  def index
     @selected_category = params[:category]
     @sort_mode = params[:sort]
 
@@ -35,7 +35,7 @@ def index
     @post = Post.new
   end
 
-def create
+  def create
     @post = Post.new(post_params)
     @post.user = current_user if respond_to?(:current_user) && current_user.present?
 
@@ -55,6 +55,7 @@ def create
       render :new, status: :unprocessable_entity
     end
   end
+
   def edit
   end
 
@@ -138,7 +139,31 @@ def create
   end
 
   def count_mora(kana)
-    kana.to_s.chars.reject { |c| SMALL_KANA.include?(c) }.size
+    # ひらがな以外（記号・英数字・カタカナ）を除外してからモーラ数をカウント
+    clean_kana = kana.to_s.gsub(/[^ぁ-ん]/, "")
+    clean_kana.chars.reject { |c| SMALL_KANA.include?(c) }.size
+  end
+
+  def validate_tanka_mora(data)
+    expected_mora = [ 5, 7, 5, 7, 7 ]
+    kus = [ "ku1", "ku2", "ku3", "ku4", "ku5" ]
+    errors = []
+
+    kus.each_with_index do |ku, index|
+      kana = data.dig(ku, "kana") || ""
+      actual_count = count_mora(kana)
+      target = expected_mora[index]
+
+      if (actual_count - target).abs > 1 # ±1音を超えるズレはエラー判定
+        errors << "#{index + 1}句目の音数が「#{actual_count}音」になっています（目標: #{target}音）。"
+      end
+    end
+
+    if errors.empty?
+      [ true, nil ]
+    else
+      [ false, errors.join(" ") ]
+    end
   end
 
   def build_tanka_prompt(error_message, feedback)
@@ -181,7 +206,7 @@ def create
     client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
     feedback = nil
 
-    3.times do
+    3.times do |i|
       prompt = build_tanka_prompt(error_message, feedback)
 
       response = client.chat(
@@ -201,7 +226,9 @@ def create
         data = JSON.parse(raw_json)
         is_valid, error_info = validate_tanka_mora(data)
 
-        if is_valid
+        # 1〜2回目は音数チェック（合格なら即返却）
+        # 3回目(i == 2)は音数が崩れていてもAIの生成結果を絶対採用して返す
+        if is_valid || i == 2
           return [
             data["ku1"]["text"],
             data["ku2"]["text"],
@@ -212,14 +239,17 @@ def create
         else
           feedback = error_info
         end
-      rescue JSON::ParserError
+      rescue JSON::ParserError => e
+        Rails.logger.error("JSON Parse Error: #{e.message}")
         feedback = "JSON形式が崩れていました。指示通りのJSONフォーマットのみを出力してください。"
+      rescue StandardError => e
+        Rails.logger.error("Tanka Validation Error: #{e.class} - #{e.message}")
       end
     end
 
     "エラー吐き 詠めぬ短歌の 虚しさよ 文字超えゆきて 涙こぼれる"
   rescue StandardError => e
-    Rails.logger.error("OpenAI API Error: #{e.message}")
+    Rails.logger.error("OpenAI API Error: #{e.class} - #{e.message}")
     "エラー吐き 詠めぬ短歌の 虚しさよ 接続切れの 深き絶望"
   end
 end
