@@ -35,7 +35,7 @@ class PostsController < ApplicationController
     @post = Post.new
   end
 
-  def create
+def create
     @post = Post.new(post_params)
     @post.user = current_user if respond_to?(:current_user) && current_user.present?
 
@@ -48,6 +48,11 @@ class PostsController < ApplicationController
     end
 
     if @post.save
+      # 🤖 AI法師の解脱助言を生成（エラーログが存在する場合）
+      if @post.error_message.present? && @post.error_message != "自作短歌"
+        @post.generate_ai_advice!
+      end
+
       redirect_target = @post.parent.present? ? @post.parent : @post
       redirect_to redirect_target, notice: "短歌が詠まれました。"
     else
@@ -55,7 +60,6 @@ class PostsController < ApplicationController
       render :new, status: :unprocessable_entity
     end
   end
-
   def edit
   end
 
