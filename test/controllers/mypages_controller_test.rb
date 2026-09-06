@@ -1,15 +1,13 @@
 require "test_helper"
 
-class PostsControllerTest < ActionDispatch::IntegrationTest
-  # Deviseのログインヘルパー（sign_in）を有効化
+class MypagesControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
-  test "should get new" do
-    # テスト用ユーザーでログイン
+  test "should get show" do
     user = users(:one)
     sign_in user
 
-    get new_post_url
+    get mypage_url
     assert_response :success
   end
 end
