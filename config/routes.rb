@@ -19,4 +19,8 @@ Rails.application.routes.draw do
       post :like
     end
   end
+
+  # 📜 静的ページ（利用規約・プライバシーポリシー）
+  get "terms", to: "pages#terms"
+  get "privacy", to: "pages#privacy"
 end
