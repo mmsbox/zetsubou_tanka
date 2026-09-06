@@ -24,32 +24,6 @@
     <meta name="twitter:description" content="プログラミングのエラーメッセージをAIが風情溢れる和風短歌（5・7・5・7・7）へ変換。絶望を笑いに昇華させるWebサービスです。">
 
     <!-- ★ 動的OGP画像 -->
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>絶望えらぁ短歌</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
-
-    <!-- 🌐 基本 OGP & Twitter Card 設定 -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@zetsubou_tanka">
-    <meta property="og:type" content="article">
-    <meta property="og:site_name" content="絶望えらぁ短歌">
-    <meta property="og:url" content="<%= request.original_url %>">
-
-    <!-- タイトル -->
-    <% title_text = @post&.persisted? ? "『#{@post.tanka.truncate(20)}』| 絶望えらぁ短歌" : "絶望えらぁ短歌 - エラーの絶望を笑いと芸術へ" %>
-    <% final_title = content_for?(:ogp_title) ? yield(:ogp_title) : title_text %>
-    <meta property="og:title" content="<%= final_title %>">
-    <meta name="twitter:title" content="<%= final_title %>">
-
-    <!-- 説明文 -->
-    <meta property="og:description" content="プログラミングのエラーメッセージをAIが風情溢れる和風短歌（5・7・5・7・7）へ変換。絶望を笑いに昇華させるWebサービスです。">
-    <meta name="twitter:description" content="プログラミングのエラーメッセージをAIが風情溢れる和風短歌（5・7・5・7・7）へ変換。絶望を笑いに昇華させるWebサービスです。">
-
-    <!-- ★ 動的OGP画像 -->
     <% 
       default_img = image_url('default_ogp.jpg')
       post_ogp_img = @post&.persisted? ? ogp_post_url(@post, format: :png) : nil
@@ -80,6 +54,8 @@
     min-height: 100vh;
     font-family: 'Shippori Mincho', serif;
     overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
   ">
     
     <!-- 上部固定ヘッダー -->
@@ -129,10 +105,35 @@
     <% end %>
 
     <!-- メインコンテンツ領域（ここへ各画面の中身が入ります） -->
-    <main style="width: 100%; box-sizing: border-box;">
+    <main style="width: 100%; box-sizing: border-box; flex: 1;">
       <%= yield %>
     </main>
 
+<!-- 📜 共通フッター -->
+    <footer style="
+      width: 100%;
+      height: 70px;
+      background: #0d0808;
+      border-top: 2px solid #8c1d1d;
+      box-shadow: 0 -4px 15px rgba(140, 29, 29, 0.4);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      box-sizing: border-box;
+      position: relative;
+      z-index: 1000;
+    ">
+      <div style="display: flex; align-items: center; gap: 16px; font-family: 'Shippori Mincho', serif; font-size: 13px;">
+        <%= link_to "利用規約", terms_path, style: "color: #d4c5b0; text-decoration: none; transition: color 0.2s;", onmouseover: "this.style.color='#e5c158'", onmouseout: "this.style.color='#d4c5b0'" %>
+        <span style="color: #8c1d1d;">｜</span>
+        <%= link_to "プライバシーポリシー", privacy_path, style: "color: #d4c5b0; text-decoration: none; transition: color 0.2s;", onmouseover: "this.style.color='#e5c158'", onmouseout: "this.style.color='#d4c5b0'" %>
+      </div>
+      <p style="margin: 0; font-size: 11px; color: #8a7b6e; letter-spacing: 0.08em; font-family: 'Shippori Mincho', serif;">
+        © 2026 絶望えらぁ短歌 All Rights Reserved.
+      </p>
+    </footer>
     <!-- 🎃 全画面怨念ローディング画面 -->
     <div id="global-loading-overlay" style="
       display: none;
