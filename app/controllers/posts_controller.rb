@@ -35,7 +35,7 @@ class PostsController < ApplicationController
     @post = Post.new
   end
 
-def create
+  def create
     @post = Post.new(post_params)
     @post.user = current_user if respond_to?(:current_user) && current_user.present?
 
@@ -60,6 +60,7 @@ def create
       render :new, status: :unprocessable_entity
     end
   end
+
   def edit
   end
 
@@ -79,7 +80,12 @@ def create
   def ogp
     post = Post.find(params[:id])
 
-    tanka_text  = (post.tanka.presence || "エラー吐き 詠めぬ短歌の 虚しさよ").tr("\n", " ")
+    # 縦書き画像描画時に「ー」が横向きになるのを防ぐため「丨」へ置換
+    tanka_text  = (post.tanka.presence || "エラー吐き 詠めぬ短歌の 虚しさよ")
+                    .tr("\n", " ")
+                    .tr("ー", "丨")
+                    .tr("〜", "丨")
+
     author_text = "詠み手：#{post.author_name.presence || '名無し法師'}"
 
     image = MiniMagick::Image.create do |f|
