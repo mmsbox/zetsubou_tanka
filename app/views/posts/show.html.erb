@@ -122,7 +122,7 @@
           
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #d4c5b0; padding-bottom: 8px; width: 100%; font-family: 'Shippori Mincho', serif; font-weight: bold;">
             <span style="font-size: 13px; color: #7a6b5d;">絶望えらぁ短歌</span>
-            <div style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
+            <div class="hide-on-download" style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
               <% if @post.respond_to?(:error_category) && @post.error_category.present? %>
                 <span style="font-size: 11px; color: #8c1d1d; background: rgba(140, 29, 29, 0.1); border: 1px solid #8c1d1d; padding: 1px 6px; border-radius: 10px;">
                   🏷️ <%= @post.error_category %>
@@ -180,7 +180,7 @@
             </div>
 
             <% if @post.respond_to?(:same_error_count) && @post.same_error_count > 1 %>
-              <div style="width: 100%; background: rgba(255, 107, 107, 0.1); border: 1px dashed #ff6b6b; border-radius: 6px; padding: 6px 10px; margin-bottom: 12px; font-size: 11px; color: #ff6b6b; text-align: center; box-sizing: border-box;">
+              <div class="hide-on-download" style="width: 100%; background: rgba(255, 107, 107, 0.1); border: 1px dashed #ff6b6b; border-radius: 6px; padding: 6px 10px; margin-bottom: 12px; font-size: 11px; color: #ff6b6b; text-align: center; box-sizing: border-box;">
                 📿 この絶望型、これまでに <b><%= @post.same_error_count %>人</b> の法師が詠んでいます
               </div>
             <% end %>
@@ -191,7 +191,7 @@
             <span>詠み手：<%= @post.author_name.presence || "名無し法師" %></span>
             <% if @post.user.present? %>
               <% rank = @post.user.despair_rank %>
-              <span style="
+              <span class="hide-on-download" style="
                 display: inline-flex;
                 align-items: center;
                 gap: 2px;
@@ -432,6 +432,12 @@
         downloadBtn.textContent = "⏳ 画像作成中…";
         downloadBtn.disabled = true;
 
+        // 📸 短冊カード内の「画像保存時のみ非表示にしたいUIパーツ」をすべて取得
+        const elementsToHide = cardElement.querySelectorAll('.hide-on-download');
+
+        // 一時的に非表示
+        elementsToHide.forEach(el => el.style.display = 'none');
+
         html2canvas(cardElement, {
           scale: 2,
           useCORS: true,
@@ -442,10 +448,14 @@
           link.href = canvas.toDataURL("image/png");
           link.click();
 
+          // 🔄 生成完了後に元の表示に戻す
+          elementsToHide.forEach(el => el.style.display = '');
+
           downloadBtn.textContent = "📸 短冊を画像保存";
           downloadBtn.disabled = false;
         }).catch(err => {
           console.error("Canvas error:", err);
+          elementsToHide.forEach(el => el.style.display = '');
           alert("画像の作成に失敗しました。");
           downloadBtn.textContent = "📸 短冊を画像保存";
           downloadBtn.disabled = false;
