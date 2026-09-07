@@ -2,7 +2,9 @@
 <% content_for :ogp_title, "『#{@post.tanka.truncate(20)}』| 絶望えらぁ短歌" %>
 
 <% 
-  formatted_tanka = @post.tanka.to_s.gsub(/[  ]+/, "\n")
+  # 縦書き＆短冊画像DL用に「ー」を「丨」に置換
+  tanka_vertical_text = @post.tanka.to_s.tr("ー", "丨").tr("〜", "丨")
+  formatted_tanka = tanka_vertical_text.gsub(/[  ]+/, "\n")
   author_name = @post.author_name.presence || '名無し法師'
 
   share_text = "【絶望えらぁ短歌】\n#{formatted_tanka}\n\n詠み手：#{author_name}\n"
@@ -138,7 +140,7 @@
           <div style="width: 100%; height: 300px; display: flex; justify-content: center; align-items: center; overflow: hidden; margin: 10px 0;">
             <div 
               id="typewriter-tanka" 
-              data-tanka="<%= @post.tanka %>"
+              data-tanka="<%= tanka_vertical_text %>"
               style="
                 writing-mode: vertical-rl;
                 -webkit-writing-mode: vertical-rl;
