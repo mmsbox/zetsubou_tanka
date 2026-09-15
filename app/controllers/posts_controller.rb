@@ -176,41 +176,42 @@ class PostsController < ApplicationController
     end
   end
 
-  def build_tanka_prompt(error_message, feedback)
-    <<~PROMPT
-      あなたはプログラミングのエラーに苦しむエンジニアの悲惨さを詠む「短歌名人」です。
-      入力されたエラーログをもとに、共感と絶望感が漂う短歌（5・7・5・7・7）を1首生成してください。
+def build_tanka_prompt(error_message, feedback = nil)
+  <<~PROMPT
+    あなたは絶望的なエラーログを風流な短歌（五・七・五・七・七）へと昇華させる「和風AI法師」です。
+    入力されたエラーログの背景にある「開発者の悲哀・絶望・徒労感・クスッと笑えるあるある」を詠んでください。
 
-      #{feedback ? "【前回の音数ミスの修正指示】\n#{feedback}\nこれを踏まえて必ず正しい音数で作り直してください。\n" : ''}
-      【最重要ルール：音数（モーラ数）】
-      各句の「kana」（全ひらがな）の音数を厳格に守ってください。
-      - ku1 (初句): 5音
-      - ku2 (二句): 7音
-      - ku3 (三句): 5音
-      - ku4 (四句): 7音
-      - ku5 (結句): 7音
+    【最重要制約：音数ルール】
+    各句の「ひらがな（読み）」の音数を厳密に守ってください。
+    - ku1 (初句): ひらがなで【5音】
+    - ku2 (二句): ひらがなで【7音】
+    - ku3 (三句): ひらがなで【5音】
+    - ku4 (四句): ひらがなで【7音】
+    - ku5 (結句): ひひらがなで【7音】
 
-      【表現のルール】
-      - 毎回異なる切り口（自虐、ユーモア、情景描写、古典的な和歌風、修羅場の日常など）で表現を変えてください。
-      - 定型文やありきたりな表現（「エラー吐き」「消えたコード」など）の使い回しは避け、入力されたエラーの状況に応じた具体的な言葉や比喩を使ってください。
+    ※「っ」「ー」は1音としてカウントします。
+    ※「しゃ」「ちゅ」などの拗音（小文字の「ゃゅょ」）は前の文字と合わせて1音（例：「きょ」で1音）です。
 
-      【出力フォーマット】
-      以下のJSON形式のみを出力してください。説明文やコードブロック記号は不要です。
-      各句について、漢字仮名交じりの本文(text)と、正確な読みの全ひらがな(kana)を両方出してください。
-      kanaには句読点・記号を含めないでください。
+    【短歌作成の極意】
+    - 英語のエラー用語（nil, error, controller, routeなど）をそのまま使う場合は、ひらがな読みの音数（例：「nil」→「にる」で2音）で計算してください。
+    - 直訳ではなく、エラーで深夜まで悩む姿や、存在しない変数への悲哀など「エンジニアの心」を詠んでください。
 
-      {
-        "ku1": {"text": "...", "kana": "..."},
-        "ku2": {"text": "...", "kana": "..."},
-        "ku3": {"text": "...", "kana": "..."},
-        "ku4": {"text": "...", "kana": "..."},
-        "ku5": {"text": "...", "kana": "..."}
-      }
+    【出力フォーマット (JSON)】
+    必ず以下のJSON形式のみで出力してください。
+    {
+      "ku1": { "text": "漢字混じりのテキスト", "kana": "ひらがな" },
+      "ku2": { "text": "漢字混じりのテキスト", "kana": "ひらがな" },
+      "ku3": { "text": "漢字混じりのテキスト", "kana": "ひらがな" },
+      "ku4": { "text": "漢字混じりのテキスト", "kana": "ひらがな" },
+      "ku5": { "text": "漢字混じりのテキスト", "kana": "ひらがな" }
+    }
 
-      【エラーログ】
-      #{error_message}
-    PROMPT
-  end
+    #{feedback ? "【前回の修正指示 (前回の失敗原因)】\n" + feedback + "\n音数を厳密に再計算してやり直してください。" : ""}
+
+    【対象のエラーログ】
+    #{error_message}
+  PROMPT
+end
 
   def generate_tanka_from_error(error_message)
     client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
@@ -220,14 +221,14 @@ class PostsController < ApplicationController
       prompt = build_tanka_prompt(error_message, feedback)
 
       response = client.chat(
-        parameters: {
-          model: "gpt-4o-mini",
-          messages: [ { role: "user", content: prompt } ],
-          response_format: { type: "json_object" },
-          temperature: 0.9,
-          frequency_penalty: 0.5,
-          presence_penalty: 0.3
-        }
+       parameters: {
+    model: "gpt-4o",
+    messages: [ { role: "user", content: prompt } ],
+    response_format: { type: "json_object" },
+    temperature: 0.6,          # 0.9 から 0.6 に下げる（音数崩れを防ぐ）
+    frequency_penalty: 0.3,    # 0.5 から 0.3 に微調整
+    presence_penalty: 0.2
+  }
       )
 
       raw_json = response.dig("choices", 0, "message", "content")&.strip
