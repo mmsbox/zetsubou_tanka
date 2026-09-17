@@ -382,7 +382,7 @@
       }
     }
 
-    function initEmpathyButtons() {
+   function initEmpathyButtons() {
       const empathyBtns = document.querySelectorAll(".empathy-btn");
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
@@ -391,18 +391,21 @@
         btn.dataset.initialized = "true";
 
         btn.addEventListener("click", function() {
+          //  二重押し（連打）防止：すでに押されていたら処理しない
+          if (this.disabled) return;
+
+          // ボタンを押不可＆見た目を「押下済み」に固定
+          this.disabled = true;
+          this.style.cursor = "not-allowed";
+          this.style.opacity = "0.7";
+          this.style.borderColor = "#8c1d1d";
+          this.style.transform = "scale(1.05)";
+
           const countSpan = this.querySelector(".count");
           if (!countSpan) return;
 
           let currentCount = parseInt(countSpan.textContent, 10) || 0;
           countSpan.textContent = currentCount + 1;
-
-          this.style.transform = "scale(1.1)";
-          this.style.borderColor = "#8c1d1d";
-
-          setTimeout(() => {
-            this.style.transform = "scale(1)";
-          }, 120);
 
           fetch(`/posts/<%= @post.id %>/like`, {
             method: 'POST',
@@ -413,7 +416,7 @@
           }).catch(err => console.error("Like error:", err));
         });
       });
-    }
+   }
 
     function initImageDownload() {
       const downloadBtn = document.getElementById("download-card-btn");
