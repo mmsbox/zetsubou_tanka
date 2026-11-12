@@ -1,7 +1,7 @@
 <style>
   /* 縦書き共通スタイル（グローバルCSSの上書き対策で !important を付与） */
-  a.btn-omikuji, a.btn-tanka, a.btn-gallery,
-  .btn-omikuji, .btn-tanka, .btn-gallery, .btn-otakiage {
+  a.btn-omikuji, a.btn-tanka, a.btn-gallery, a.btn-karuta,
+  .btn-omikuji, .btn-tanka, .btn-gallery, .btn-karuta, .btn-otakiage {
     writing-mode: vertical-rl !important;
     -webkit-writing-mode: vertical-rl !important;
     text-orientation: upright !important;
@@ -81,6 +81,19 @@
     color: #ffffff !important;
   }
 
+  /* 🎴 絶望百人一首ボタン */
+  a.btn-karuta, .btn-karuta {
+    background: rgba(250, 246, 237, 0.92);
+    color: #1a1512 !important;
+    border: 2px solid #8c1d1d;
+  }
+  .btn-karuta:hover {
+    transform: translateY(-6px);
+    background: #ffffff;
+    box-shadow: 0 15px 30px rgba(140, 29, 29, 0.6);
+    color: #8c1d1d !important;
+  }
+
   /* 📱 スマホ用スタイル調整 */
   @media (max-width: 768px) {
     .hero-layout {
@@ -101,7 +114,7 @@
       justify-content: center !important;
     }
 
-    .btn-tanka, .btn-gallery, .btn-omikuji, .btn-otakiage {
+    .btn-tanka, .btn-gallery, .btn-omikuji, .btn-karuta, .btn-otakiage {
       font-size: 13px !important;
       padding: 16px 8px !important;
     }
@@ -145,7 +158,7 @@
     class="hero-layout"
     style="position: relative; z-index: 2; display: flex; justify-content: center; align-items: center; gap: 30px; height: 100%; width: 100%; max-width: 1200px; padding: 0 20px; box-sizing: border-box;"
   >
-    <!-- 左側：縦書きボタン4つ -->
+    <!-- 左側：縦書きボタン5つ -->
     <div
       class="btn-container"
       style="display: flex; gap: 12px; align-items: center; flex-shrink: 0;"
@@ -158,6 +171,11 @@
       <!-- ⛩️ おみくじボタン -->
       <%= link_to omikuji_path, class: "btn-omikuji" do %>
         本日の絶望おみくじ
+      <% end %>
+
+      <!-- 🎴 絶望百人一首ボタン -->
+      <%= link_to karuta_path, class: "btn-karuta" do %>
+        絶望百人一首
       <% end %>
 
       <!-- ✍️ 短歌を詠むボタン -->

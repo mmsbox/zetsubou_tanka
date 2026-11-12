@@ -9,6 +9,9 @@ Rails.application.routes.draw do
 
   root "home#index"
 
+  # 🎴 絶望百人一首（かるた）
+  get "karuta", to: "karuta#show"
+
   # ⏳ 絶望年表（タイムライン）
   get "timeline", to: "posts#timeline"
 
