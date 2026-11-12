@@ -107,4 +107,45 @@ class KarutaRoomTest < ActiveSupport::TestCase
     start_game
     assert_empty @room.take!(@host, current_id, 2)
   end
+
+  test "相手の合図が30秒以上途絶えていなければ不戦勝にできない" do
+    start_game
+    @room.touch_presence!(@guest)
+
+    assert_nil @room.claim_forfeit!(@host)
+    assert_equal "playing", @room.reload.status
+  end
+
+  test "相手の合図が30秒以上途絶えたら不戦勝で終局する" do
+    start_game
+    @room.update_column(:guest_seen_at, 31.seconds.ago)
+
+    event = @room.claim_forfeit!(@host)
+    assert_equal "finished", event[:event]
+    assert event[:forfeit]
+    assert_equal "guest", @room.reload.forfeit_by
+    assert_equal :win, @room.outcome_for(@host)
+    assert_equal :lose, @room.outcome_for(@guest)
+  end
+
+  test "対局中でなければ不戦勝は申し立てられない" do
+    @room.join!(@guest)
+    assert_nil @room.claim_forfeit!(@host)
+  end
+
+  test "pvp_stats_for は終局した部屋の勝敗を集計する" do
+    start_game
+    4.times do |i|
+      @room.take!(@host, current_id, i + 1)
+      @room.advance!(i + 1)
+    end
+    other = KarutaRoom.open!(@guest)
+    other.join!(@host)
+    other.start!(@guest)
+    other.update_column(:host_seen_at, 1.minute.ago)
+    other.claim_forfeit!(@guest)
+
+    assert_equal({ total: 2, wins: 1, losses: 1, draws: 0 }, KarutaRoom.pvp_stats_for(@host))
+    assert_equal({ total: 2, wins: 1, losses: 1, draws: 0 }, KarutaRoom.pvp_stats_for(@guest))
+  end
 end

@@ -15,5 +15,7 @@ class MypagesController < ApplicationController
     # 4. 🎴 かるた戦績
     @karuta_stats = current_user.karuta_results.stats
     @karuta_results = current_user.karuta_results.recent.limit(10)
+    @pvp_stats = KarutaRoom.pvp_stats_for(current_user)
+    @pvp_rooms = KarutaRoom.finished_with(current_user).includes(:host, :guest).order(updated_at: :desc).limit(10)
   end
 end
