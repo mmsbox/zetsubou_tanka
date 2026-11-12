@@ -10,38 +10,51 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_01_061501) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_070000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
+  create_table "karuta_results", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "level", null: false
+    t.integer "player_score", default: 0, null: false
+    t.integer "cpu_score", default: 0, null: false
+    t.integer "otetsuki", default: 0, null: false
+    t.integer "card_count", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "created_at"], name: "index_karuta_results_on_user_id_and_created_at"
+  end
+
   create_table "posts", force: :cascade do |t|
-    t.text "ai_advice"
     t.string "author_name"
     t.datetime "created_at", null: false
-    t.string "error_category"
     t.text "error_message"
-    t.string "error_signature"
     t.integer "likes_count"
-    t.integer "parent_id"
     t.text "tanka"
     t.datetime "updated_at", null: false
     t.bigint "user_id"
+    t.integer "parent_id"
+    t.string "error_category"
+    t.text "ai_advice"
+    t.string "error_signature"
     t.index ["parent_id"], name: "index_posts_on_parent_id"
     t.index ["user_id"], name: "index_posts_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
-    t.datetime "created_at", null: false
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
-    t.string "name"
-    t.datetime "remember_created_at"
-    t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "name"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "karuta_results", "users"
   add_foreign_key "posts", "users"
 end
