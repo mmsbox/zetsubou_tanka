@@ -1,0 +1,77 @@
+<% content_for :ogp_title, "#{@room.name} | 絶望百人一首" %>
+<%= render "karuta/styles" %>
+
+<div class="karuta-page"
+     data-controller="karuta-room"
+     data-karuta-room-code-value="<%= @room.code %>"
+     data-karuta-room-room-name-value="<%= @room.name %>"
+     data-karuta-room-role-value="<%= @role %>"
+     data-karuta-room-state-value="<%= @room.public_state.to_json %>"
+     data-karuta-room-cards-value="<%= @room.field_cards.to_json %>"
+     data-karuta-room-posts-path-value="<%= posts_path %>"
+     data-karuta-room-share-url-value="<%= karuta_url %>">
+
+  <p class="karuta-room-kind">⚔️ 合言葉の部屋</p>
+  <h1 class="karuta-title"><%= @room.name %></h1>
+  <p class="karuta-connection" data-karuta-room-target="connection">接続中…</p>
+
+  <!-- 待合：合言葉の共有と開始 -->
+  <div class="karuta-panel" data-karuta-room-target="waiting">
+    <div style="color: #a39382; font-size: 13px;">合言葉</div>
+    <div class="karuta-code"><%= @room.code %></div>
+
+    <% if @role == "host" %>
+      <p style="color: #d4c5b0; font-size: 13px; margin: 0 0 10px;">このURLか合言葉を対戦相手に送り、「<%= @room.name %>」へ招いてくだされ。</p>
+      <div class="karuta-room-url">
+        <input type="text" readonly value="<%= karuta_room_url(@room.code) %>" data-karuta-room-target="roomUrl" aria-label="部屋のURL">
+        <button type="button" class="karuta-btn" data-action="karuta-room#copy" data-karuta-room-target="copyButton">写す</button>
+      </div>
+    <% end %>
+
+    <p class="karuta-status" data-karuta-room-target="waitingStatus"></p>
+
+    <div class="karuta-actions">
+      <% if @role == "host" %>
+        <button type="button" class="karuta-btn karuta-btn--primary" data-action="karuta-room#start" data-karuta-room-target="startButton" disabled>
+          対局を始める
+        </button>
+      <% end %>
+      <button type="button" class="karuta-btn" data-karuta-room-target="speechToggle" data-action="karuta-room#toggleSpeech">
+        🔇 読み上げ：無
+      </button>
+    </div>
+    <p style="color: #8a7b6e; font-size: 12px; margin: 16px 0 0;">
+      ※ 先に正しい札に触れた方が取り。お手つきは相手に1点献上、両者お手つきの札は流れとなります。
+    </p>
+  </div>
+
+  <!-- 対戦画面 -->
+  <div data-karuta-room-target="board" hidden>
+    <div class="karuta-scoreboard">
+      <div>あなた<span class="karuta-score" data-karuta-room-target="myScore">0</span></div>
+      <div style="font-size: 12px; color: #8a7b6e;" data-karuta-room-target="progress"></div>
+      <div><span data-karuta-room-target="opponentName"></span><span class="karuta-score" data-karuta-room-target="opponentScore">0</span></div>
+    </div>
+
+    <div class="karuta-reader">
+      <div class="karuta-reader-label">📜 上の句</div>
+      <div class="karuta-reading" data-karuta-room-target="reading" aria-live="polite"></div>
+    </div>
+    <p class="karuta-status" data-karuta-room-target="status"></p>
+
+    <div class="karuta-field" data-karuta-room-target="field"></div>
+
+    <div class="karuta-last" data-karuta-room-target="lastCard" hidden></div>
+
+    <!-- 結果 -->
+    <div class="karuta-panel karuta-result" data-karuta-room-target="result" hidden>
+      <p class="karuta-result-title" data-karuta-room-target="resultTitle"></p>
+      <p class="karuta-result-detail" data-karuta-room-target="resultDetail"></p>
+      <div class="karuta-actions">
+        <a href="#" target="_blank" rel="noopener noreferrer" class="karuta-btn karuta-share" data-karuta-room-target="shareLink">𝕏 結果を呟く</a>
+        <%= button_to "新しい部屋を作る", karuta_rooms_path, class: "karuta-btn karuta-btn--primary", form: { style: "display: inline;" } %>
+        <%= link_to "かるたへ戻る", karuta_path, class: "karuta-btn" %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -30,7 +30,7 @@ export default class extends Controller {
   static targets = [
     "start", "board", "field", "reading", "status",
     "playerScore", "cpuScore", "levelName", "lastCard",
-    "result", "resultTitle", "resultDetail", "shareLink", "speechToggle", "saveStatus"
+    "result", "resultTitle", "resultDetail", "shareLink", "speechToggle", "saveStatus", "roomPanel"
   ]
   static values = { cards: Array, shareUrl: String, postsPath: String, saveUrl: String }
 
@@ -70,6 +70,7 @@ export default class extends Controller {
     this.renderField()
     this.lastCardTarget.hidden = true
     this.startTarget.hidden = true
+    if (this.hasRoomPanelTarget) this.roomPanelTarget.hidden = true
     this.resultTarget.hidden = true
     this.boardTarget.hidden = false
 
