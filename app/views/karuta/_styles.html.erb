@@ -1,0 +1,186 @@
+<style>
+  .karuta-page [hidden] { display: none !important; }
+
+  .karuta-page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 16px 80px;
+    box-sizing: border-box;
+    font-family: 'Shippori Mincho', serif;
+    text-align: center;
+  }
+
+  .karuta-title {
+    font-size: 28px;
+    color: #ffffff;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    border-bottom: 2px solid #8c1d1d;
+    display: inline-block;
+    padding-bottom: 6px;
+    margin: 0 0 16px;
+  }
+
+  .karuta-lead {
+    color: #d4c5b0;
+    font-size: 14px;
+    line-height: 1.9;
+    margin: 0 0 28px;
+  }
+
+  .karuta-panel {
+    background: rgba(20, 8, 8, 0.85);
+    border: 2px solid #8c1d1d;
+    border-radius: 12px;
+    padding: 24px 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  }
+
+  .karuta-levels {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 20px 0 16px;
+  }
+
+  .karuta-btn {
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    border: 1px solid #5a4a3e;
+    background: #2a221d;
+    color: #d4c5b0;
+    transition: all 0.2s ease;
+  }
+  .karuta-btn:hover { border-color: #e5c158; color: #ffffff; }
+  .karuta-btn--primary { background: #8c1d1d; border-color: #ff4d4d; color: #ffffff; }
+  .karuta-btn--primary:hover { background: #b32424; }
+  .karuta-btn small { display: block; font-size: 11px; font-weight: normal; color: #c9b8a3; margin-top: 2px; }
+
+  .karuta-scoreboard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    color: #d4c5b0;
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  .karuta-score { font-size: 26px; font-weight: 800; color: #ffffff; margin-left: 6px; }
+
+  .karuta-reader {
+    background: rgba(250, 246, 237, 0.95);
+    border: 3px double #d4c5b0;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .karuta-reader-label { font-size: 12px; color: #8a7b6e; margin-bottom: 6px; }
+  .karuta-reading {
+    min-height: 2.4em;
+    font-size: 22px;
+    line-height: 1.6;
+    letter-spacing: 0.12em;
+    color: #1a1512;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .karuta-status {
+    min-height: 1.6em;
+    color: #e5c158;
+    font-size: 15px;
+    margin: 0 0 16px;
+  }
+
+  .karuta-field {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  @media (min-width: 900px) {
+    .karuta-field { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  }
+
+  /* 🎴 取り札（下の句の短冊） */
+  .karuta-fuda {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    padding: 12px 4px;
+    box-sizing: border-box;
+    overflow: hidden;
+    background: #faf6ed;
+    color: #1a1512;
+    border: 2px solid #d4c5b0;
+    border-radius: 6px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.5);
+    font-family: 'Shippori Mincho', serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1.5;
+    word-break: break-all;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.3s ease;
+  }
+  /* 短冊の中身だけを縦書きにし、ボタン側で上下左右中央に置く */
+  .karuta-fuda-text {
+    writing-mode: vertical-rl;
+    -webkit-writing-mode: vertical-rl;
+    text-orientation: mixed;
+    max-height: 100%;
+  }
+  .karuta-fuda-text span { display: block; }
+  .karuta-fuda:hover:not(:disabled) { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(140, 29, 29, 0.6); }
+  .karuta-fuda:disabled { cursor: default; }
+  .karuta-fuda.is-miss { background: #f5c6c6; border-color: #d93838; animation: karutaShake 0.3s; }
+  .karuta-fuda.is-taken-player { opacity: 0.35; border-color: #27ae60; background: #d8efdc; }
+  .karuta-fuda.is-taken-cpu { opacity: 0.25; border-color: #5a4a3e; background: #3a302a; color: #8a7b6e; }
+  @media (min-width: 900px) {
+    .karuta-fuda { height: 240px; font-size: 16px; }
+  }
+
+  @keyframes karutaShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+
+  .karuta-last {
+    background: rgba(0,0,0,0.35);
+    border-left: 4px solid #8c1d1d;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    text-align: left;
+  }
+  .karuta-last-tanka { color: #f2e8d8; font-size: 15px; line-height: 1.8; text-decoration: none; overflow-wrap: anywhere; }
+  .karuta-last-tanka:hover { color: #e5c158; text-decoration: underline; }
+  .karuta-last-author { color: #8a7b6e; font-size: 12px; margin-top: 4px; }
+
+  .karuta-result { margin-top: 24px; }
+  .karuta-result-title { font-size: 36px; font-weight: 800; color: #ffffff; margin: 0 0 8px; }
+  .karuta-result-detail { color: #d4c5b0; font-size: 15px; margin: 0 0 20px; }
+  .karuta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .karuta-share { background: #000; color: #fff; border-color: #333; }
+  .karuta-record { color: #d4c5b0; font-size: 13px; margin: 16px 0 0; }
+  .karuta-result .karuta-record { margin: 0 0 20px; min-height: 1.4em; }
+  .karuta-record a { color: #e5c158; }
+
+  /* 🎴 合言葉の部屋 */
+  .karuta-code { font-size: 40px; font-weight: 800; letter-spacing: 0.3em; color: #e5c158; margin: 6px 0 16px; font-family: ui-monospace, 'SFMono-Regular', monospace; }
+  .karuta-room-url { display: flex; gap: 8px; max-width: 520px; margin: 0 auto 16px; }
+  .karuta-room-url input { flex: 1; min-width: 0; padding: 10px 12px; border-radius: 8px; border: 1px solid #5a4a3e; background: #140f0d; color: #f2e8d8; font-size: 13px; }
+  .karuta-join-form { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+  .karuta-join-form input { width: 160px; padding: 10px 12px; border-radius: 8px; border: 1px solid #5a4a3e; background: #140f0d; color: #f2e8d8; font-size: 16px; letter-spacing: 0.2em; text-transform: uppercase; text-align: center; }
+  .karuta-fuda.is-nagare { opacity: 0.25; border-style: dashed; background: #2a221d; color: #8a7b6e; }
+  .karuta-connection { font-size: 12px; color: #8a7b6e; margin: 0 0 12px; }
+  .karuta-connection.is-offline { color: #ff6b6b; }
+  .karuta-section-title { color: #f2e8d8; font-size: 16px; margin: 0 0 6px; }
+</style>
