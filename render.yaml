@@ -15,6 +15,17 @@ services:
         sync: false
       - key: PORT
         value: "3000"
+      # 📮 メール送信（パスワード再設定など）。未設定ならメールは送信されない
+      - key: SMTP_ADDRESS
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: MAILER_FROM
+        sync: false
 
 databases:
   - name: despair-tanka-db
