@@ -20,6 +20,7 @@ class KarutaRoomsControllerTest < ActionDispatch::IntegrationTest
     get karuta_room_url(room.code)
     assert_response :success
     assert_select "[data-karuta-room-role-value='host']"
+    assert_select "h1", text: room.name
   end
 
   test "札が足りなければ部屋を作れない" do

@@ -24,6 +24,7 @@ class KarutaRoomTest < ActiveSupport::TestCase
 
   test "部屋を作ると合言葉と札が用意される" do
     assert_match(/\A[A-Z2-9]{6}\z/, @room.code)
+    assert_match(/\A(#{Post::ALL_CATEGORIES.map { Regexp.escape(_1) }.join("|")})(#{KarutaRoom::ROOM_SUFFIXES.join("|")})\z/, @room.name)
     assert_equal 4, @room.cards.size
     assert_equal @room.cards.map { |c| c["id"] }.sort, @room.reading_order.sort
     assert_equal "waiting", @room.status
