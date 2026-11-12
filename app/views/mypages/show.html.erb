@@ -29,6 +29,15 @@
                 <span><%= rank[:title] %></span>
               </span>
             <% end %>
+            <!-- 🎴 かるたの称号 -->
+            <% if (k_rank = current_user.karuta_rank) %>
+              <span
+                style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 12px; background: <%= k_rank[:bg_rgba] %>; border: 1px solid <%= k_rank[:border] %>; color: <%= k_rank[:color] %>; border-radius: 20px; font-size: 12px; font-weight: bold; box-shadow: 0 0 10px <%= k_rank[:bg_rgba] %>;"
+              >
+                <span><%= k_rank[:icon] %></span>
+                <span><%= k_rank[:title] %></span>
+              </span>
+            <% end %>
           </div>
           <!-- 詠み人名前 -->
           <h1
@@ -124,6 +133,16 @@
           <span style="font-size: 14px; color: #f2e8d8;">心</span>
         </div>
       </div>
+      <!-- かるた戦績 -->
+      <div
+        style="background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; padding: 18px; text-align: center;"
+      >
+        <div style="font-size: 12px; color: #a39382; margin-bottom: 6px;">🎴 かるた戦績</div>
+        <div style="font-size: 24px; font-weight: bold; color: #bd93f9;">
+          <%= @karuta_stats[:wins] %>
+          <span style="font-size: 14px; color: #f2e8d8;">勝 / <%= @karuta_stats[:total] %>戦</span>
+        </div>
+      </div>
     </div>
     <!-- 🗂️ タブ切替ヘッダー -->
     <div
@@ -151,6 +170,14 @@
         style="padding: 10px 20px; background: none; border: none; border-bottom: 3px solid transparent; color: #a39382; font-size: 15px; font-weight: bold; font-family: 'Shippori Mincho', serif; cursor: pointer; transition: all 0.2s ease;"
       >
         🌸 共感した短歌
+      </button>
+
+      <button
+        class="carte-tab"
+        onclick="switchCarteTab('karuta')"
+        style="padding: 10px 20px; background: none; border: none; border-bottom: 3px solid transparent; color: #a39382; font-size: 15px; font-weight: bold; font-family: 'Shippori Mincho', serif; cursor: pointer; transition: all 0.2s ease; white-space: nowrap;"
+      >
+        🎴 かるた戦績
       </button>
     </div>
     <!-- ---------------------------------------------------- --> <!-- タブ 1:
@@ -366,6 +393,65 @@
         <% end %>
       </div>
     </div>
+    <!-- ---------------------------------------------------- --> <!-- タブ 4:
+    かるた戦績 --> <!-- ---------------------------------------------------- -->
+    <div id="tab-content-karuta" class="carte-content" style="display: none;">
+      <% if @karuta_stats[:total].zero? %>
+        <div
+          style="text-align: center; padding: 60px 16px; color: #887868; background: #1a1512; border: 1px dashed #3a2e2b; border-radius: 12px;"
+        >
+          まだ一局も指しておりませぬ。
+          <%= link_to "🎴 絶望百人一首で法師に挑む", karuta_path, style: "color: #e5c158; font-weight: bold;" %>
+        </div>
+      <% else %>
+        <!-- 難易度別の戦績 -->
+        <div class="karuta-stats-wrap">
+          <table class="karuta-stats-table">
+            <thead>
+              <tr><th>対戦相手</th><th>戦</th><th>勝</th><th>敗</th><th>分</th><th>勝率</th></tr>
+            </thead>
+            <tbody>
+              <% KarutaResult::LEVELS.each do |key, name| %>
+                <% s = @karuta_stats[:by_level][key] %>
+                <tr>
+                  <td><%= name %></td>
+                  <td><%= s[:total] %></td>
+                  <td style="color: #e5c158;"><%= s[:wins] %></td>
+                  <td><%= s[:losses] %></td>
+                  <td><%= s[:draws] %></td>
+                  <td><%= s[:total].zero? ? "―" : "#{(s[:wins] * 100.0 / s[:total]).round}%" %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 直近の対局 -->
+        <div style="font-size: 14px; color: #a39382; margin: 28px 0 12px;">⏳ 直近の対局</div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <% @karuta_results.each do |result| %>
+            <div
+              style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; background: #1a1512; border: 1px solid #3a2e2b; border-radius: 10px; padding: 12px 16px;"
+            >
+              <div style="font-weight: bold; color: <%= { win: '#e5c158', lose: '#ff6b6b', draw: '#d4c5b0' }[result.outcome] %>;">
+                <%= result.outcome_label %>
+              </div>
+              <div style="font-size: 14px; color: #f2e8d8;">
+                vs <%= result.level_name %>　<%= result.player_score %> 対 <%= result.cpu_score %>
+                <% if result.otetsuki.positive? %>
+                  <span style="font-size: 12px; color: #887868;">（お手つき <%= result.otetsuki %>）</span>
+                <% end %>
+              </div>
+              <div style="font-size: 12px; color: #887868;"><%= result.created_at.strftime("%Y/%m/%d %H:%M") %></div>
+            </div>
+          <% end %>
+        </div>
+
+        <div style="text-align: center; margin-top: 24px;">
+          <%= link_to "🎴 もう一局挑む", karuta_path, style: "display: inline-block; padding: 10px 22px; background: #8c1d1d; color: #fff; border-radius: 8px; text-decoration: none; font-weight: bold;" %>
+        </div>
+      <% end %>
+    </div>
 
   </div>
 </div>
@@ -393,6 +479,12 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6); transition: transform 0.2s ease, border-color 0.2s ease;
   }
   .user-timeline-card:hover { transform: translateY(-3px); border-color: #8c1d1d; }
+  .karuta-stats-wrap { overflow-x: auto; }
+  .karuta-stats-table { width: 100%; border-collapse: collapse; background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; overflow: hidden; font-size: 14px; }
+  .karuta-stats-table th, .karuta-stats-table td { padding: 12px 10px; text-align: center; border-bottom: 1px solid #3a2e2b; white-space: nowrap; }
+  .karuta-stats-table th { color: #a39382; font-size: 12px; font-weight: normal; background: #140f0d; }
+  .karuta-stats-table td:first-child { text-align: left; color: #f2e8d8; }
+  .karuta-stats-table tr:last-child td { border-bottom: none; }
   @media (max-width: 768px) {
     .user-timeline-line { left: 18px; }
     .user-timeline-item { width: 100%; left: 0 !important; padding-left: 40px !important; padding-right: 0 !important; }

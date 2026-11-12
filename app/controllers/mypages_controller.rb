@@ -11,5 +11,9 @@ class MypagesController < ApplicationController
     # 3. 🌸 共感した短歌（セッションに保持されている「わかる」を押した短歌IDから取得）
     liked_ids = session[:liked_post_ids] || []
     @liked_posts = Post.where(id: liked_ids).order(created_at: :desc)
+
+    # 4. 🎴 かるた戦績
+    @karuta_stats = current_user.karuta_results.stats
+    @karuta_results = current_user.karuta_results.recent.limit(10)
   end
 end

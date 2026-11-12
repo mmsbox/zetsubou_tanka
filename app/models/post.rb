@@ -68,6 +68,8 @@ class Post < ApplicationRecord
 
   # 🎴 絶望百人一首：共感数の多い短歌から、5句に分かれた歌を最大100首選んで札にする
   KARUTA_DECK_SIZE = 100
+  KARUTA_ROUND_SIZE = 8 # 1局で場に並べる札の枚数
+  KARUTA_MIN_CARDS = 4  # これ未満の歌しかない場合はかるたを開催しない
 
   def self.karuta_deck(size: KARUTA_DECK_SIZE)
     where.not(tanka: [ nil, "" ])

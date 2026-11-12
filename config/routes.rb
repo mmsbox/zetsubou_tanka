@@ -11,6 +11,7 @@ Rails.application.routes.draw do
 
   # 🎴 絶望百人一首（かるた）
   get "karuta", to: "karuta#show"
+  post "karuta/results", to: "karuta_results#create", as: :karuta_results
 
   # ⏳ 絶望年表（タイムライン）
   get "timeline", to: "posts#timeline"
