@@ -46,4 +46,27 @@ class KarutaRoomChannelTest < ActionCable::Channel::TestCase
     end
     assert_equal 1, @room.reload.guest_score
   end
+
+  test "購読すると接続を記録し、入室を部屋に知らせる" do
+    stub_connection current_user: users(:two)
+
+    assert_broadcasts(KarutaRoomChannel.broadcasting_for(@room), 1) do
+      subscribe code: @room.code
+    end
+    assert_not_nil @room.reload.guest_seen_at
+  end
+
+  test "相手がまだ居るときの不戦勝の申し立ては、本人にだけ相手の在室を返す" do
+    @room.start!(users(:one))
+    @room.touch_presence!(users(:two))
+    stub_connection current_user: users(:one)
+    subscribe code: @room.code
+
+    assert_no_broadcasts(KarutaRoomChannel.broadcasting_for(@room)) do
+      perform :claim_forfeit
+    end
+    assert_equal "presence", transmissions.last["event"]
+    assert transmissions.last["online"]
+    assert_equal "playing", @room.reload.status
+  end
 end

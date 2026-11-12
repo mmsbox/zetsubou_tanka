@@ -7,6 +7,8 @@ import { cable } from "@hotwired/turbo-rails"
 const CHAR_INTERVAL = 170 // 上の句を一文字表示する間隔
 const NEXT_TURN_DELAY = 2800 // 札が取られてから次の首へ進むまで
 const MISS_FLASH = 600 // お手つきの札が赤く光る時間
+const HEARTBEAT_INTERVAL = 10000 // 「接続している」合図を送る間隔
+const FORFEIT_WAIT = 30 // 相手が抜けてから不戦勝を申し立てるまでの秒数（サーバーの FORFEIT_AFTER と対応）
 
 function shuffle(array) {
   const a = [ ...array ]
@@ -19,7 +21,7 @@ function shuffle(array) {
 
 export default class extends Controller {
   static targets = [
-    "connection", "waiting", "waitingStatus", "startButton", "roomUrl", "copyButton", "speechToggle",
+    "connection", "notice", "waiting", "waitingStatus", "startButton", "roomUrl", "copyButton", "speechToggle",
     "board", "myScore", "opponentScore", "opponentName", "progress", "reading", "status", "field",
     "lastCard", "result", "resultTitle", "resultDetail", "shareLink"
   ]
@@ -40,6 +42,8 @@ export default class extends Controller {
   disconnect() {
     this.gone = true
     this.clearTimers()
+    this.stopForfeitCountdown()
+    clearInterval(this.heartbeatTimer)
     this.cancelSpeech()
     this.subscription?.unsubscribe()
   }
@@ -71,6 +75,8 @@ export default class extends Controller {
     }
     this.wasConnected = true
     this.setConnection("🟢 接続中", false)
+    clearInterval(this.heartbeatTimer)
+    this.heartbeatTimer = setInterval(() => this.perform("heartbeat"), HEARTBEAT_INTERVAL)
   }
 
   perform(action, data = {}) {
@@ -93,8 +99,12 @@ export default class extends Controller {
       case "otetsuki":
         this.onOtetsuki(data)
         break
+      case "presence":
+        this.onPresence(data)
+        break
       case "finished":
         this.clearTimers()
+        this.stopForfeitCountdown()
         this.render()
         break
     }
@@ -169,6 +179,52 @@ export default class extends Controller {
     } else {
       this.statusTarget.textContent = `${this.opponentName()}がお手つき！ あなたに一点。`
     }
+  }
+
+  // 相手の入退室。対局中に抜けたら、戻らなければ不戦勝となるまでの秒読みを始める
+  onPresence(data) {
+    if (data.role !== this.opponent) return
+
+    if (data.online) {
+      const wasCounting = Boolean(this.forfeitTimer)
+      this.stopForfeitCountdown()
+      this.showNotice(wasCounting ? `${this.opponentName()}が戻りました。` : null)
+      if (wasCounting) this.later(() => this.showNotice(null), 2500)
+      return
+    }
+
+    if (this.state.status === "playing") {
+      this.startForfeitCountdown()
+    } else if (this.state.status === "waiting") {
+      this.showNotice(`${this.opponentName()}が部屋を離れました。`)
+    }
+  }
+
+  startForfeitCountdown() {
+    this.stopForfeitCountdown()
+    let remaining = FORFEIT_WAIT
+    const tick = () => {
+      this.showNotice(`⚠️ ${this.opponentName()}の接続が切れました。${remaining}秒以内に戻らなければ不戦勝となります。`)
+      if (remaining <= 0) {
+        this.stopForfeitCountdown()
+        this.showNotice("不戦勝を申し立てております…")
+        this.perform("claim_forfeit")
+        return
+      }
+      remaining -= 1
+    }
+    tick()
+    this.forfeitTimer = setInterval(tick, 1000)
+  }
+
+  stopForfeitCountdown() {
+    clearInterval(this.forfeitTimer)
+    this.forfeitTimer = null
+  }
+
+  showNotice(text) {
+    this.noticeTarget.textContent = text || ""
+    this.noticeTarget.hidden = !text
   }
 
   // 札が取られた／流れた：上の句を全部見せ、少し待って次の首へ
@@ -288,16 +344,21 @@ export default class extends Controller {
 
   showResult() {
     this.readingTarget.textContent = ""
-    this.statusTarget.textContent = "全ての札が取られ申した。"
+    this.statusTarget.textContent = this.state.forfeit_by ? "対局は打ち切られ申した。" : "全ての札が取られ申した。"
+    this.showNotice(null)
 
     const mine = this.state.scores[this.me]
     const theirs = this.state.scores[this.opponent]
+    const forfeitBy = this.state.forfeit_by
     let title
-    if (mine > theirs) title = "🏆 勝利"
+    if (forfeitBy === this.opponent) title = "🏆 不戦勝"
+    else if (forfeitBy === this.me) title = "💀 不戦敗"
+    else if (mine > theirs) title = "🏆 勝利"
     else if (mine < theirs) title = "💀 敗北"
     else title = "🤝 引き分け"
 
-    const detail = `${this.opponentName()}との勝負：${mine} 対 ${theirs}（お手つき ${this.state.otetsuki[this.me]} 回）`
+    const reason = forfeitBy ? (forfeitBy === this.me ? "（接続が途絶えたため）" : `（${this.opponentName()}が退室したため）`) : ""
+    const detail = `${this.opponentName()}との勝負${reason}：${mine} 対 ${theirs}（お手つき ${this.state.otetsuki[this.me]} 回）`
     this.resultTitleTarget.textContent = title
     this.resultDetailTarget.textContent = detail
 

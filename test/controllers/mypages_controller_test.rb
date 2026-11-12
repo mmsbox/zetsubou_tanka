@@ -21,4 +21,21 @@ class MypagesControllerTest < ActionDispatch::IntegrationTest
     assert_match "札取りの若武者", response.body
     assert_match "vs 歌聖法師", response.body
   end
+
+  test "かるた戦績タブに対人戦の結果を表示する" do
+    phrases = %w[あかさたな いきしちにひみ うくすつぬ えけせてねへめ おこそとのほも]
+    4.times { |i| Post.create!(error_message: "Error #{i}", tanka: phrases.map { |p| "#{p}#{i}" }.join(" ")) }
+    room = KarutaRoom.open!(users(:one))
+    room.join!(users(:two))
+    room.start!(users(:one))
+    room.update_column(:guest_seen_at, 1.minute.ago)
+    room.claim_forfeit!(users(:one))
+    sign_in users(:one)
+
+    get mypage_url
+    assert_response :success
+    assert_match "対人戦（合言葉の部屋）", response.body
+    assert_match "不戦勝", response.body
+    assert_match "vs テスト法師二号", response.body
+  end
 end
