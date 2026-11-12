@@ -1,16 +1,18 @@
-<% content_for :ogp_title, "合言葉の部屋 | 絶望百人一首" %>
+<% content_for :ogp_title, "#{@room.name} | 絶望百人一首" %>
 <%= render "karuta/styles" %>
 
 <div class="karuta-page"
      data-controller="karuta-room"
      data-karuta-room-code-value="<%= @room.code %>"
+     data-karuta-room-room-name-value="<%= @room.name %>"
      data-karuta-room-role-value="<%= @role %>"
      data-karuta-room-state-value="<%= @room.public_state.to_json %>"
      data-karuta-room-cards-value="<%= @room.field_cards.to_json %>"
      data-karuta-room-posts-path-value="<%= posts_path %>"
      data-karuta-room-share-url-value="<%= karuta_url %>">
 
-  <h1 class="karuta-title">⚔️ 合言葉の部屋</h1>
+  <p class="karuta-room-kind">⚔️ 合言葉の部屋</p>
+  <h1 class="karuta-title"><%= @room.name %></h1>
   <p class="karuta-connection" data-karuta-room-target="connection">接続中…</p>
 
   <!-- 待合：合言葉の共有と開始 -->
@@ -19,7 +21,7 @@
     <div class="karuta-code"><%= @room.code %></div>
 
     <% if @role == "host" %>
-      <p style="color: #d4c5b0; font-size: 13px; margin: 0 0 10px;">このURLか合言葉を対戦相手に送ってくだされ。</p>
+      <p style="color: #d4c5b0; font-size: 13px; margin: 0 0 10px;">このURLか合言葉を対戦相手に送り、「<%= @room.name %>」へ招いてくだされ。</p>
       <div class="karuta-room-url">
         <input type="text" readonly value="<%= karuta_room_url(@room.code) %>" data-karuta-room-target="roomUrl" aria-label="部屋のURL">
         <button type="button" class="karuta-btn" data-action="karuta-room#copy" data-karuta-room-target="copyButton">写す</button>

@@ -23,7 +23,7 @@ export default class extends Controller {
     "board", "myScore", "opponentScore", "opponentName", "progress", "reading", "status", "field",
     "lastCard", "result", "resultTitle", "resultDetail", "shareLink"
   ]
-  static values = { code: String, role: String, state: Object, cards: Array, postsPath: String, shareUrl: String }
+  static values = { code: String, roomName: String, role: String, state: Object, cards: Array, postsPath: String, shareUrl: String }
 
   connect() {
     this.timers = []
@@ -216,7 +216,7 @@ export default class extends Controller {
           ? `${names.guest}が入室しました。いざ、対局を！`
           : "対戦相手の入室を待っております…"
       } else {
-        this.waitingStatusTarget.textContent = `${names.host}が対局を始めるのを待っております…`
+        this.waitingStatusTarget.textContent = `「${this.roomNameValue}」に入室しました。${names.host}が対局を始めるのを待っております…`
       }
       return
     }
@@ -302,7 +302,7 @@ export default class extends Controller {
     this.resultDetailTarget.textContent = detail
 
     const params = new URLSearchParams({
-      text: `【絶望百人一首・対人戦】${title.replace(/^\S+\s/, "")}\n${detail}\n\n`,
+      text: `【絶望百人一首・${this.roomNameValue}】${title.replace(/^\S+\s/, "")}\n${detail}\n\n`,
       url: this.shareUrlValue,
       hashtags: "絶望百人一首,絶望えらぁ短歌"
     })

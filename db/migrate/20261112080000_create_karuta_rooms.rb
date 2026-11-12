@@ -2,6 +2,7 @@ class CreateKarutaRooms < ActiveRecord::Migration[8.1]
   def change
     create_table :karuta_rooms do |t|
       t.string :code, null: false
+      t.string :name, null: false
       t.references :host, null: false, foreign_key: { to_table: :users }
       t.references :guest, foreign_key: { to_table: :users }
       t.string :status, null: false, default: "waiting"

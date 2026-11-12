@@ -11,8 +11,11 @@ class KarutaRoom < ApplicationRecord
   CODE_LENGTH = 6
   EXPIRES_IN = 1.day
   STATUSES = %w[waiting playing finished].freeze
+  # 部屋名は「エラーのタグ ＋ 和風の部屋」で自動命名する（例：無限ループの間）
+  ROOM_SUFFIXES = %w[の間 の座敷 の茶室 の離れ の庵 の書院 の広間].freeze
 
   validates :code, presence: true, uniqueness: true
+  validates :name, presence: true
   validates :status, inclusion: { in: STATUSES }
 
   scope :active, -> { where(created_at: EXPIRES_IN.ago..) }
@@ -25,6 +28,7 @@ class KarutaRoom < ApplicationRecord
     create!(
       host: host,
       code: generate_code,
+      name: generate_name,
       cards: cards.map(&:deep_stringify_keys),
       reading_order: cards.map { |card| card[:id] }.shuffle
     )
@@ -35,6 +39,10 @@ class KarutaRoom < ApplicationRecord
       code = Array.new(CODE_LENGTH) { CODE_CHARS.sample }.join
       return code unless exists?(code: code)
     end
+  end
+
+  def self.generate_name
+    "#{Post::ALL_CATEGORIES.sample}#{ROOM_SUFFIXES.sample}"
   end
 
   def self.normalize_code(code)
