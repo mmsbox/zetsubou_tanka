@@ -30,9 +30,9 @@ export default class extends Controller {
   static targets = [
     "start", "board", "field", "reading", "status",
     "playerScore", "cpuScore", "levelName", "lastCard",
-    "result", "resultTitle", "resultDetail", "shareLink", "speechToggle"
+    "result", "resultTitle", "resultDetail", "shareLink", "speechToggle", "saveStatus"
   ]
-  static values = { cards: Array, shareUrl: String, postsPath: String }
+  static values = { cards: Array, shareUrl: String, postsPath: String, saveUrl: String }
 
   connect() {
     this.timers = []
@@ -57,7 +57,8 @@ export default class extends Controller {
   }
 
   start(event) {
-    this.level = LEVELS[event.params.level] || LEVELS.kasei
+    this.levelKey = event.params.level in LEVELS ? event.params.level : "kasei"
+    this.level = LEVELS[this.levelKey]
     this.playerScore = 0
     this.cpuScore = 0
     this.otetsuki = 0
@@ -219,6 +220,41 @@ export default class extends Controller {
 
     this.resultTarget.hidden = false
     this.resultTarget.scrollIntoView({ behavior: "smooth", block: "center" })
+    this.saveResult()
+  }
+
+  // 📜 ログイン中なら戦績をサーバーに記録（未ログイン時は saveUrl が空で、ログイン案内がビューに出ている）
+  async saveResult() {
+    if (!this.saveUrlValue) return
+
+    this.saveStatusTarget.textContent = "戦績を記録しております…"
+    try {
+      const response = await fetch(this.saveUrlValue, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]')?.content || ""
+        },
+        body: JSON.stringify({
+          karuta_result: {
+            level: this.levelKey,
+            player_score: this.playerScore,
+            cpu_score: this.cpuScore,
+            otetsuki: this.otetsuki,
+            card_count: this.cardsValue.length
+          }
+        })
+      })
+      if (!response.ok) throw new Error(`status ${response.status}`)
+
+      const data = await response.json()
+      const rank = data.rank ? `（現在の称号：${data.rank.icon} ${data.rank.title}）` : ""
+      this.saveStatusTarget.textContent = `📜 戦績をマイページに記録し申した${rank}`
+    } catch (error) {
+      console.error("Karuta result save failed:", error)
+      this.saveStatusTarget.textContent = "戦績の記録に失敗し申した…"
+    }
   }
 
   findFuda(id) {

@@ -171,13 +171,17 @@
   .karuta-result-detail { color: #d4c5b0; font-size: 15px; margin: 0 0 20px; }
   .karuta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
   .karuta-share { background: #000; color: #fff; border-color: #333; }
+  .karuta-record { color: #d4c5b0; font-size: 13px; margin: 16px 0 0; }
+  .karuta-result .karuta-record { margin: 0 0 20px; min-height: 1.4em; }
+  .karuta-record a { color: #e5c158; }
 </style>
 
 <div class="karuta-page"
      data-controller="karuta"
      data-karuta-cards-value="<%= @cards.to_json %>"
      data-karuta-share-url-value="<%= karuta_url %>"
-     data-karuta-posts-path-value="<%= posts_path %>">
+     data-karuta-posts-path-value="<%= posts_path %>"
+     <% if user_signed_in? %>data-karuta-save-url-value="<%= karuta_results_path %>"<% end %>>
 
   <h1 class="karuta-title">🎴 絶望百人一首</h1>
   <p class="karuta-lead">
@@ -188,7 +192,7 @@
   <% if @cards.empty? %>
     <div class="karuta-panel">
       <p style="color: #d4c5b0; margin: 0 0 20px;">
-        まだ札にできる短歌が足りませぬ（あと<%= KarutaController::MIN_CARDS - @deck_size %>首）。<br>
+        まだ札にできる短歌が足りませぬ（あと<%= Post::KARUTA_MIN_CARDS - @deck_size %>首）。<br>
         短歌を詠んで、札を増やしてくだされ。
       </p>
       <%= link_to "短歌を詠む", new_post_path, class: "karuta-btn karuta-btn--primary" %>
@@ -211,6 +215,13 @@
       <button type="button" class="karuta-btn" data-karuta-target="speechToggle" data-action="karuta#toggleSpeech">
         🔇 読み上げ：無
       </button>
+      <p class="karuta-record">
+        <% if @karuta_stats %>
+          📜 あなたの戦績：<%= @karuta_stats[:total] %>戦 <%= @karuta_stats[:wins] %>勝 <%= @karuta_stats[:losses] %>敗 <%= @karuta_stats[:draws] %>分
+        <% else %>
+          <%= link_to "ログイン", new_user_session_path %>すると、戦績がマイページに刻まれます。
+        <% end %>
+      </p>
       <p style="color: #8a7b6e; font-size: 12px; margin: 16px 0 0;">
         ※ 間違った札に触れると「お手つき」。法師に1点献上となり、その首には手を出せなくなります。
       </p>
@@ -238,6 +249,11 @@
       <div class="karuta-panel karuta-result" data-karuta-target="result" hidden>
         <p class="karuta-result-title" data-karuta-target="resultTitle"></p>
         <p class="karuta-result-detail" data-karuta-target="resultDetail"></p>
+        <p class="karuta-record" data-karuta-target="saveStatus">
+          <% unless user_signed_in? %>
+            <%= link_to "ログイン", new_user_session_path %>すると、戦績がマイページに刻まれます。
+          <% end %>
+        </p>
         <div class="karuta-actions">
           <a href="#" target="_blank" rel="noopener noreferrer" class="karuta-btn karuta-share" data-karuta-target="shareLink">𝕏 結果を呟く</a>
           <%= link_to "もう一局", karuta_path, class: "karuta-btn karuta-btn--primary" %>
