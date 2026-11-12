@@ -13,12 +13,26 @@ class KarutaRoom < ApplicationRecord
   STATUSES = %w[waiting playing finished].freeze
   # 部屋名は「エラーのタグ ＋ 和風の部屋」で自動命名する（例：無限ループの間）
   ROOM_SUFFIXES = %w[の間 の座敷 の茶室 の離れ の庵 の書院 の広間].freeze
+  # 対局中に相手の合図（ハートビート）がこの時間途絶えたら、残った側が不戦勝を申し立てられる
+  FORFEIT_AFTER = 30.seconds
 
   validates :code, presence: true, uniqueness: true
   validates :name, presence: true
   validates :status, inclusion: { in: STATUSES }
 
   scope :active, -> { where(created_at: EXPIRES_IN.ago..) }
+  scope :finished_with, ->(user) { where(status: "finished").where("host_id = :id OR guest_id = :id", id: user.id) }
+
+  # 📊 対人戦の戦績（終局した部屋から集計）
+  def self.pvp_stats_for(user)
+    stats = { total: 0, wins: 0, losses: 0, draws: 0 }
+    finished_with(user).each do |room|
+      key = { win: :wins, lose: :losses, draw: :draws }[room.outcome_for(user)]
+      stats[:total] += 1
+      stats[key] += 1
+    end
+    stats
+  end
 
   # 部屋を作り、場に並べる札と読む順番を決める
   def self.open!(host)
@@ -107,9 +121,51 @@ class KarutaRoom < ApplicationRecord
     end
   end
 
+  # 接続中であることの記録（購読時と、対局中のハートビートで更新）
+  def touch_presence!(user)
+    role = role_of(user)
+    update_column("#{role}_seen_at", Time.current) if role
+  end
+
+  # 相手が FORFEIT_AFTER 以上不在なら、相手の不戦敗として終局する。条件を満たさなければ nil
+  def claim_forfeit!(user)
+    with_lock do
+      role = role_of(user)
+      return nil unless role && status == "playing"
+
+      last_seen = self["#{opponent(role)}_seen_at"]
+      return nil if last_seen && last_seen > FORFEIT_AFTER.ago
+
+      self.forfeit_by = opponent(role)
+      self.status = "finished"
+      self.turn_open = false
+      save!
+      event("finished", forfeit: true)
+    end
+  end
+
+  # 終局した部屋での user の勝敗（:win / :lose / :draw）
+  def outcome_for(user)
+    role = role_of(user)
+    return nil unless role && status == "finished"
+    return forfeit_by == role ? :lose : :win if forfeit_by.present?
+
+    mine = self["#{role}_score"]
+    theirs = self["#{opponent(role)}_score"]
+    if mine > theirs then :win
+    elsif mine < theirs then :lose
+    else :draw
+    end
+  end
+
+  def opponent_of(user)
+    role_of(user) == "host" ? guest : host
+  end
+
   def public_state
     {
       status: status,
+      forfeit_by: forfeit_by,
       turn: turn,
       turn_open: turn_open,
       total: reading_order.size,
