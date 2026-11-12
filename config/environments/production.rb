@@ -62,6 +62,9 @@ Rails.application.configure do
 
   # 📮 パスワード再設定メールなどの送信（SMTP）。環境変数が設定されている場合のみ有効化する
   # 必要な環境変数：SMTP_ADDRESS / SMTP_USERNAME / SMTP_PASSWORD（任意：SMTP_PORT、既定 587）
+  # メール送信の設定がなければ、パスワード再設定のリンクとページを閉じる
+  config.x.password_reset_available = ENV["SMTP_ADDRESS"].present?
+
   if ENV["SMTP_ADDRESS"].present?
     config.action_mailer.delivery_method = :smtp
     config.action_mailer.smtp_settings = {
