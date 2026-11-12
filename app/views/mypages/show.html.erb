@@ -139,8 +139,8 @@
       >
         <div style="font-size: 12px; color: #a39382; margin-bottom: 6px;">🎴 かるた戦績</div>
         <div style="font-size: 24px; font-weight: bold; color: #bd93f9;">
-          <%= @karuta_stats[:wins] %>
-          <span style="font-size: 14px; color: #f2e8d8;">勝 / <%= @karuta_stats[:total] %>戦</span>
+          <%= @karuta_stats[:wins] + @pvp_stats[:wins] %>
+          <span style="font-size: 14px; color: #f2e8d8;">勝 / <%= @karuta_stats[:total] + @pvp_stats[:total] %>戦</span>
         </div>
       </div>
     </div>
@@ -396,7 +396,7 @@
     <!-- ---------------------------------------------------- --> <!-- タブ 4:
     かるた戦績 --> <!-- ---------------------------------------------------- -->
     <div id="tab-content-karuta" class="carte-content" style="display: none;">
-      <% if @karuta_stats[:total].zero? %>
+      <% if @karuta_stats[:total].zero? && @pvp_stats[:total].zero? %>
         <div
           style="text-align: center; padding: 60px 16px; color: #887868; background: #1a1512; border: 1px dashed #3a2e2b; border-radius: 12px;"
         >
@@ -404,6 +404,41 @@
           <%= link_to "🎴 絶望百人一首で法師に挑む", karuta_path, style: "color: #e5c158; font-weight: bold;" %>
         </div>
       <% else %>
+        <% outcome_colors = { win: "#e5c158", lose: "#ff6b6b", draw: "#d4c5b0" } %>
+
+        <% if @pvp_stats[:total].positive? %>
+          <!-- ⚔️ 対人戦（合言葉の部屋） -->
+          <div class="karuta-section-heading">⚔️ 対人戦（合言葉の部屋）</div>
+          <div class="karuta-pvp-summary">
+            <%= @pvp_stats[:total] %>戦
+            <span style="color: #e5c158;"><%= @pvp_stats[:wins] %>勝</span>
+            <%= @pvp_stats[:losses] %>敗 <%= @pvp_stats[:draws] %>分
+            <span style="color: #a39382; font-size: 13px;">（勝率 <%= (@pvp_stats[:wins] * 100.0 / @pvp_stats[:total]).round %>%）</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px;">
+            <% @pvp_rooms.each do |room| %>
+              <% outcome = room.outcome_for(current_user) %>
+              <% role = room.role_of(current_user) %>
+              <% opponent_role = role == "host" ? "guest" : "host" %>
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; background: #1a1512; border: 1px solid #3a2e2b; border-radius: 10px; padding: 12px 16px;">
+                <div style="font-weight: bold; color: <%= outcome_colors[outcome] %>;">
+                  <%= { win: "🏆 勝利", lose: "💀 敗北", draw: "🤝 引き分け" }[outcome] %>
+                  <% if room.forfeit_by.present? %><span style="font-size: 12px; font-weight: normal;">（<%= room.forfeit_by == role ? "不戦敗" : "不戦勝" %>）</span><% end %>
+                </div>
+                <div style="font-size: 14px; color: #f2e8d8;">
+                  vs <%= room.opponent_of(current_user)&.name.presence || "名無し法師" %>
+                  　<%= room["#{role}_score"] %> 対 <%= room["#{opponent_role}_score"] %>
+                  <span style="font-size: 12px; color: #887868;">（<%= room.name %>）</span>
+                </div>
+                <div style="font-size: 12px; color: #887868;"><%= room.updated_at.strftime("%Y/%m/%d %H:%M") %></div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if @karuta_stats[:total].positive? %>
+          <!-- 🤖 CPU法師との対局 -->
+          <div class="karuta-section-heading">🤖 CPU法師との対局</div>
         <!-- 難易度別の戦績 -->
         <div class="karuta-stats-wrap">
           <table class="karuta-stats-table">
@@ -427,7 +462,7 @@
         </div>
 
         <!-- 直近の対局 -->
-        <div style="font-size: 14px; color: #a39382; margin: 28px 0 12px;">⏳ 直近の対局</div>
+        <div style="font-size: 14px; color: #a39382; margin: 20px 0 12px;">⏳ 直近の対局</div>
         <div style="display: flex; flex-direction: column; gap: 10px;">
           <% @karuta_results.each do |result| %>
             <div
@@ -446,6 +481,8 @@
             </div>
           <% end %>
         </div>
+
+        <% end %>
 
         <div style="text-align: center; margin-top: 24px;">
           <%= link_to "🎴 もう一局挑む", karuta_path, style: "display: inline-block; padding: 10px 22px; background: #8c1d1d; color: #fff; border-radius: 8px; text-decoration: none; font-weight: bold;" %>
@@ -480,6 +517,8 @@
   }
   .user-timeline-card:hover { transform: translateY(-3px); border-color: #8c1d1d; }
   .karuta-stats-wrap { overflow-x: auto; }
+  .karuta-section-heading { font-size: 15px; font-weight: bold; color: #f2e8d8; margin: 0 0 12px; padding-bottom: 6px; border-bottom: 1px dashed #3a2e2b; }
+  .karuta-pvp-summary { font-size: 18px; color: #f2e8d8; margin: 0 0 14px; }
   .karuta-stats-table { width: 100%; border-collapse: collapse; background: #1a1512; border: 1px solid #3a2e2b; border-radius: 12px; overflow: hidden; font-size: 14px; }
   .karuta-stats-table th, .karuta-stats-table td { padding: 12px 10px; text-align: center; border-bottom: 1px solid #3a2e2b; white-space: nowrap; }
   .karuta-stats-table th { color: #a39382; font-size: 12px; font-weight: normal; background: #140f0d; }
