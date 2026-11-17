@@ -19,7 +19,6 @@ class OmikujisController < ApplicationController
     { id: 4, theme: "ログに何も出ず原因不明のまま静まり返る夜の絶望", advice: "サーバーが起動しているか、ポート番号を今一度見直すべし。" }
   ].freeze
 
-  SMALL_KANA = %w[ぁ ぃ ぅ ぇ ぉ ゃ ゅ ょ ァ ィ ゥ ェ ォ ャ ュ ョ].freeze
 
   def show
     today_key = "omikuji_#{Date.today}"
@@ -88,7 +87,7 @@ class OmikujisController < ApplicationController
   end
 
   def count_mora(kana)
-    kana.to_s.chars.reject { |c| SMALL_KANA.include?(c) }.size
+    TankaMora.count(kana)
   end
 
   def validate_tanka_mora(data)
