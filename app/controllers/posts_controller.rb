@@ -6,7 +6,6 @@ class PostsController < ApplicationController
   OGP_BG_COLOR = "#0d0808".freeze
   OGP_TEXT_COLOR = "#e5c158".freeze
   OGP_AUTHOR_COLOR = "#a39382".freeze
-  SMALL_KANA = %w[っ ゃ ゅ ょ ぁ ぃ ぅ ぇ ぉ ヮ ヵ ヶ].freeze
 
   def index
     @selected_category = params[:category]
@@ -149,9 +148,7 @@ class PostsController < ApplicationController
   end
 
   def count_mora(kana)
-    # ひらがな以外（記号・英数字・カタカナ）を除外してからモーラ数をカウント
-    clean_kana = kana.to_s.gsub(/[^ぁ-ん]/, "")
-    clean_kana.chars.reject { |c| SMALL_KANA.include?(c) }.size
+    TankaMora.count(kana)
   end
 
   def validate_tanka_mora(data)
