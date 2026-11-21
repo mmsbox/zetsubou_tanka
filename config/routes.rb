@@ -1,14 +1,34 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  devise_for :users
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+  # マイページ用ルーティング (/mypage)
+  resource :mypage, only: [ :show ]
+  resource :omikuji, only: [ :show ]
+
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+  root "home#index"
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  # 🎴 絶望百人一首（かるた）
+  get "karuta", to: "karuta#show"
+  post "karuta/results", to: "karuta_results#create", as: :karuta_results
+  # 🎴 合言葉の部屋（2人対戦）
+  post "karuta/rooms", to: "karuta_rooms#create", as: :karuta_rooms
+  get "karuta/rooms/join", to: "karuta_rooms#join", as: :join_karuta_room
+  get "karuta/rooms/:code", to: "karuta_rooms#show", as: :karuta_room
+
+  # ⏳ 絶望年表（タイムライン）
+  get "timeline", to: "posts#timeline"
+
+  # :edit, :update, :destroy を追加
+  resources :posts, only: [ :index, :show, :new, :create, :edit, :update, :destroy ] do
+    member do
+      get :ogp, defaults: { format: :png }
+      post :like
+    end
+  end
+
+  # 📜 静的ページ（利用規約・プライバシーポリシー）
+  get "terms", to: "pages#terms"
+  get "privacy", to: "pages#privacy"
 end
