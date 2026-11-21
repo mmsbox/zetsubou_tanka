@@ -23,6 +23,9 @@ module App
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    # 📮 パスワード再設定（メール送信）を受け付けるか。本番は production.rb でメール設定の有無に合わせる
+    config.x.password_reset_available = true
     config.i18n.default_locale = :ja
     config.time_zone = "Tokyo"
   end
