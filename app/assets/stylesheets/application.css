@@ -1,10 +1,26 @@
-/*
- * This is a manifest file that'll be compiled into application.css.
- *
- * With Propshaft, assets are served efficiently without preprocessing steps. You can still include
- * application-wide styles in this file, but keep in mind that CSS precedence will follow the standard
- * cascading order, meaning styles declared later in the document or manifest will override earlier ones,
- * depending on specificity.
- *
- * Consider organizing styles into separate files for maintainability.
- */
+/* 和風・縦書きスタイル */
+.tanka-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-family: 'Yuji Syuku', 'Shippori Mincho', serif;
+  letter-spacing: 0.15em;
+  line-height: 2.2;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #111; /* 背景が白〜和紙風の場合 */
+  height: 320px; /* 縦書きの高さ調整 */
+  margin: 0 auto;
+}
+
+/* 絶望感漂うダーク和風背景（水墨風）にする場合 */
+.dark-sumi-bg {
+  background-color: #0d0d0d;
+  color: #e6e6e6;
+  background-image: radial-gradient(#222 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* 縦書き内の英数字やスコアなどの調整 */
+.tanka-vertical span {
+  text-combine-upright: all; /* 数字2桁などを縦書きの中で横並びにする */
+}

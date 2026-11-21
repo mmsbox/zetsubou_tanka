@@ -13,3 +13,11 @@ module ActiveSupport
     # Add more helper methods to be used by all tests here...
   end
 end
+
+# Integration Test (コントローラー/統合テスト) でDeviseのsign_inなどのヘルパーを使えるように追加
+class ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
+
+  # 回数制限のカウントはテストごとにリセットする
+  setup { ApplicationController::RATE_LIMIT_STORE.clear }
+end
