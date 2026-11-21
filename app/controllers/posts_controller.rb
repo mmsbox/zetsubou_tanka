@@ -3,6 +3,15 @@ class PostsController < ApplicationController
   before_action :set_post, only: [ :show, :edit, :update, :destroy, :like ]
   before_action :authorize_user!, only: [ :edit, :update, :destroy ]
 
+  # 🚦 回数制限：AI を呼ぶ投稿はユーザーごと、画像生成と「わかる」はIPごとに数える
+  rate_limit to: 10, within: 10.minutes, only: :create, store: RATE_LIMIT_STORE,
+             by: -> { current_user.id },
+             with: -> { redirect_to new_post_path, alert: "詠みすぎでございます。しばし休まれてから、また詠んでくだされ。" }
+  rate_limit to: 60, within: 1.minute, only: :ogp, store: RATE_LIMIT_STORE,
+             with: -> { head :too_many_requests }
+  rate_limit to: 30, within: 1.minute, only: :like, store: RATE_LIMIT_STORE,
+             with: -> { render json: { error: "少し時間を置いてくだされ" }, status: :too_many_requests }
+
   OGP_BG_COLOR = "#0d0808".freeze
   OGP_TEXT_COLOR = "#e5c158".freeze
   OGP_AUTHOR_COLOR = "#a39382".freeze
@@ -39,8 +48,9 @@ class PostsController < ApplicationController
     @post.user = current_user if respond_to?(:current_user) && current_user.present?
 
     # 🤖 AIモード（短歌が空でエラーメッセージがある場合）
+    # 長すぎるログはAIに送らず、保存時のバリデーションで弾く
     if @post.tanka.blank? && @post.error_message.present?
-      @post.tanka = generate_tanka_from_error(@post.error_message)
+      @post.tanka = generate_tanka_from_error(@post.error_message) if @post.error_message.length <= Post::ERROR_MESSAGE_MAX_LENGTH
     # ✍️ 自作短歌モード（短歌が入力されていて、エラーメッセージが空の場合の補填）
     elsif @post.tanka.present? && @post.error_message.blank?
       @post.error_message = "自作短歌"
@@ -64,7 +74,7 @@ class PostsController < ApplicationController
   end
 
   def update
-    if @post.update(post_params)
+    if @post.update(post_update_params)
       redirect_to mypage_path, notice: "短歌を推敲（更新）しました。"
     else
       render :edit, status: :unprocessable_entity
@@ -143,8 +153,14 @@ class PostsController < ApplicationController
     redirect_to mypage_path, alert: "権限がありません。" unless @post.respond_to?(:user) && @post.user == current_user
   end
 
+  # likes_count（共感数）は「わかる」ボタンだけが増やす。フォームからは受け取らない
   def post_params
-    params.require(:post).permit(:author_name, :error_message, :tanka, :likes_count, :parent_id, :error_category)
+    params.require(:post).permit(:author_name, :error_message, :tanka, :parent_id, :error_category)
+  end
+
+  # 推敲（更新）では、どの短歌への返歌か（parent_id）は変えさせない
+  def post_update_params
+    params.require(:post).permit(:author_name, :error_message, :tanka, :error_category)
   end
 
   def count_mora(kana)
@@ -211,7 +227,7 @@ def build_tanka_prompt(error_message, feedback = nil)
 end
 
   def generate_tanka_from_error(error_message)
-    client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
+    client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"], request_timeout: Post::OPENAI_TIMEOUT)
     feedback = nil
 
     3.times do |i|

@@ -20,6 +20,10 @@ class OmikujisController < ApplicationController
   ].freeze
 
 
+  # 🚦 クッキーを持たないアクセスでは毎回AIを呼ぶため、IPごとに回数を制限する
+  rate_limit to: 10, within: 1.minute, only: :show, store: RATE_LIMIT_STORE,
+             with: -> { redirect_to root_path, alert: "おみくじの引きすぎでございます。しばし時を置いてくだされ。" }
+
   def show
     today_key = "omikuji_#{Date.today}"
     cached_session = session[today_key]
@@ -120,7 +124,7 @@ class OmikujisController < ApplicationController
       return "消えたコード 二度と戻らぬ 黄昏に 静かに閉じる エディタの画面"
     end
 
-    client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
+    client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"], request_timeout: Post::OPENAI_TIMEOUT)
     feedback = nil
 
     3.times do

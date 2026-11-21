@@ -1,4 +1,9 @@
 class ApplicationController < ActionController::Base
+  # 🚦 回数制限（rate_limit）の記録先。DBのキャッシュ表に頼らず、プロセス内のメモリで数える
+  RATE_LIMIT_STORE = ActiveSupport::Cache::MemoryStore.new
+
+  # （ログイン・会員登録まわりの回数制限は config/initializers/rate_limits.rb）
+
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :reject_password_reset, if: -> { devise_controller? && controller_name == "passwords" && !password_reset_available? }
 

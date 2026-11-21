@@ -5,6 +5,17 @@ class Post < ApplicationRecord
   belongs_to :parent, class_name: "Post", optional: true
   has_many :replies, class_name: "Post", foreign_key: "parent_id", dependent: :destroy
 
+  # 📏 文字数の上限（長すぎる入力でAIの利用料やDBが膨らむのを防ぐ）
+  ERROR_MESSAGE_MAX_LENGTH = 5000
+  # 🤖 OpenAI の応答を待つ上限（秒）。応答が返らないままサーバーが塞がるのを防ぐ
+  OPENAI_TIMEOUT = 30
+
+  validates :tanka, length: { maximum: 200 }
+  validates :error_message, length: { maximum: ERROR_MESSAGE_MAX_LENGTH }
+  validates :author_name, length: { maximum: 50 }
+  validates :error_category, length: { maximum: 50 }
+  validate :parent_must_exist
+
   # 必達チェック：短歌本文かエラーメッセージのどちらかが存在すること
   validates :tanka, presence: true, if: -> { error_message.blank? }
   validates :error_message, presence: true, if: -> { tanka.blank? }
@@ -36,7 +47,7 @@ class Post < ApplicationRecord
     target_text = error_message.presence || tanka.presence
     return if target_text.blank? || ENV["OPENAI_API_KEY"].blank?
 
-    client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
+    client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"], request_timeout: OPENAI_TIMEOUT)
 
     prompt = <<~PROMPT
       あなたは優しく優秀なシニアエンジニアです。
@@ -100,6 +111,13 @@ class Post < ApplicationRecord
   end
 
   private
+
+  # 返歌の宛先は、実在する別の短歌に限る
+  def parent_must_exist
+    return if parent_id.blank?
+
+    errors.add(:parent_id, "の短歌が見つかりませぬ") if parent.nil? || parent_id == id
+  end
 
   # 📿 エラーメッセージを抽象化・正規化してシグネチャを生成
   def generate_error_signature
