@@ -1,0 +1,108 @@
+<% content_for :ogp_title, "絶望百人一首 | 絶望えらぁ短歌" %>
+
+<%= render "karuta/styles" %>
+
+<div class="karuta-page"
+     data-controller="karuta"
+     data-karuta-cards-value="<%= @cards.to_json %>"
+     data-karuta-share-url-value="<%= karuta_url %>"
+     data-karuta-posts-path-value="<%= posts_path %>"
+     <% if user_signed_in? %>data-karuta-save-url-value="<%= karuta_results_path %>"<% end %>>
+
+  <h1 class="karuta-title">🎴 絶望百人一首</h1>
+  <p class="karuta-lead">
+    展覧会で共感を集めた絶望短歌<%= @deck_size %>首が札になりました。<br>
+    法師が上の句を詠み上げます。法師より先に、場に並んだ<strong>下の句</strong>の札を取りましょう。
+  </p>
+
+  <% if @cards.empty? %>
+    <div class="karuta-panel">
+      <p style="color: #d4c5b0; margin: 0 0 20px;">
+        まだ札にできる短歌が足りませぬ（あと<%= Post::KARUTA_MIN_CARDS - @deck_size %>首）。<br>
+        短歌を詠んで、札を増やしてくだされ。
+      </p>
+      <%= link_to "短歌を詠む", new_post_path, class: "karuta-btn karuta-btn--primary" %>
+    </div>
+  <% else %>
+    <!-- 開始画面：難易度選択 -->
+    <div class="karuta-panel" data-karuta-target="start">
+      <div style="color: #f2e8d8; font-size: 16px;">対戦する法師を選んでくだされ</div>
+      <div class="karuta-levels">
+        <button type="button" class="karuta-btn" data-action="karuta#start" data-karuta-level-param="minarai">
+          🌱 見習い法師<small>のんびり取る</small>
+        </button>
+        <button type="button" class="karuta-btn karuta-btn--primary" data-action="karuta#start" data-karuta-level-param="kasei">
+          🕯️ 歌聖法師<small>なかなか手強い</small>
+        </button>
+        <button type="button" class="karuta-btn" data-action="karuta#start" data-karuta-level-param="kami">
+          👑 絶望の神<small>詠み終わる前に取る</small>
+        </button>
+      </div>
+      <button type="button" class="karuta-btn" data-karuta-target="speechToggle" data-action="karuta#toggleSpeech">
+        🔇 読み上げ：無
+      </button>
+      <p class="karuta-record">
+        <% if @karuta_stats %>
+          📜 あなたの戦績：<%= @karuta_stats[:total] %>戦 <%= @karuta_stats[:wins] %>勝 <%= @karuta_stats[:losses] %>敗 <%= @karuta_stats[:draws] %>分
+        <% else %>
+          <%= link_to "ログイン", new_user_session_path %>すると、戦績がマイページに刻まれます。
+        <% end %>
+      </p>
+      <p style="color: #8a7b6e; font-size: 12px; margin: 16px 0 0;">
+        ※ 間違った札に触れると「お手つき」。法師に1点献上となり、その首には手を出せなくなります。
+      </p>
+    </div>
+
+    <!-- 合言葉の部屋（2人対戦） -->
+    <div class="karuta-panel" style="margin-top: 20px;" data-karuta-target="roomPanel">
+      <p class="karuta-section-title">⚔️ 合言葉の部屋で友と対戦</p>
+      <p style="color: #a39382; font-size: 13px; margin: 0 0 16px;">部屋を作って合言葉（URL）を送れば、2人で早取りを競えます。</p>
+      <% if user_signed_in? %>
+        <%= button_to "部屋を作る", karuta_rooms_path, class: "karuta-btn karuta-btn--primary", form: { style: "display: inline;" } %>
+        <%= form_with url: join_karuta_room_path, method: :get, class: "karuta-join-form", data: { turbo: false } do |f| %>
+          <%= f.text_field :code, placeholder: "合言葉", maxlength: 12, autocomplete: "off", "aria-label": "合言葉" %>
+          <%= f.submit "入室", class: "karuta-btn" %>
+        <% end %>
+      <% else %>
+        <p class="karuta-record" style="margin: 0;">
+          <%= link_to "ログイン", new_user_session_path %>すると、友と対戦できます。
+        </p>
+      <% end %>
+    </div>
+
+    <!-- 対戦画面 -->
+    <div data-karuta-target="board" hidden>
+      <div class="karuta-scoreboard">
+        <div>あなた<span class="karuta-score" data-karuta-target="playerScore">0</span></div>
+        <div style="font-size: 12px; color: #8a7b6e;">全<%= @cards.size %>首</div>
+        <div><span data-karuta-target="levelName"></span><span class="karuta-score" data-karuta-target="cpuScore">0</span></div>
+      </div>
+
+      <div class="karuta-reader">
+        <div class="karuta-reader-label">📜 上の句</div>
+        <div class="karuta-reading" data-karuta-target="reading" aria-live="polite"></div>
+      </div>
+      <p class="karuta-status" data-karuta-target="status"></p>
+
+      <div class="karuta-field" data-karuta-target="field"></div>
+
+      <div class="karuta-last" data-karuta-target="lastCard" hidden></div>
+
+      <!-- 結果画面 -->
+      <div class="karuta-panel karuta-result" data-karuta-target="result" hidden>
+        <p class="karuta-result-title" data-karuta-target="resultTitle"></p>
+        <p class="karuta-result-detail" data-karuta-target="resultDetail"></p>
+        <p class="karuta-record" data-karuta-target="saveStatus">
+          <% unless user_signed_in? %>
+            <%= link_to "ログイン", new_user_session_path %>すると、戦績がマイページに刻まれます。
+          <% end %>
+        </p>
+        <div class="karuta-actions">
+          <a href="#" target="_blank" rel="noopener noreferrer" class="karuta-btn karuta-share" data-karuta-target="shareLink">𝕏 結果を呟く</a>
+          <%= link_to "もう一局", karuta_path, class: "karuta-btn karuta-btn--primary" %>
+          <%= link_to "展覧会へ", posts_path, class: "karuta-btn" %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
