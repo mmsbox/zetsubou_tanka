@@ -34,3 +34,9 @@
 /config/*.key
 
 .DS_Store
+
+# Ignore database dumps and backups.
+*.sql
+*.dump
+*.sql.gz
+*.backup

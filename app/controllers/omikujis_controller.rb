@@ -19,7 +19,10 @@ class OmikujisController < ApplicationController
     { id: 4, theme: "ログに何も出ず原因不明のまま静まり返る夜の絶望", advice: "サーバーが起動しているか、ポート番号を今一度見直すべし。" }
   ].freeze
 
-  SMALL_KANA = %w[ぁ ぃ ぅ ぇ ぉ ゃ ゅ ょ ァ ィ ゥ ェ ォ ャ ュ ョ].freeze
+
+  # 🚦 クッキーを持たないアクセスでは毎回AIを呼ぶため、IPごとに回数を制限する
+  rate_limit to: 10, within: 1.minute, only: :show, store: RATE_LIMIT_STORE,
+             with: -> { redirect_to root_path, alert: "おみくじの引きすぎでございます。しばし時を置いてくだされ。" }
 
   def show
     today_key = "omikuji_#{Date.today}"
@@ -88,7 +91,7 @@ class OmikujisController < ApplicationController
   end
 
   def count_mora(kana)
-    kana.to_s.chars.reject { |c| SMALL_KANA.include?(c) }.size
+    TankaMora.count(kana)
   end
 
   def validate_tanka_mora(data)
@@ -121,7 +124,7 @@ class OmikujisController < ApplicationController
       return "消えたコード 二度と戻らぬ 黄昏に 静かに閉じる エディタの画面"
     end
 
-    client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
+    client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"], request_timeout: Post::OPENAI_TIMEOUT)
     feedback = nil
 
     3.times do
