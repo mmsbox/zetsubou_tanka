@@ -1,0 +1,480 @@
+<% content_for :ogp_image, ogp_post_url(@post, format: :png) %>
+<% content_for :ogp_title, "『#{@post.tanka.truncate(20)}』| 絶望えらぁ短歌" %>
+
+<% 
+  # 縦書き＆短冊画像DL用に「ー」を「丨」に置換
+  tanka_vertical_text = @post.tanka.to_s.tr("ー", "丨").tr("〜", "丨")
+  formatted_tanka = tanka_vertical_text.gsub(/[  ]+/, "\n")
+  author_name = @post.author_name.presence || '名無し法師'
+
+  share_text = "【絶望えらぁ短歌】\n#{formatted_tanka}\n\n詠み手：#{author_name}\n"
+  share_url = post_url(@post)
+  hashtags = "絶望えらぁ短歌"
+  twitter_share_url = "https://twitter.com/intent/tweet?text=#{CGI.escape(share_text)}&url=#{CGI.escape(share_url)}&hashtags=#{CGI.escape(hashtags)}"
+%>
+
+<div style="
+  width: 100%;
+  min-height: calc(100vh - 60px);
+  background: 
+    radial-gradient(circle at center, rgba(180, 20, 20, 0.25) 0%, rgba(20, 5, 5, 0.95) 60%, #050202 100%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 1px, transparent 1px, transparent 40px),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0px, rgba(0, 0, 0, 0.4) 1px, transparent 1px, transparent 3px);
+  padding: 40px 16px 80px;
+  box-sizing: border-box;
+  font-family: 'Shippori Mincho', serif;
+  color: #f2e8d8;
+  position: relative;
+">
+  <div style="max-width: 900px; margin: 0 auto; position: relative; z-index: 1;">
+
+    <!-- 返歌の場合：親短歌へのリンクバナー -->
+    <% if @post.parent.present? %>
+      <div style="
+        background: #150f14;
+        border: 1px solid #8c1d72;
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin-bottom: 30px;
+        color: #f2e8d8;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+      ">
+        <div>
+          <div style="font-size: 12px; color: #ff79c6; font-weight: bold; margin-bottom: 4px;">
+            ✉️ この短歌は以下の絶望への返歌（アンサー短歌）です
+          </div>
+          <div style="font-size: 14px; font-weight: 600; color: #f0e6d2;">
+            『<%= @post.parent.tanka.truncate(30) %>』
+          </div>
+        </div>
+        <%= link_to "親短歌を見に行く →", post_path(@post.parent), style: "padding: 8px 16px; background: #8c1d72; color: #fff; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: bold;" %>
+      </div>
+    <% end %>
+
+    <!-- ★ メインエリア（左：ボタン群 / 右：短冊カード） -->
+    <div style="display: flex; gap: 30px; align-items: flex-start; justify-content: center; flex-wrap: wrap;">
+      
+      <!-- 左側：アクションボタン群 ＆ 絶望度メーター -->
+      <div style="display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 320px; box-sizing: border-box;">
+        
+        <!-- 絶望度メーター -->
+        <div style="width: 100%; background: #1a1512; padding: 18px; border-radius: 12px; border: 1px solid #3a2e2b; box-shadow: 0 4px 15px rgba(0,0,0,0.5); box-sizing: border-box;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <span style="font-size: 14px; font-weight: bold; color: #ff6b6b; font-family: 'Shippori Mincho', serif;">
+              ☠️ 絶望度判定
+            </span>
+            <span id="despair-score-text" style="font-size: 20px; font-weight: bold; color: #ff4d4d;">
+              0%
+            </span>
+          </div>
+          <div style="width: 100%; height: 12px; background: #0d0808; border-radius: 6px; overflow: hidden; border: 1px solid #3a2e2b;">
+            <div 
+              id="despair-bar" 
+              data-score="<%= rand(75..99) %>" 
+              style="width: 0%; height: 100%; background: linear-gradient(90deg, #8c1d1d, #ff4d4d); border-radius: 6px; transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);"
+            ></div>
+          </div>
+        </div>
+
+        <!-- ボタン・アクションエリア -->
+        <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+          <%= link_to twitter_share_url, target: "_blank", rel: "noopener noreferrer", style: "padding: 12px 20px; background: #000; color: #fff; border: 1px solid #444; border-radius: 8px; text-decoration: none; text-align: center; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);" do %>
+            <svg style="width: 16px; height: 16px; fill: currentColor;" viewBox="0 0 24 24">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+            X でシェア
+          <% end %>
+
+          <button id="download-card-btn" style="padding: 12px 20px; background: linear-gradient(135deg, #8c1d1d, #571010); color: #fff; border: none; border-radius: 8px; font-weight: bold; font-family: 'Shippori Mincho', serif; cursor: pointer; box-shadow: 0 4px 12px rgba(140, 29, 29, 0.4);">
+            📸 短冊を画像保存
+          </button>
+
+          <%= link_to "✉️ この絶望に返歌を贈る", new_post_path(parent_id: @post.id), style: "padding: 12px 20px; background: linear-gradient(135deg, #2b1d38, #57104d); color: #f2e8d8; border: 1px solid #8c1d72; border-radius: 8px; text-decoration: none; text-align: center; font-weight: bold; box-shadow: 0 4px 12px rgba(87, 16, 77, 0.4);" %>
+          <%= link_to "ギャラリーへ", posts_path, onclick: "showLoading('展覧会へご案内中…')", style: "padding: 12px 20px; background: #2a221d; border: 1px solid #5a4a3e; border-radius: 8px; text-decoration: none; color: #d4c5b0; text-align: center; font-weight: bold;" %>
+          <%= link_to "もう一度詠む", new_post_path, style: "padding: 12px 20px; background: #8c1d1d; color: #fff; border-radius: 8px; text-decoration: none; text-align: center; font-weight: bold;" %>
+        </div>
+
+      </div>
+
+      <!-- 右側：和紙・短冊風結果表示エリア -->
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        
+        <div id="tanka-card" style="
+          background: #faf6ed url('/images/washi-bg.png') repeat;
+          border: 2px solid #c8b9a6;
+          border-radius: 12px;
+          padding: 24px 20px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(140, 29, 29, 0.4);
+          width: 320px;
+          min-height: 560px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          align-items: center;
+          position: relative;
+          box-sizing: border-box;
+          color: #2c221e;
+        ">
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #d4c5b0; padding-bottom: 8px; width: 100%; font-family: 'Shippori Mincho', serif; font-weight: bold;">
+            <span style="font-size: 13px; color: #7a6b5d;">絶望えらぁ短歌</span>
+            <div class="hide-on-download" style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
+              <% if @post.respond_to?(:error_category) && @post.error_category.present? %>
+                <span style="font-size: 11px; color: #8c1d1d; background: rgba(140, 29, 29, 0.1); border: 1px solid #8c1d1d; padding: 1px 6px; border-radius: 10px;">
+                  🏷️ <%= @post.error_category %>
+                </span>
+              <% end %>
+              <% if @post.respond_to?(:same_error_count) && @post.same_error_count > 1 %>
+                <span style="font-size: 11px; color: #ff6b6b; background: rgba(255, 107, 107, 0.12); border: 1px solid #ff6b6b; padding: 1px 6px; border-radius: 10px;" title="同じエラー型を詠んだ法師の人数">
+                  📿 同調 <%= @post.same_error_count %>人
+                </span>
+              <% end %>
+            </div>
+          </div>
+
+<!-- 縦書き短歌表示 -->
+          <div style="width: 100%; height: 320px; display: flex; justify-content: center; align-items: center; overflow: hidden; margin: 15px 0 20px 0;">
+            <div 
+              id="typewriter-tanka" 
+              data-tanka="<%= tanka_vertical_text %>"
+              style="
+                writing-mode: vertical-rl;
+                -webkit-writing-mode: vertical-rl;
+                text-orientation: upright;
+                -webkit-text-orientation: upright;
+                font-size: 19px;
+                letter-spacing: 3px;
+                line-height: 2.1;
+                height: 310px;
+                max-width: 280px;
+                color: #1a1008;
+                font-family: 'Shippori Mincho', serif;
+                font-weight: 600;
+                white-space: pre-wrap;
+                word-break: keep-all;
+              "
+            ></div>
+          </div>
+
+          <!-- エラー文表示 ＆ 同調バナー -->
+          <% if @post.respond_to?(:error_message) && @post.error_message.present? %>
+            <div style="
+              width: 100%;
+              background: #110e0c;
+              color: #ff79c6;
+              padding: 8px 12px;
+              border-radius: 6px;
+              font-family: monospace;
+              font-size: 11px;
+              line-height: 1.4;
+              box-sizing: border-box;
+              word-break: break-all;
+              margin-bottom: 8px;
+              border-left: 3px solid #8c1d1d;
+              text-align: left;
+            ">
+              <span style="color: #6272a4; font-weight: bold;">$ error:</span> <%= truncate(@post.error_message, length: 80) %>
+            </div>
+
+            <% if @post.respond_to?(:same_error_count) && @post.same_error_count > 1 %>
+              <div class="hide-on-download" style="width: 100%; background: rgba(255, 107, 107, 0.1); border: 1px dashed #ff6b6b; border-radius: 6px; padding: 6px 10px; margin-bottom: 12px; font-size: 11px; color: #ff6b6b; text-align: center; box-sizing: border-box;">
+                📿 この絶望型、これまでに <b><%= @post.same_error_count %>人</b> の法師が詠んでいます
+              </div>
+            <% end %>
+          <% end %>
+
+          <!-- 詠み手 ＆ 🏅 称号バッジ表示 -->
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; font-family: 'Shippori Mincho', serif; font-weight: bold; font-size: 13px; color: #7a6b5d;">
+            <span>詠み手：<%= @post.author_name.presence || "名無し法師" %></span>
+            <% if @post.user.present? %>
+              <% rank = @post.user.despair_rank %>
+              <span class="hide-on-download" style="
+                display: inline-flex;
+                align-items: center;
+                gap: 2px;
+                padding: 1px 8px;
+                background: <%= rank[:bg_rgba] %>;
+                border: 1px solid <%= rank[:border] %>;
+                color: <%= rank[:color] %>;
+                border-radius: 12px;
+                font-size: 10px;
+              ">
+                <%= rank[:icon] %> <%= rank[:title] %>
+              </span>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- 共感ボタンエリア -->
+        <div style="margin-top: 20px; display: flex; gap: 8px; justify-content: center; width: 100%; flex-wrap: wrap;">
+          <button class="empathy-btn" style="padding: 8px 14px; background: #1a1512; border: 1px solid #5a4a3e; border-radius: 20px; cursor: pointer; font-family: 'Shippori Mincho', serif; font-weight: bold; color: #d4c5b0; transition: all 0.2s ease;">
+            💡 わかる <span class="count" style="color: #ff6b6b;"><%= @post.likes_count.to_i %></span>
+          </button>
+          <button class="empathy-btn" style="padding: 8px 14px; background: #1a1512; border: 1px solid #5a4a3e; border-radius: 20px; cursor: pointer; font-family: 'Shippori Mincho', serif; font-weight: bold; color: #d4c5b0; transition: all 0.2s ease;">
+            🍂 深し… <span class="count" style="color: #ff6b6b;">0</span>
+          </button>
+          <button class="empathy-btn" style="padding: 8px 14px; background: #1a1512; border: 1px solid #5a4a3e; border-radius: 20px; cursor: pointer; font-family: 'Shippori Mincho', serif; font-weight: bold; color: #d4c5b0; transition: all 0.2s ease;">
+            💧 哀れ <span class="count" style="color: #ff6b6b;">0</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- 🤖 会員限定：AI法師の解脱助言（エラー解決ヒント）セクション -->
+    <div style="width: 100%; max-width: 680px; margin: 40px auto 0; box-sizing: border-box;">
+      <div style="
+        background: #1a1512; 
+        border: 1px solid #3a2e2b; 
+        border-radius: 12px; 
+        padding: 24px; 
+        box-shadow: 0 4px 20px rgba(0,0,0,0.6); 
+        font-family: 'Shippori Mincho', serif;
+      ">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px dashed #3a2e2b; padding-bottom: 12px; margin-bottom: 18px;">
+          <h3 style="font-size: 16px; color: #e5c158; margin: 0; display: flex; align-items: center; gap: 8px; font-weight: bold;">
+            <span>🤖</span> AI法師の解脱助言（エラー解決ヒント）
+          </h3>
+          <span style="font-size: 11px; background: rgba(229,193,88,0.1); border: 1px solid #e5c158; color: #e5c158; padding: 2px 10px; border-radius: 12px; font-weight: bold;">
+            会員限定
+          </span>
+        </div>
+
+        <% if respond_to?(:user_signed_in?) ? user_signed_in? : current_user.present? %>
+          <% if @post.ai_advice.present? %>
+            <div style="color: #f2e8d8; font-size: 14px; line-height: 1.8; white-space: pre-wrap; background: #0d0808; padding: 18px; border-radius: 8px; border-left: 4px solid #e5c158; font-family: 'Shippori Mincho', serif;">
+              <%= @post.ai_advice %>
+            </div>
+          <% else %>
+            <div style="color: #a39382; font-size: 13px; text-align: center; padding: 16px 0;">
+              ⏳ AI法師がただいま解決策を解読中…（エラー本文がない自作短歌の場合は表示されません）
+            </div>
+          <% end %>
+        <% else %>
+          <!-- 未ログイン時の訴求（CTA） -->
+          <div style="text-align: center; padding: 20px 12px; background: rgba(140, 29, 29, 0.15); border: 1px dashed #8c1d1d; border-radius: 8px;">
+            <p style="color: #d4c5b0; font-size: 13px; margin: 0 0 14px 0; line-height: 1.6;">
+              🔒 <b>会員限定機能</b><br>
+              会員登録（ログイン）すると、この絶望エラーに対するAI法師からの個別解決アドバイスが閲覧できます！
+            </p>
+            <%= link_to "会員登録してアドバイスを見る ✨", new_user_registration_path, style: "display: inline-block; padding: 10px 24px; background: linear-gradient(135deg, #8c1d1d, #571010); color: #fff; border-radius: 20px; font-size: 13px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 12px rgba(140,29,29,0.5);" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- ★ 完全独立：下部に配置した返歌（アンサー短歌）一覧セクション -->
+    <div style="width: 100%; margin-top: 60px; border-top: 1px dashed #5a4a3e; padding-top: 40px; box-sizing: border-box;">
+      <h3 style="text-align: center; color: #f2e8d8; font-size: 22px; margin-bottom: 24px; font-family: 'Shippori Mincho', serif;">
+        ✉️ 寄せられた返歌（<%= @replies&.count || 0 %>首）
+      </h3>
+      
+      <% if @replies.present? %>
+        <div style="display: flex; flex-direction: column; gap: 16px; align-items: center; width: 100%;">
+          <% @replies.each do |reply| %>
+            <div style="
+              background: #1a1512;
+              border: 1px solid #3a2e2b;
+              border-left: 5px solid #8c1d72;
+              border-radius: 8px;
+              padding: 20px;
+              width: 100%;
+              max-width: 680px;
+              box-sizing: border-box;
+              box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            ">
+              <div style="font-size: 17px; line-height: 1.8; color: #f2e8d8; font-weight: 600; margin-bottom: 12px; font-family: 'Shippori Mincho', serif;">
+                <%= reply.tanka %>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #a39585;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span>詠み手：<%= reply.author_name.presence || '名無し法師' %></span>
+                  <% if reply.user.present? %>
+                    <% r_rank = reply.user.despair_rank %>
+                    <span style="
+                      display: inline-flex;
+                      align-items: center;
+                      gap: 2px;
+                      padding: 1px 6px;
+                      background: <%= r_rank[:bg_rgba] %>;
+                      border: 1px solid <%= r_rank[:border] %>;
+                      color: <%= r_rank[:color] %>;
+                      border-radius: 10px;
+                      font-size: 10px;
+                    ">
+                      <%= r_rank[:icon] %> <%= r_rank[:title] %>
+                    </span>
+                  <% end %>
+                </div>
+                <%= link_to "この返歌の詳細を見る →", post_path(reply), style: "color: #ff79c6; text-decoration: none; font-weight: bold;" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div style="text-align: center; color: #8c7b6c; padding: 20px 0;">
+          <p style="font-size: 15px; margin-bottom: 8px;">まだこの絶望への返歌はありません…</p>
+          <p style="font-size: 13px; color: #a39585;">一番乗りで寄り添う歌や、共鳴の短歌を贈ってみませんか？</p>
+        </div>
+      <% end %>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+  (function() {
+    let activeTimer = null;
+
+    function startTypewriter() {
+      const tankaElement = document.getElementById("typewriter-tanka");
+      if (!tankaElement) return;
+
+      if (activeTimer) clearInterval(activeTimer);
+      tankaElement.textContent = "";
+
+      const fullText = tankaElement.dataset.tanka || "";
+      let index = 0;
+
+      activeTimer = setInterval(() => {
+        if (index < fullText.length) {
+          tankaElement.textContent = fullText.slice(0, index + 1);
+          index++;
+        } else {
+          clearInterval(activeTimer);
+          activeTimer = null;
+        }
+      }, 80);
+    }
+
+    function animateScore() {
+      const barElement = document.getElementById("despair-bar");
+      const scoreTextElement = document.getElementById("despair-score-text");
+
+      if (barElement && scoreTextElement) {
+        const targetScore = parseInt(barElement.dataset.score || "85", 10);
+        
+        setTimeout(() => {
+          barElement.style.width = targetScore + "%";
+        }, 200);
+
+        let currentScore = 0;
+        const duration = 1200;
+        const intervalTime = 20;
+        const totalSteps = duration / intervalTime;
+        const increment = targetScore / totalSteps;
+
+        const scoreTimer = setInterval(() => {
+          currentScore += increment;
+          if (currentScore >= targetScore) {
+            currentScore = targetScore;
+            clearInterval(scoreTimer);
+          }
+          scoreTextElement.textContent = Math.floor(currentScore) + "%";
+        }, intervalTime);
+      }
+    }
+
+   function initEmpathyButtons() {
+      const empathyBtns = document.querySelectorAll(".empathy-btn");
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+      empathyBtns.forEach(btn => {
+        if (btn.dataset.initialized) return;
+        btn.dataset.initialized = "true";
+
+        btn.addEventListener("click", function() {
+          //  二重押し（連打）防止：すでに押されていたら処理しない
+          if (this.disabled) return;
+
+          // ボタンを押不可＆見た目を「押下済み」に固定
+          this.disabled = true;
+          this.style.cursor = "not-allowed";
+          this.style.opacity = "0.7";
+          this.style.borderColor = "#8c1d1d";
+          this.style.transform = "scale(1.05)";
+
+          const countSpan = this.querySelector(".count");
+          if (!countSpan) return;
+
+          let currentCount = parseInt(countSpan.textContent, 10) || 0;
+          countSpan.textContent = currentCount + 1;
+
+          fetch(`/posts/<%= @post.id %>/like`, {
+            method: 'POST',
+            headers: {
+              'X-CSRF-Token': csrfToken,
+              'Content-Type': 'application/json'
+            }
+          }).catch(err => console.error("Like error:", err));
+        });
+      });
+   }
+
+    function initImageDownload() {
+      const downloadBtn = document.getElementById("download-card-btn");
+      const cardElement = document.getElementById("tanka-card");
+
+      if (!downloadBtn || !cardElement) return;
+
+      if (downloadBtn.dataset.downloadBound) return;
+      downloadBtn.dataset.downloadBound = "true";
+
+      downloadBtn.addEventListener("click", function() {
+        if (typeof html2canvas === "undefined") {
+          alert("画像生成ライブラリの読み込み中です。少々お待ちください。");
+          return;
+        }
+
+        downloadBtn.textContent = "⏳ 画像作成中…";
+        downloadBtn.disabled = true;
+
+        // 📸 短冊カード内の「画像保存時のみ非表示にしたいUIパーツ」をすべて取得
+        const elementsToHide = cardElement.querySelectorAll('.hide-on-download');
+
+        // 一時的に非表示
+        elementsToHide.forEach(el => el.style.display = 'none');
+
+        html2canvas(cardElement, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: null
+        }).then(canvas => {
+          const link = document.createElement("a");
+          link.download = `zetsubou_tanka_${Date.now()}.png`;
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+
+          // 🔄 生成完了後に元の表示に戻す
+          elementsToHide.forEach(el => el.style.display = '');
+
+          downloadBtn.textContent = "📸 短冊を画像保存";
+          downloadBtn.disabled = false;
+        }).catch(err => {
+          console.error("Canvas error:", err);
+          elementsToHide.forEach(el => el.style.display = '');
+          alert("画像の作成に失敗しました。");
+          downloadBtn.textContent = "📸 短冊を画像保存";
+          downloadBtn.disabled = false;
+        });
+      });
+    }
+
+    function initAll() {
+      startTypewriter();
+      animateScore();
+      initEmpathyButtons();
+      initImageDownload();
+    }
+
+    document.addEventListener("DOMContentLoaded", initAll);
+    document.addEventListener("turbo:load", initAll);
+  })();
+</script>

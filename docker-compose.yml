@@ -16,6 +16,8 @@ services:
       - .:/rails
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     environment:
       DATABASE_HOST: db
       POSTGRES_PASSWORD: password

@@ -2,18 +2,27 @@ default: &default
   adapter: postgresql
   encoding: unicode
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  host: <%= ENV.fetch("DATABASE_HOST") { "localhost" } %>
-  username: postgres
-  password: <%= ENV.fetch("POSTGRES_PASSWORD") { "password" } %>
+  # ↓ ここに default で書いておいてもOK！
+  host: <%= ENV.fetch("POSTGRES_HOST", "db") %>
+  user: <%= ENV.fetch("POSTGRES_USER", "postgres") %>
+  password: <%= ENV.fetch("POSTGRES_PASSWORD", "postgres") %>
 
 development:
   <<: *default
-  database: zetsubou_tanka_development
+  database: despair_tanka_development
+  host: db # ← ここにホスト名が入っていればソケット接続に行かなくなります！
 
 test:
   <<: *default
-  database: zetsubou_tanka_test
+  database: despair_tanka_test
+  host: db
 
 production:
-  <<: *default
-  database: zetsubou_tanka_production
+  primary: &primary_production
+    url: <%= ENV["DATABASE_URL"] %>
+  cache:
+    <<: *primary_production
+  queue:
+    <<: *primary_production
+  cable:
+    <<: *primary_production

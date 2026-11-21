@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: despair-tanka
+    runtime: docker
+    plan: free
+    region: singapore
+    envVars:
+      # 🗄 本番DBは Neon。接続文字列はRenderの画面で手入力する。
+      # fromDatabase にすると Blueprint 同期のたびに Render の無料DBへ書き戻されるため使わない
+      - key: DATABASE_URL
+        sync: false
+      - key: RAILS_MASTER_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: PORT
+        value: "3000"
+      # 📮 メール送信（パスワード再設定など）。未設定ならメールは送信されない
+      - key: SMTP_ADDRESS
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: MAILER_FROM
+        sync: false
+
