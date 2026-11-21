@@ -3,10 +3,18 @@ class PostsController < ApplicationController
   before_action :set_post, only: [ :show, :edit, :update, :destroy, :like ]
   before_action :authorize_user!, only: [ :edit, :update, :destroy ]
 
+  # 🚦 回数制限：AI を呼ぶ投稿はユーザーごと、画像生成と「わかる」はIPごとに数える
+  rate_limit to: 10, within: 10.minutes, only: :create, store: RATE_LIMIT_STORE,
+             by: -> { current_user.id },
+             with: -> { redirect_to new_post_path, alert: "詠みすぎでございます。しばし休まれてから、また詠んでくだされ。" }
+  rate_limit to: 60, within: 1.minute, only: :ogp, store: RATE_LIMIT_STORE,
+             with: -> { head :too_many_requests }
+  rate_limit to: 30, within: 1.minute, only: :like, store: RATE_LIMIT_STORE,
+             with: -> { render json: { error: "少し時間を置いてくだされ" }, status: :too_many_requests }
+
   OGP_BG_COLOR = "#0d0808".freeze
   OGP_TEXT_COLOR = "#e5c158".freeze
   OGP_AUTHOR_COLOR = "#a39382".freeze
-  SMALL_KANA = %w[っ ゃ ゅ ょ ぁ ぃ ぅ ぇ ぉ ヮ ヵ ヶ].freeze
 
   def index
     @selected_category = params[:category]
@@ -40,8 +48,9 @@ class PostsController < ApplicationController
     @post.user = current_user if respond_to?(:current_user) && current_user.present?
 
     # 🤖 AIモード（短歌が空でエラーメッセージがある場合）
+    # 長すぎるログはAIに送らず、保存時のバリデーションで弾く
     if @post.tanka.blank? && @post.error_message.present?
-      @post.tanka = generate_tanka_from_error(@post.error_message)
+      @post.tanka = generate_tanka_from_error(@post.error_message) if @post.error_message.length <= Post::ERROR_MESSAGE_MAX_LENGTH
     # ✍️ 自作短歌モード（短歌が入力されていて、エラーメッセージが空の場合の補填）
     elsif @post.tanka.present? && @post.error_message.blank?
       @post.error_message = "自作短歌"
@@ -65,7 +74,7 @@ class PostsController < ApplicationController
   end
 
   def update
-    if @post.update(post_params)
+    if @post.update(post_update_params)
       redirect_to mypage_path, notice: "短歌を推敲（更新）しました。"
     else
       render :edit, status: :unprocessable_entity
@@ -144,14 +153,18 @@ class PostsController < ApplicationController
     redirect_to mypage_path, alert: "権限がありません。" unless @post.respond_to?(:user) && @post.user == current_user
   end
 
+  # likes_count（共感数）は「わかる」ボタンだけが増やす。フォームからは受け取らない
   def post_params
-    params.require(:post).permit(:author_name, :error_message, :tanka, :likes_count, :parent_id, :error_category)
+    params.require(:post).permit(:author_name, :error_message, :tanka, :parent_id, :error_category)
+  end
+
+  # 推敲（更新）では、どの短歌への返歌か（parent_id）は変えさせない
+  def post_update_params
+    params.require(:post).permit(:author_name, :error_message, :tanka, :error_category)
   end
 
   def count_mora(kana)
-    # ひらがな以外（記号・英数字・カタカナ）を除外してからモーラ数をカウント
-    clean_kana = kana.to_s.gsub(/[^ぁ-ん]/, "")
-    clean_kana.chars.reject { |c| SMALL_KANA.include?(c) }.size
+    TankaMora.count(kana)
   end
 
   def validate_tanka_mora(data)
@@ -176,58 +189,59 @@ class PostsController < ApplicationController
     end
   end
 
-  def build_tanka_prompt(error_message, feedback)
-    <<~PROMPT
-      あなたはプログラミングのエラーに苦しむエンジニアの悲惨さを詠む「短歌名人」です。
-      入力されたエラーログをもとに、共感と絶望感が漂う短歌（5・7・5・7・7）を1首生成してください。
+def build_tanka_prompt(error_message, feedback = nil)
+  <<~PROMPT
+    あなたは絶望的なエラーログを風流な短歌（五・七・五・七・七）へと昇華させる「和風AI法師」です。
+    入力されたエラーログの背景にある「開発者の悲哀・絶望・徒労感・クスッと笑えるあるある」を詠んでください。
 
-      #{feedback ? "【前回の音数ミスの修正指示】\n#{feedback}\nこれを踏まえて必ず正しい音数で作り直してください。\n" : ''}
-      【最重要ルール：音数（モーラ数）】
-      各句の「kana」（全ひらがな）の音数を厳格に守ってください。
-      - ku1 (初句): 5音
-      - ku2 (二句): 7音
-      - ku3 (三句): 5音
-      - ku4 (四句): 7音
-      - ku5 (結句): 7音
+    【最重要制約：音数ルール】
+    各句の「ひらがな（読み）」の音数を厳密に守ってください。
+    - ku1 (初句): ひらがなで【5音】
+    - ku2 (二句): ひらがなで【7音】
+    - ku3 (三句): ひらがなで【5音】
+    - ku4 (四句): ひらがなで【7音】
+    - ku5 (結句): ひひらがなで【7音】
 
-      【表現のルール】
-      - 毎回異なる切り口（自虐、ユーモア、情景描写、古典的な和歌風、修羅場の日常など）で表現を変えてください。
-      - 定型文やありきたりな表現（「エラー吐き」「消えたコード」など）の使い回しは避け、入力されたエラーの状況に応じた具体的な言葉や比喩を使ってください。
+    ※「っ」「ー」は1音としてカウントします。
+    ※「しゃ」「ちゅ」などの拗音（小文字の「ゃゅょ」）は前の文字と合わせて1音（例：「きょ」で1音）です。
 
-      【出力フォーマット】
-      以下のJSON形式のみを出力してください。説明文やコードブロック記号は不要です。
-      各句について、漢字仮名交じりの本文(text)と、正確な読みの全ひらがな(kana)を両方出してください。
-      kanaには句読点・記号を含めないでください。
+    【短歌作成の極意】
+    - 英語のエラー用語（nil, error, controller, routeなど）をそのまま使う場合は、ひらがな読みの音数（例：「nil」→「にる」で2音）で計算してください。
+    - 直訳ではなく、エラーで深夜まで悩む姿や、存在しない変数への悲哀など「エンジニアの心」を詠んでください。
 
-      {
-        "ku1": {"text": "...", "kana": "..."},
-        "ku2": {"text": "...", "kana": "..."},
-        "ku3": {"text": "...", "kana": "..."},
-        "ku4": {"text": "...", "kana": "..."},
-        "ku5": {"text": "...", "kana": "..."}
-      }
+    【出力フォーマット (JSON)】
+    必ず以下のJSON形式のみで出力してください。
+    {
+      "ku1": { "text": "漢字混じりのテキスト", "kana": "ひらがな" },
+      "ku2": { "text": "漢字混じりのテキスト", "kana": "ひらがな" },
+      "ku3": { "text": "漢字混じりのテキスト", "kana": "ひらがな" },
+      "ku4": { "text": "漢字混じりのテキスト", "kana": "ひらがな" },
+      "ku5": { "text": "漢字混じりのテキスト", "kana": "ひらがな" }
+    }
 
-      【エラーログ】
-      #{error_message}
-    PROMPT
-  end
+    #{feedback ? "【前回の修正指示 (前回の失敗原因)】\n" + feedback + "\n音数を厳密に再計算してやり直してください。" : ""}
+
+    【対象のエラーログ】
+    #{error_message}
+  PROMPT
+end
 
   def generate_tanka_from_error(error_message)
-    client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
+    client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"], request_timeout: Post::OPENAI_TIMEOUT)
     feedback = nil
 
     3.times do |i|
       prompt = build_tanka_prompt(error_message, feedback)
 
       response = client.chat(
-        parameters: {
-          model: "gpt-4o-mini",
-          messages: [ { role: "user", content: prompt } ],
-          response_format: { type: "json_object" },
-          temperature: 0.9,
-          frequency_penalty: 0.5,
-          presence_penalty: 0.3
-        }
+       parameters: {
+    model: "gpt-4o",
+    messages: [ { role: "user", content: prompt } ],
+    response_format: { type: "json_object" },
+    temperature: 0.6,          # 0.9 から 0.6 に下げる（音数崩れを防ぐ）
+    frequency_penalty: 0.3,    # 0.5 から 0.3 に微調整
+    presence_penalty: 0.2
+  }
       )
 
       raw_json = response.dig("choices", 0, "message", "content")&.strip
