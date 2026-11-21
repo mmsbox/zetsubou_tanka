@@ -5,6 +5,23 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
 
   has_many :posts, dependent: :nullify # ユーザーが削除されても投稿は残す
+  has_many :karuta_results, dependent: :destroy
+
+  # 🎴 かるたの称号（絶望度バッジとは別枠）。一局も指していなければ nil
+  def karuta_rank
+    stats = karuta_results.stats
+    return nil if stats[:total].zero?
+
+    if stats[:by_level]["kami"][:wins] >= 1
+      { title: "神をも退けし名人", icon: "👑", color: "#ffd700", bg_rgba: "rgba(255, 215, 0, 0.15)", border: "#ffd700" }
+    elsif stats[:by_level]["kasei"][:wins] >= 3
+      { title: "歌聖破り", icon: "🕯️", color: "#e5c158", bg_rgba: "rgba(229, 193, 88, 0.15)", border: "#e5c158" }
+    elsif stats[:wins] >= 1
+      { title: "札取りの若武者", icon: "🎴", color: "#ff79c6", bg_rgba: "rgba(255, 121, 198, 0.15)", border: "#ff79c6" }
+    else
+      { title: "かるた初陣", icon: "🌱", color: "#50fa7b", bg_rgba: "rgba(80, 250, 123, 0.15)", border: "#50fa7b" }
+    end
+  end
 
   # 👑 ユーザーの総獲得共感数（いいね数）の計算
   def total_likes_count
