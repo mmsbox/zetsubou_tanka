@@ -5,6 +5,17 @@ class Post < ApplicationRecord
   belongs_to :parent, class_name: "Post", optional: true
   has_many :replies, class_name: "Post", foreign_key: "parent_id", dependent: :destroy
 
+  # 📏 文字数の上限（長すぎる入力でAIの利用料やDBが膨らむのを防ぐ）
+  ERROR_MESSAGE_MAX_LENGTH = 5000
+  # 🤖 OpenAI の応答を待つ上限（秒）。応答が返らないままサーバーが塞がるのを防ぐ
+  OPENAI_TIMEOUT = 30
+
+  validates :tanka, length: { maximum: 200 }
+  validates :error_message, length: { maximum: ERROR_MESSAGE_MAX_LENGTH }
+  validates :author_name, length: { maximum: 50 }
+  validates :error_category, length: { maximum: 50 }
+  validate :parent_must_exist
+
   # 必達チェック：短歌本文かエラーメッセージのどちらかが存在すること
   validates :tanka, presence: true, if: -> { error_message.blank? }
   validates :error_message, presence: true, if: -> { tanka.blank? }
@@ -36,7 +47,7 @@ class Post < ApplicationRecord
     target_text = error_message.presence || tanka.presence
     return if target_text.blank? || ENV["OPENAI_API_KEY"].blank?
 
-    client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
+    client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"], request_timeout: OPENAI_TIMEOUT)
 
     prompt = <<~PROMPT
       あなたは優しく優秀なシニアエンジニアです。
@@ -66,6 +77,33 @@ class Post < ApplicationRecord
     Rails.logger.error("AI Advice Generation Error: #{e.message}")
   end
 
+  # 🎴 絶望百人一首：共感数の多い短歌から、5句に分かれた歌を最大100首選んで札にする
+  KARUTA_DECK_SIZE = 100
+  KARUTA_ROUND_SIZE = 8 # 1局で場に並べる札の枚数
+  KARUTA_MIN_CARDS = 4  # これ未満の歌しかない場合はかるたを開催しない
+
+  def self.karuta_deck(size: KARUTA_DECK_SIZE)
+    where.not(tanka: [ nil, "" ])
+      .most_liked
+      .limit(size * 3) # 5句に分かれていない歌を除外する分、多めに取得
+      .filter_map(&:karuta_card)
+      .uniq { |card| card[:shimo] } # 同じ下の句があると取り札が区別できないため除外
+      .first(size)
+  end
+
+  # 🎴 かるた札データ（上の句＝5・7・5 / 下の句＝7・7）。5句に分かれていない歌は nil
+  def karuta_card
+    phrases = tanka.to_s.strip.split(/[[:space:]]+/)
+    return nil unless phrases.size == 5
+
+    {
+      id: id,
+      kami: phrases[0, 3],
+      shimo: phrases[3, 2],
+      author: author_name.presence || "名無し法師"
+    }
+  end
+
   # 📿 同じ正規化エラー（同じ罠）を詠んだ投稿の件数を取得
   def same_error_count
     return 0 if error_signature.blank?
@@ -73,6 +111,13 @@ class Post < ApplicationRecord
   end
 
   private
+
+  # 返歌の宛先は、実在する別の短歌に限る
+  def parent_must_exist
+    return if parent_id.blank?
+
+    errors.add(:parent_id, "の短歌が見つかりませぬ") if parent.nil? || parent_id == id
+  end
 
   # 📿 エラーメッセージを抽象化・正規化してシグネチャを生成
   def generate_error_signature
